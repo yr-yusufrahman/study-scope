@@ -1,5 +1,5 @@
 <script setup>
-import GoogleMini from './icons/GoogleMini.vue'
+import GoogleMini from '../icons/GoogleMini.vue'
 </script>
 
 <template>

@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import logout
-from django.contrib.auth.models import User
 
 from rest_framework import status, generics, permissions
 from rest_framework.decorators import api_view
@@ -51,13 +50,9 @@ def googleAuth(request):
                     data = {}
                     profile_data = profile_response.json()
                     
-                    # Create user if needed
+                    # Create user if needed - This may not be needed, library does this for you, check with new user login
                     email = profile_data["email"]
                     name = profile_data["given_name"]
-                    user = User.objects.filter(email=email).first()
-                    if not user:
-                        user = User(first_name=name, email=email)
-                        user.save()
 
                     # Use google token to create local token
                     exchange_endpoint = 'http://127.0.0.1:8000/auth/convert-token'
@@ -72,7 +67,9 @@ def googleAuth(request):
                     server_response = requests.post(exchange_endpoint, data=exchange_params)
                     if server_response.ok:
                         access_token = server_response.json().get('access_token')
+                        refresh_token = server_response.json().get('refresh_token')
                         data['access_token'] = access_token
+                        data['refresh_token'] = refresh_token
                         data['email'] = email
                         data['name'] = name
 
@@ -82,6 +79,39 @@ def googleAuth(request):
 # EMD googleAuth
 
 
+# If an access token expires, the user can send a refresh token to get a new access token
+# To get new access token, send a POST request to http://127.0.0.1:8000/auth/token
+# If the refresh token expires, the user will have to login again through google
+
+# Use refresh token to gain new local access token
+@api_view(["POST"])
+def refreshAuth(request):
+    refresh_token = request.data['refresh']
+    if refresh_token:
+        CLIENT_ID = "REDACTED"
+        CLIENT_SECRET='REDACTED'
+
+        refresh_endpoint = 'http://127.0.0.1:8000/auth/token'
+        refresh_params = {
+            'client_id': CLIENT_ID,
+            'client_secret': CLIENT_SECRET,
+            'grant_type': 'refresh_token',
+            'token': refresh_token
+        }
+
+        server_response = requests.post(refresh_endpoint, data=refresh_params)
+        if server_response.ok:
+            access_token = server_response.json().get('access_token')
+            refresh_token = server_response.json().get('refresh_token')
+            data = {}
+            data['access_token'] = access_token
+            data['refresh_token'] = refresh_token
+
+            return Response(data, status.HTTP_201_CREATED)
+        
+    return Response({}, status.HTTP_400_BAD_REQUEST)
+
+# END refreshAuth
 
 
 # Create your views here.

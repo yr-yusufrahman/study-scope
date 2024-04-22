@@ -3,8 +3,7 @@ import { RouterLink } from 'vue-router'
 
 function logout() {
   localStorage.removeItem('token');
-  localStorage.removeItem('email');
-  localStorage.removeItem('name');
+  localStorage.removeItem('refresh');
 }
 </script>
 

@@ -1,9 +1,10 @@
 <script setup>
-import CourseCard from '@/components/courses/CourseCard.vue';
+import CoursesList from '@/components/courses/CoursesList.vue';
 </script>
 
 
 <template>
-  <h1>My Courses</h1>
-  <CourseCard />
+  <div class="bg">
+    <CoursesList />
+  </div>
 </template>

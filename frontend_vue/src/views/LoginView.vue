@@ -1,5 +1,5 @@
 <script setup>
-import LoginForm from '@/components/LoginForm.vue'
+import LoginForm from '@/components/login/LoginForm.vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -12,7 +12,9 @@ if (token) {
 
 
 <template>
-  <LoginForm />
+  <div class="bg">
+    <LoginForm />  
+  </div>
 </template>
 
 
