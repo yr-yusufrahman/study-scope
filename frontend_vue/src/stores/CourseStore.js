@@ -5,6 +5,7 @@ export const useCourseStore = defineStore("courseStore", () => {
     // ----- State -----
     const courses = ref([])
     const additions = ref([]) // New courses added
+    const deletions = ref([]) // Courses removed
 
     // ----- Getters -----
 
@@ -21,12 +22,26 @@ export const useCourseStore = defineStore("courseStore", () => {
     function addCourse(new_course) {
         courses.value.push(new_course)
         additions.value.push(new_course)
-    }   
+    }
+
+    // Removes course from the list and keeps track of deletions
+    function removeCourse(title) {
+        // If course is new, remove it from additions
+        if (additions.value.find(course => course.title === title)) {
+            additions.value = additions.value.filter(course => course.title !== title)
+        } else {
+            deletions.value.push(title)
+        }
+        courses.value = courses.value.filter(course => course.title !== title)
+        console.log(deletions.value)
+    }
 
     return {
         courses,
         additions,
+        deletions,
         courseExists,
-        addCourse
+        addCourse,
+        removeCourse
     }
 })

@@ -29,8 +29,8 @@ function allCourses() {
 
     axios.get('http://127.0.0.1:8000/courses/get', { headers })
     .then(response => {
-        store.courses = response.data.courses
-        console.log(response.data.courses)
+        store.courses = response.data?.courses
+        console.log(response.data?.courses)
     })
     .catch(error => {
         refresh()

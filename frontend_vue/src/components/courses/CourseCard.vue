@@ -1,9 +1,18 @@
 <script setup>
 import { defineProps } from 'vue'
+import { useCourseStore } from '../../stores/CourseStore.js'
 
 defineProps({
   title: String
 })
+
+const store = useCourseStore()
+
+function handleDelete(e) {
+  const title = e.target.value
+  store.removeCourse(title)
+}
+
 </script>
 
 
@@ -17,7 +26,7 @@ defineProps({
         <button class="btn btn-primary">Edit</button>
       </div>
       <div class="card-actions justify-end">
-        <button class="btn btn-primary">Delete</button>
+        <button class="btn btn-primary" @click="handleDelete" :value=title>Delete</button>
       </div>
     </div>
   </div>

@@ -12,7 +12,7 @@ function handleAdd() {
     // Check if course already has the same title
     if (!store.courseExists(new_title.value)) {
         store.addCourse(new_course)
-        console.log(new_course)        
+        new_title.value = ''    
     } else {
         console.log('Course already exists')
     }
