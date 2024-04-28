@@ -1,8 +1,7 @@
 import axios from 'axios'
-import { useRouter } from 'vue-router'
 
-export default function refresh() {
-    const router = useRouter()
+
+export default function refresh(router) {
     const refresh_url = "http://127.0.0.1:8000/auth/refresh"
     const request_data = {
       refresh: localStorage.getItem('refresh')
@@ -14,7 +13,7 @@ export default function refresh() {
         localStorage.setItem('refresh', response.data.refresh_token)
         router.push('/courses')
     }).catch(error => {
-        console.error('Error: not authenticated.', error)
+        console.log('Error: not authenticated.', error)
         localStorage.removeItem('token')
         localStorage.removeItem('refresh')
         router.push('/login')

@@ -79,10 +79,6 @@ def googleAuth(request):
 # EMD googleAuth
 
 
-# If an access token expires, the user can send a refresh token to get a new access token
-# To get new access token, send a POST request to http://127.0.0.1:8000/auth/token
-# If the refresh token expires, the user will have to login again through google
-
 # Use refresh token to gain new local access token
 @api_view(["POST"])
 def refreshAuth(request):
@@ -96,7 +92,7 @@ def refreshAuth(request):
             'client_id': CLIENT_ID,
             'client_secret': CLIENT_SECRET,
             'grant_type': 'refresh_token',
-            'token': refresh_token
+            'refresh_token': refresh_token
         }
 
         server_response = requests.post(refresh_endpoint, data=refresh_params)

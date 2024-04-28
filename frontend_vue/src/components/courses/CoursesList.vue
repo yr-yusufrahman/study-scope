@@ -5,14 +5,13 @@ import AddCourse from './AddCourse.vue'
 import { useRouter } from 'vue-router'
 import { ref, onBeforeMount, onMounted } from 'vue'
 import axios from 'axios'
-import { useCourseStore } from '../../stores/CourseStore.js'
 import refresh from '../helpers/refresh.js'
+import { useCourseStore } from '../../stores/CourseStore.js'
 
 const router = useRouter()
 
 // State
 const store = useCourseStore()
-const newCourse = ref('')
 
 // Check for logged in
 const token = localStorage.getItem('token')
@@ -33,7 +32,7 @@ function allCourses() {
         console.log(response.data?.courses)
     })
     .catch(error => {
-        refresh()
+        refresh(router)
     })
 }
 // END allCourses
@@ -45,7 +44,7 @@ function allCourses() {
 <template>
     <div class="page-layout">
         <div class="course-list">
-            <CourseCard v-for="course in store.courses" :title="course.title"  />
+            <CourseCard v-for="course in store.courses" :id="course.id" :title="course.title"  />
             <AddCourse />    
         </div>
         <button class="btn btn-primary">Add Course</button>

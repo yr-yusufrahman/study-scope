@@ -12,10 +12,11 @@ def all_courses(request):
     # First confirm if user access token is valid
     user = request.user
     if user:
-        courses = Course.objects.all()
+        courses = Course.objects.filter(owner=user)
         courses_data = []
         for course in courses:
             courses_data.append({
+                'id': course.id,
                 'title': course.title,
             })
         response = {
