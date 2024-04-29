@@ -6,13 +6,19 @@ export const useCourseStore = defineStore("courseStore", () => {
     const courses = ref([])
     const additions = ref([]) // New courses added
     const edits = ref([]) // Courses edited: {id, new_title}
-    const deletions = ref([]) // Courses removed
+    const removals = ref([]) // Courses removed
 
     // ----- Getters -----
 
 
 
     // ----- Actions -----
+
+    // Sets the list of courses
+    function setCourses(courses_list) {
+        courses.value = courses_list
+    }
+
 
     // Checks if course already exists in the list
     function courseExists(title) {
@@ -52,16 +58,19 @@ export const useCourseStore = defineStore("courseStore", () => {
         if (additions.value.find(course => course.id === id)) {
             additions.value = additions.value.filter(course => course.id !== id)
         } else {
-            deletions.value.push(id)
+            removals.value.push(id)
         }
+        // Remove course from edit list as it is going to be deleted
+        edits.value = edits.value.filter(course => course.id !== id)
         courses.value = courses.value.filter(course => course.id !== id)
-        console.log("Deletions list: ", deletions.value)
+        console.log("Deletions list: ", removals.value)
     }
 
     return {
         courses,
         additions,
-        deletions,
+        removals,
+        setCourses,
         courseExists,
         addCourse,
         editCourse,

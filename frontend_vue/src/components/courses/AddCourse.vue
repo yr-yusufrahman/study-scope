@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { defineProps, ref } from 'vue'
 import { useCourseStore } from '../../stores/CourseStore.js'
 
 // State

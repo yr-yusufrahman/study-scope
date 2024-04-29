@@ -6,7 +6,7 @@ from rest_framework.response import Response
 
 from .models import Course
 
-
+# Returns all courses for a user
 @api_view(["GET"])
 def all_courses(request):
     # First confirm if user access token is valid
@@ -29,3 +29,47 @@ def all_courses(request):
         'error': 'User not authenticated.',
     }
     return Response(bad_response, status=status.HTTP_401_UNAUTHORIZED)
+
+
+# Makes changes to a user's courses
+@api_view(["POST"])
+def change_courses(request):
+    # First confirm if user access token is valid
+    user = request.user
+    if user:
+        additions = request.data.get('add')
+        edits = request.data.get('edit')
+        removals = request.data.get('remove')
+
+        # Add new courses
+        if additions:
+            for addition in additions:
+                course_title = addition.get('title')
+                course = Course.objects.create(owner=user, title=course_title)
+                course.save()
+        
+        # Edit existing courses
+        if edits:
+            for edit in edits:
+                course_id = edit.get('id')
+                course_title = edit.get('new_title')
+                course = Course.objects.filter(owner=user, id=course_id).first()
+                if course:
+                    course.title = course_title
+                    course.save()
+
+        # Remove courses
+        if removals:
+            for removal in removals:
+                course_id = removal.get('id')
+                course = Course.objects.filter(owner=user, id=course_id).first()
+                if course:
+                    course.delete()
+        
+        return Response(status=status.HTTP_200_OK)
+
+    else:
+        bad_response = {
+            'error': 'User not authenticated.',
+        }
+        return Response(bad_response, status=status.HTTP_401_UNAUTHORIZED)
