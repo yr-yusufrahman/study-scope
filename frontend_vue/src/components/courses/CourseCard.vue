@@ -1,5 +1,6 @@
 <script setup>
-import { defineProps, ref, nextTick } from 'vue'
+import { useRouter } from 'vue-router';
+import { ref, nextTick } from 'vue'
 import { useCourseStore } from '../../stores/CourseStore.js'
 import { useToggleEditStore } from '../../stores/ToggleEditStore.js'
 
@@ -8,10 +9,21 @@ defineProps({
   title: String,
 })
 
+const router = useRouter()
 const store = useCourseStore()
 const edit_store = useToggleEditStore()
 const input = ref('')
 
+
+// Selects course for workspace
+function selectCourse(id) {
+  //store.selectCourse(id)
+  localStorage.setItem('selectedCourse', id)
+  router.push('/workspace')
+}
+
+
+// Opens input for editing course title
 function toggleEdit(id) {
   edit_store.setEditCourse(id)
 
@@ -21,6 +33,8 @@ function toggleEdit(id) {
   })
 }
 
+
+// Handles editing course title
 function handleEdit(e, id, original_title) {
   id = Number(id)
   const new_title = e.target[0].value
@@ -32,6 +46,8 @@ function handleEdit(e, id, original_title) {
   edit_store.setEditCourse(id)
 }
 
+
+// Deletes course
 function handleDelete(e) {
   const id = Number(e.target.value)
   store.removeCourse(id)
@@ -43,8 +59,12 @@ function handleDelete(e) {
 <template>
   <div class="card w-96 bg-base-100 shadow-xl">
     <div class="card-body">
-      <h2 v-show="!edit_store.isEditCourse(id)" class="card-title">{{ title }}</h2>
       
+      <h2 v-show="!edit_store.isEditCourse(id)"  class="card-title">
+        <button @click="selectCourse(id)">{{ title }}</button>
+      </h2>
+      
+
       <form v-show="edit_store.isEditCourse(id)" @submit.prevent="(event) => handleEdit(event, id, title)">
         <input ref="input" :value=title type="text" placeholder="Title" class="input input-bordered" />  
       </form>

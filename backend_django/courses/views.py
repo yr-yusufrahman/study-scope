@@ -4,21 +4,29 @@ from rest_framework import status, generics, permissions
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .models import Course
+from .models import Course, Chapter
 
-# Returns all courses for a user
+# Returns all course data for a user
 @api_view(["GET"])
 def all_courses(request):
     # First confirm if user access token is valid
     user = request.user
     if user:
+        # All courses for the user
         courses = Course.objects.filter(owner=user)
         courses_data = []
         for course in courses:
+            # All chapters for the course
+            chapters = Chapter.objects.filter(course=course)
             courses_data.append({
                 'id': course.id,
                 'title': course.title,
+                'chapters': [{
+                    'id': chapter.id,
+                    'title': chapter.chapter_title,
+                } for chapter in chapters],
             })
+            
         response = {
             'courses': courses_data,
         }
@@ -55,8 +63,10 @@ def change_courses(request):
                 course_title = edit.get('new_title')
                 course = Course.objects.filter(owner=user, id=course_id).first()
                 if course:
-                    course.title = course_title
-                    course.save()
+                    # Check if the title was changed
+                    if course_title != course.title:
+                        course.title = course_title
+                        course.save()
 
         # Remove courses
         if removals:
@@ -73,3 +83,4 @@ def change_courses(request):
             'error': 'User not authenticated.',
         }
         return Response(bad_response, status=status.HTTP_401_UNAUTHORIZED)
+    

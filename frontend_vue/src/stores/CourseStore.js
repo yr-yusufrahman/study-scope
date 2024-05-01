@@ -1,5 +1,7 @@
 import { computed, ref } from "vue";
 import { defineStore } from "pinia";
+import axios from "axios";
+import refresh from "../components/helpers/refresh";
 
 export const useCourseStore = defineStore("courseStore", () => {
     // ----- State -----
@@ -7,18 +9,46 @@ export const useCourseStore = defineStore("courseStore", () => {
     const additions = ref([]) // New courses added
     const edits = ref([]) // Courses edited: {id, new_title}
     const removals = ref([]) // Courses removed
+    //const selected = ref(null) // Selected course on workspace
 
-    // ----- Getters -----
+    // ----- Getters ----- try and use computed?
 
+    // Returns list of chapters for the selected course
+    function selectedChapters() {
+        let selected = Number(localStorage.getItem('selectedCourse'))
+        if (selected && courses.value.length > 0) {
+            let course = courses.value.find(course => course.id === selected)
+            let chapters = course?.chapters
+            return chapters
+        }
+        return false
+    }
 
 
     // ----- Actions -----
+
+    // Get courses
+    const getCourses =  async () => {
+        try {
+            const token = localStorage.getItem('token')
+            const headers = {"Authorization": `Bearer ${token}`}
+
+            const response = await axios.get('http://127.0.0.1:8000/courses/get', { headers })
+            const data = await response.data
+            setCourses(data?.courses)
+            return true            
+        } catch (error) {
+            console.log("Error getting courses: ", error)
+            let success = refresh()
+            return success
+        }
+    }
+
 
     // Sets the list of courses
     function setCourses(courses_list) {
         courses.value = courses_list
     }
-
 
     // Checks if course already exists in the list
     function courseExists(title) {
@@ -66,14 +96,26 @@ export const useCourseStore = defineStore("courseStore", () => {
         console.log("Deletions list: ", removals.value)
     }
 
+    // Selected course on workspace
+    //function selectCourse(id) {
+    //    selected.value = id
+    //}
+
     return {
         courses,
         additions,
+        edits,
         removals,
+        //selected,
+
+        getCourses,
+        selectedChapters,
+
         setCourses,
         courseExists,
         addCourse,
         editCourse,
-        removeCourse
+        removeCourse,
+        //selectCourse
     }
 })
