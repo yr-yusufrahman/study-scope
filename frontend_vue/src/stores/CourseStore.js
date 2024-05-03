@@ -1,7 +1,6 @@
 import { computed, ref } from "vue";
 import { defineStore } from "pinia";
 import axios from "axios";
-import refresh from "../components/helpers/refresh";
 
 export const useCourseStore = defineStore("courseStore", () => {
     // ----- State -----
@@ -9,7 +8,8 @@ export const useCourseStore = defineStore("courseStore", () => {
     const additions = ref([]) // New courses added
     const edits = ref([]) // Courses edited: {id, new_title}
     const removals = ref([]) // Courses removed
-    //const selected = ref(null) // Selected course on workspace
+    
+    const chapter_additions = ref([]) // New chapters added
 
     // ----- Getters ----- try and use computed?
 
@@ -39,8 +39,8 @@ export const useCourseStore = defineStore("courseStore", () => {
             return true            
         } catch (error) {
             console.log("Error getting courses: ", error)
-            let success = refresh()
-            return success
+            // Refresh token
+            return false
         }
     }
 
@@ -50,36 +50,65 @@ export const useCourseStore = defineStore("courseStore", () => {
         courses.value = courses_list
     }
 
-    // Checks if course already exists in the list
-    function courseExists(title) {
-        return courses.value.find(course => course.title === title)
-    }
-
     // Adds new course to the list and keeps track of additions
-    function addCourse(new_course) {
-        courses.value.push(new_course)
-        additions.value.push(new_course)
+    function addCourse(title) {
+        let success = false
+        // Check if course already exists
+        if (!courses.value.find(course => course.title === title)) {
+            // Give course a local id for editing
+            const generateId = () => {
+                let id = Math.floor(Math.random() * 1000);
+                let exists = courses.value.find(course => course.id === id)
+                while (exists) {
+                    id = Math.floor(Math.random() * 1000);
+                    exists = courses.value.find(course => course.id === id)
+                }
+                return id
+            }
+            let new_course = {id: generateId(), title: title}
+            courses.value.push(new_course)
+            additions.value.push(new_course)
+            console.log("Course additions: ", additions.value)
+            success = true
+        }
+        return success
     }
 
     // Edits course in the list
     function editCourse(id, new_title) {
-        // Check if course has been edited before
-        if (edits.value.find(course => course.id === id)) {
-            edits.value.forEach((item, index) => {
-                if (item.id === id) {
-                    edits.value[index].new_title = new_title
+        let success = false
+        // Check if course exists
+        if (!courses.value.find(course => course.title === new_title)) {
+            // Check if course is new
+            if (additions.value.find(course => course.id === id)) {
+                additions.value.forEach((item, index) => {
+                    if (item.id === id) {
+                        additions.value[index].title = new_title
+                    }
+                })
+            }
+
+            // Check if course has been edited before
+            else if (edits.value.find(course => course.id === id)) {
+                edits.value.forEach((item, index) => {
+                    if (item.id === id) {
+                        edits.value[index].new_title = new_title
+                    }
+                })
+            } else {
+                edits.value.push({id, new_title})
+            }
+
+            // Update state
+            courses.value.forEach(course => {
+                if (course.id === id) {
+                    course.title = new_title
                 }
             })
-        } else {
-            edits.value.push({id, new_title})
+            success = true
+            console.log("Course edits: ", edits.value)
         }
-        // Update state
-        courses.value.forEach(course => {
-            if (course.id === id) {
-                course.title = new_title
-            }
-        })
-        console.log("Edits list: ", edits.value)
+        return success
     }
 
     // Removes course from the list and keeps track of deletions
@@ -93,29 +122,47 @@ export const useCourseStore = defineStore("courseStore", () => {
         // Remove course from edit list as it is going to be deleted
         edits.value = edits.value.filter(course => course.id !== id)
         courses.value = courses.value.filter(course => course.id !== id)
-        console.log("Deletions list: ", removals.value)
+        console.log("Course removals: ", removals.value)
     }
 
-    // Selected course on workspace
-    //function selectCourse(id) {
-    //    selected.value = id
-    //}
+    // Add chapter to course
+    function addChapter(course_id, new_title) {
+        // Check if chapter exists
+        if (!chapterExists(course_id, new_title)) {
+            let new_chapter = {title: new_title}
+
+            courses.value.forEach(course => {
+                if (course.id === course_id) {
+                    course.chapters.push(new_chapter)
+                }
+            })
+            // Add to chapter additions
+            chapter_additions.value.push(new_chapter)
+            console.log("Chapter additions: ", chapter_additions.value)            
+        }
+    }
+
+    // Check if chapter exists in course
+    function chapterExists(course_id, title) {
+        console.log("Checking if chapter exists: ", course_id, title)
+        let course = courses.value.find(course => course.id === course_id)
+        console.log("Course: ", course)
+        return course?.chapters?.includes(title)
+    }
 
     return {
         courses,
         additions,
         edits,
         removals,
-        //selected,
 
         getCourses,
         selectedChapters,
 
         setCourses,
-        courseExists,
         addCourse,
         editCourse,
         removeCourse,
-        //selectCourse
+        addChapter
     }
 })

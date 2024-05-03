@@ -6,6 +6,7 @@ import { useToggleEditStore } from '../../stores/ToggleEditStore.js'
 
 defineProps({
   id: Number,
+  index: Number,
   title: String,
 })
 
@@ -17,7 +18,6 @@ const input = ref('')
 
 // Selects course for workspace
 function selectCourse(id) {
-  //store.selectCourse(id)
   localStorage.setItem('selectedCourse', id)
   router.push('/workspace')
 }
@@ -38,18 +38,21 @@ function toggleEdit(id) {
 function handleEdit(e, id, original_title) {
   id = Number(id)
   const new_title = e.target[0].value
-  if (new_title !== original_title && !store.courseExists(new_title)) {
-    store.editCourse(id, new_title)
+  if (new_title !== original_title) {
+    let success = store.editCourse(id, new_title)
+    if (!success) {
+      console.log('Course already exists with this name')
+    }
   } else {
-    console.log('Course already exists with this name')
+    console.log('Course title unchanged')
   }
   edit_store.setEditCourse(id)
 }
 
 
 // Deletes course
-function handleDelete(e) {
-  const id = Number(e.target.value)
+function handleDelete(id) {
+  //const id = Number(e.target.value)
   store.removeCourse(id)
 }
 
@@ -75,7 +78,7 @@ function handleDelete(e) {
         <button class="btn btn-primary" @click="toggleEdit(id)">Edit</button>
       </div>
       <div class="card-actions justify-end">
-        <button class="btn btn-primary" @click="handleDelete" :value=id>Delete</button>
+        <button class="btn btn-primary" @click="handleDelete(id)">Delete</button>
       </div>
     </div>
   </div>

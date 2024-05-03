@@ -7,11 +7,7 @@ const store = useCourseStore()
 const new_title = ref('')
 
 function handleAdd() {
-    let new_course = { title: new_title.value }
-
-    // Check if course already has the same title
-    if (!store.courseExists(new_title.value)) {
-        store.addCourse(new_course)
+    if (store.addCourse(new_title.value)) {
         new_title.value = ''    
     } else {
         console.log('Course already exists')
@@ -33,5 +29,5 @@ function handleAdd() {
                 <button class="btn btn-accent">Add</button>
             </div>
         </form>
-  </div>
+    </div>
 </template>
