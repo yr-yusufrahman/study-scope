@@ -6,7 +6,6 @@ import { useToggleEditStore } from '../../stores/ToggleEditStore.js'
 
 defineProps({
   id: Number,
-  index: Number,
   title: String,
 })
 
@@ -25,7 +24,7 @@ function selectCourse(id) {
 
 // Opens input for editing course title
 function toggleEdit(id) {
-  edit_store.setEditCourse(id)
+  edit_store.setEdit(id)
 
   // Focus on input after DOM renders
   nextTick(() => {
@@ -46,7 +45,7 @@ function handleEdit(e, id, original_title) {
   } else {
     console.log('Course title unchanged')
   }
-  edit_store.setEditCourse(id)
+  edit_store.setEdit(id)
 }
 
 
@@ -63,12 +62,12 @@ function handleDelete(id) {
   <div class="card w-96 bg-base-100 shadow-xl">
     <div class="card-body">
       
-      <h2 v-show="!edit_store.isEditCourse(id)"  class="card-title">
+      <h2 v-show="!edit_store.isEdit(id)"  class="card-title">
         <button @click="selectCourse(id)">{{ title }}</button>
       </h2>
       
 
-      <form v-show="edit_store.isEditCourse(id)" @submit.prevent="(event) => handleEdit(event, id, title)">
+      <form v-show="edit_store.isEdit(id)" @submit.prevent="(event) => handleEdit(event, id, title)">
         <input ref="input" :value=title type="text" placeholder="Title" class="input input-bordered" />  
       </form>
 

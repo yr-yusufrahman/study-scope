@@ -7,15 +7,19 @@ const store = useCourseStore()
 const new_title = ref('')
 
 function handleAdd() {
-    let new_chapter = new_title.value
-    const course_id = Number(localStorage.getItem('selectedCourse'))
-    store.addChapter(course_id, new_chapter)
+    const new_chapter = new_title.value
+    let success = store.addChapter(new_chapter)
+    if (success) {
+        new_title.value = ''
+    } else {
+        console.log('Failed to add chapter')
+    }
 }
 </script>
 
 
 <template>
-    <form class="shadow-xl" @submit.prevent="handleAdd" >
+    <form @submit.prevent="handleAdd" >
         <div class="form-control">
             <label class="label">
                 <span class="label-text">Chapter name</span>

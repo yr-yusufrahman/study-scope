@@ -15,7 +15,7 @@ const input = ref('')
 
 // Opens input for editing chapter title
 function toggleEdit(id) {
-  edit_store.setEditCourse(id)
+  edit_store.setEdit(id)
 
   // Focus on input after DOM renders
   nextTick(() => {
@@ -26,16 +26,15 @@ function toggleEdit(id) {
 
 // Handles editing chapter title
 function handleEdit(e, id, original_title) {
-  /*
-  id = Number(id)
+  /**/
   const new_title = e.target[0].value
-  if (new_title !== original_title && !store.courseExists(new_title)) {
-    store.editCourse(id, new_title)
+  if (new_title !== original_title) {
+    store.editChapter(id, new_title)
   } else {
-    console.log('Course already exists with this name')
+    console.log('Chapter already exists with this name')
   }
-  edit_store.setEditCourse(id)
-  */
+  edit_store.setEdit(id)
+  
 }
 
 // Deletes chapter
@@ -52,10 +51,15 @@ function handleDelete(e) {
 <template>
   <div class="grid grid-cols-8 bg-base-200 rounded-lg">
     <div class="col-span-7">
-      <button class="btn btn-ghost">{{ title }}</button>
+      <button v-show="!edit_store.isEdit(id)" class="btn btn-ghost">{{ title }}</button>
+
+      <form v-show="edit_store.isEdit(id)" @submit.prevent="(event) => handleEdit(event, id, title)">
+        <input ref="input" :value=title type="text" placeholder="Title" class="input input-bordered" />  
+      </form>
+
     </div>
     <div class="col-span-1 flex flex-row gap-1">
-      <button>Name</button>
+      <button @click="toggleEdit(id)">Edit</button>
     </div>
   </div>
 </template>

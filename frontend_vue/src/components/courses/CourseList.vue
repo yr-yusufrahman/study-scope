@@ -7,13 +7,13 @@ import { ref, onBeforeMount, onMounted } from 'vue'
 import axios from 'axios'
 import refresh from '../helpers/refresh.js'
 import { useCourseStore } from '../../stores/CourseStore.js'
+import { useToggleEditStore } from '../../stores/ToggleEditStore.js'
 
 
 const router = useRouter()
 
 // State
 const store = useCourseStore()
-const add = ref(false)
 
 
 // Check for logged in
@@ -70,13 +70,11 @@ function saveChanges() {
 <template>
     <div class="page-layout">
         <div class="course-list">
-            <CourseCard v-for="(course, index) in store.courses" 
+            <CourseCard v-for="course in store.courses" 
             :id="course.id" 
-            :index="index"
             :title="course.title" />
-            <AddCourse v-show="add" />    
         </div>
-        <button class="btn btn-primary" @click="add = !add">Add Course</button>
+        <AddCourse/>
         <button class="btn btn-accent" @click="saveChanges">Save Changes</button>       
     </div>
 </template>

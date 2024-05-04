@@ -10,6 +10,7 @@ export const useCourseStore = defineStore("courseStore", () => {
     const removals = ref([]) // Courses removed
     
     const chapter_additions = ref([]) // New chapters added
+    const chapter_edits = ref([]) // Chapters edited: {id, new_title}
 
     // ----- Getters ----- try and use computed?
 
@@ -126,28 +127,79 @@ export const useCourseStore = defineStore("courseStore", () => {
     }
 
     // Add chapter to course
-    function addChapter(course_id, new_title) {
-        // Check if chapter exists
-        if (!chapterExists(course_id, new_title)) {
-            let new_chapter = {title: new_title}
+    function addChapter(new_title) {
+        let success = false
 
-            courses.value.forEach(course => {
-                if (course.id === course_id) {
-                    course.chapters.push(new_chapter)
+        // Find the course to add chapter to
+        const course_id = Number(localStorage.getItem('selectedCourse'))
+        let course = courses.value.find(course => course.id === course_id)
+
+        // Check if chapter exists
+        const exists = () => course?.chapters?.find(chapter => chapter.title === new_title)
+        if (!exists()) {
+            
+            // Give chapter a local id for editing
+            const generateId = () => {
+                let id = Math.floor(Math.random() * 1000);
+                let exists = course.chapters.find(chapter => chapter.id === id)
+                while (exists) {
+                    id = Math.floor(Math.random() * 1000);
+                    exists = course.find(chapter => chapter.id === id)
                 }
-            })
+                return id
+            }
+            let new_chapter = {id: generateId(), title: new_title}
+
+            // Add chapter to course state
+            course.chapters.push(new_chapter)
+
             // Add to chapter additions
             chapter_additions.value.push(new_chapter)
-            console.log("Chapter additions: ", chapter_additions.value)            
+            console.log("Chapter additions: ", chapter_additions.value)    
+            success = true        
         }
+        return success
     }
 
-    // Check if chapter exists in course
-    function chapterExists(course_id, title) {
-        console.log("Checking if chapter exists: ", course_id, title)
+    // Rename chapter
+    function editChapter(id, new_title) {
+        let success = false
+        const course_id = Number(localStorage.getItem('selectedCourse'))
         let course = courses.value.find(course => course.id === course_id)
-        console.log("Course: ", course)
-        return course?.chapters?.includes(title)
+        console.log("chapter id: ", id, "new title: ", new_title)
+        // Check if chapter exists with the new title
+        const exists = () => course?.chapters?.some(chapter => chapter.title === new_title)
+        if (!exists()) {
+            // Check if chapter is new
+            if (chapter_additions.value.some(chapter => chapter.id === id)) {
+                chapter_additions.value.forEach((item, index) => {
+                    if (item.id === id) {
+                        chapter_additions.value[index].title = new_title
+                    }
+                })
+            }
+
+            // Check if chapter has been edited before
+            else if (chapter_edits.value.some(chapter => chapter.id === id)) {
+                chapter_edits.value.forEach((item, index) => {
+                    if (item.id === id) {
+                        chapter_edits.value[index].new_title = new_title
+                    }
+                })
+            } else {
+                chapter_edits.value.push({id, new_title})
+            }
+
+            // Update state
+            course.chapters.forEach(chapter => {
+                if (chapter.id === id) {
+                    chapter.title = new_title
+                }
+            })
+            success = true
+            console.log("Chapter edits: ", chapter_edits.value)
+        }
+        return success
     }
 
     return {
@@ -163,6 +215,7 @@ export const useCourseStore = defineStore("courseStore", () => {
         addCourse,
         editCourse,
         removeCourse,
-        addChapter
+        addChapter,
+        editChapter
     }
 })

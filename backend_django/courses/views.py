@@ -49,6 +49,14 @@ def change_courses(request):
         edits = request.data.get('edit')
         removals = request.data.get('remove')
 
+        # Remove courses
+        if removals:
+            for removal in removals:
+                course_id = removal.get('id')
+                course = Course.objects.filter(owner=user, id=course_id).first()
+                if course:
+                    course.delete()
+
         # Add new courses
         if additions:
             for addition in additions:
@@ -67,14 +75,6 @@ def change_courses(request):
                     if course_title != course.title:
                         course.title = course_title
                         course.save()
-
-        # Remove courses
-        if removals:
-            for removal in removals:
-                course_id = removal.get('id')
-                course = Course.objects.filter(owner=user, id=course_id).first()
-                if course:
-                    course.delete()
         
         return Response(status=status.HTTP_200_OK)
 

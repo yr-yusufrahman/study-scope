@@ -14,7 +14,7 @@ export default async function refresh() {
         localStorage.setItem('refresh', data.refresh_token)
         return true
     } catch (error) {
-        console.log('Error: not authenticated.', error)
+        console.log('Error: tried to refresh')
         localStorage.removeItem('token')
         localStorage.removeItem('refresh')
         return false

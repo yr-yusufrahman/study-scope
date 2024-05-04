@@ -1,4 +1,5 @@
 <script setup>
+import EditChapterModal from './EditChapterModal.vue'
 import ChapterCard from './ChapterCard.vue'
 import AddChapter from './AddChapter.vue'
 
@@ -65,16 +66,17 @@ function saveChanges() {
             </ul>
         </div> 
 
-        <div class="flex flex-col gap-3">
+        <EditChapterModal />
+        <div class="divider">Chapters</div>
+
+        <div class="flex flex-col gap-3 mt-3">
             <ChapterCard v-for="chapter in chapters" :id="chapter.id" :title="chapter.title" />
         </div>
 
-        
         <AddChapter v-show="add" />    
-        
 
+        <div class="divider">Add new</div>
         <div class="card">
-            
             <button class="btn btn-primary" @click="add = !add">Add Chapter</button>  
             <button class="btn btn-accent" @click="saveChanges">Save Changes</button>    
         </div>

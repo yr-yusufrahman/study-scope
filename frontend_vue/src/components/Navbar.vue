@@ -14,18 +14,17 @@ function logout() {
       <RouterLink to="/" class="btn btn-ghost text-xl">Study App</RouterLink>
     </div>
     <div class="flex-none">
-      <ul class="menu menu-horizontal px-1">
-        <li><RouterLink to="/login">Login</RouterLink></li>
-        <li>
-          <details>
-            <summary>Parent</summary>
-            <ul class="p-2 bg-base-100 rounded-t-none">
-              <li><a>Link 1</a></li>
-              <li><RouterLink to="/" @click="logout">Logout</RouterLink></li>
-            </ul>
-          </details>
-        </li>
-      </ul>
+      <button class="btn btn-ghost rounded-btn">
+        <RouterLink to="/login">Login</RouterLink>  
+      </button>
+      
+      <div class="dropdown dropdown-end">
+        <div tabindex="0" role="button" class="btn btn-ghost rounded-btn">Dropdown</div>
+        <ul tabindex="0" class="menu dropdown-content z-[1] p-2 shadow bg-base-100 rounded-box w-52 mt-4">
+          <li><a>Item 1</a></li> 
+          <li><RouterLink to="/" @click="logout">Logout</RouterLink></li>
+        </ul>
+      </div>
     </div>
   </div>
 </template>
@@ -39,7 +38,7 @@ div {
   color: white;
 }
 
-details ul li {
+.dropdown ul li {
   color: initial;
 }
 
