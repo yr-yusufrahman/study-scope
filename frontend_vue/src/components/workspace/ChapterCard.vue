@@ -38,31 +38,35 @@ function handleEdit(e, id, original_title) {
 }
 
 // Deletes chapter
-function handleDelete(e) {
-  /*
-  const id = Number(e.target.value)
-  store.removeCourse(id)
-  */
+function handleDelete(id) {
+  store.removeChapter(id)
 }
 
 </script>
 
 
 <template>
-  <div class="grid grid-cols-8 bg-base-200 rounded-lg">
-    <div class="col-span-7">
+  <div class=" flex flex-row bg-base-200 rounded-lg">
+    <div class=" w-full">
       <button v-show="!edit_store.isEdit(id)" class="btn btn-ghost">{{ title }}</button>
 
       <form v-show="edit_store.isEdit(id)" @submit.prevent="(event) => handleEdit(event, id, title)">
         <input ref="input" :value=title type="text" placeholder="Title" class="input input-bordered" />  
       </form>
+    </div>  
 
-    </div>
-    <div class="col-span-1 flex flex-row gap-1">
-      <button @click="toggleEdit(id)">Edit</button>
+    <div class="dropdown dropdown-hover">
+      <div tabindex="0" role="button" class="btn" >...</div>
+      <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+        <li><button @click="toggleEdit(id)">Edit</button></li>
+        <li><button @click="handleDelete(id)">Delete</button></li>
+      </ul>
     </div>
   </div>
 </template>
 
 <style scoped>
+.dropdown {
+  position: initial;
+}
 </style>

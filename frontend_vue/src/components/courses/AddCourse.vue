@@ -1,5 +1,5 @@
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, watch } from 'vue'
 import { useCourseStore } from '../../stores/CourseStore.js'
 import { useToggleEditStore } from '../../stores/ToggleEditStore.js'
 
@@ -9,20 +9,20 @@ const edit_store = useToggleEditStore()
 const addId = -1
 const new_title = ref('')
 
-// Opens input for adding new course
-function toggleEdit(id) {
-  edit_store.setEdit(id)
 
-  // Focus on input after DOM renders
-  nextTick(() => {
-    new_title.value.focus()
-  })
-}
+// Focuses input for adding new chapter by watching for edit state
+watch(() => edit_store.isEdit(addId), (value) => {
+    if (value) {
+        nextTick(() => {
+            new_title.value.focus()
+        })
+    }
+})
 
 
 function handleAdd(e) {
-    const new_title = e.target[0].value
-    if (store.addCourse(new_title)) {
+    const new_title = e.target[0]
+    if (store.addCourse(new_title.value)) {
         new_title.value = ''    
     } else {
         console.log('Course already exists')
@@ -45,5 +45,4 @@ function handleAdd(e) {
             </div>
         </form>
     </div>
-    <button class="btn btn-primary" @click="toggleEdit(addId)">Add Course</button>
 </template>

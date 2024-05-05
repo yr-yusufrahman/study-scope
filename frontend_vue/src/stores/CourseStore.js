@@ -11,18 +11,20 @@ export const useCourseStore = defineStore("courseStore", () => {
     
     const chapter_additions = ref([]) // New chapters added
     const chapter_edits = ref([]) // Chapters edited: {id, new_title}
+    const chapter_removals = ref([]) // Chapters removed
 
     // ----- Getters ----- try and use computed?
 
     // Returns list of chapters for the selected course
     function selectedChapters() {
         let selected = Number(localStorage.getItem('selectedCourse'))
-        if (selected && courses.value.length > 0) {
+        
+        if (!selected) return null
+        else {
             let course = courses.value.find(course => course.id === selected)
             let chapters = course?.chapters
             return chapters
         }
-        return false
     }
 
 
@@ -140,10 +142,10 @@ export const useCourseStore = defineStore("courseStore", () => {
             
             // Give chapter a local id for editing
             const generateId = () => {
-                let id = Math.floor(Math.random() * 1000);
+                let id = Math.floor(Math.random() * 1000)
                 let exists = course.chapters.find(chapter => chapter.id === id)
                 while (exists) {
-                    id = Math.floor(Math.random() * 1000);
+                    id = Math.floor(Math.random() * 1000)
                     exists = course.find(chapter => chapter.id === id)
                 }
                 return id
@@ -155,6 +157,13 @@ export const useCourseStore = defineStore("courseStore", () => {
 
             // Add to chapter additions
             chapter_additions.value.push(new_chapter)
+
+            // Update state
+            courses.value.forEach((course, index) => {
+                if (course.id === course_id) {
+                    courses.value[index] = course
+                }
+            })
             console.log("Chapter additions: ", chapter_additions.value)    
             success = true        
         }
@@ -190,16 +199,50 @@ export const useCourseStore = defineStore("courseStore", () => {
                 chapter_edits.value.push({id, new_title})
             }
 
-            // Update state
+            // Change title
             course.chapters.forEach(chapter => {
                 if (chapter.id === id) {
                     chapter.title = new_title
+                }
+            })
+
+            // Update state
+            courses.value.forEach((course, index) => {
+                if (course.id === course_id) {
+                    courses.value[index] = course
                 }
             })
             success = true
             console.log("Chapter edits: ", chapter_edits.value)
         }
         return success
+    }
+
+    // Remove chapter
+    function removeChapter(id) {
+        const course_id = Number(localStorage.getItem('selectedCourse'))
+        let course = courses.value.find(course => course.id === course_id)
+
+        // If chapter is new, remove it from additions
+        const isNew = () => chapter_additions.value.some(chapter => chapter.id === id)
+        if (isNew()) {
+            chapter_additions.value = chapter_additions.value.filter(chapter => chapter.id !== id)
+        } else {
+            chapter_removals.value.push(id) // Using id to delete will work as the id is given by backend
+        }
+
+        // Remove course from edit list as it is going to be deleted
+        chapter_edits.value = chapter_edits.value.filter(chapter => chapter.id !== id)
+        course.chapters = course.chapters.filter(chapter => chapter.id !== id)
+
+        // Update state
+        courses.value.forEach((course, index) => {
+            if (course.id === course_id) {
+                courses.value[index] = course
+            }
+        })
+
+        console.log("Chapter removals: ", chapter_removals.value)
     }
 
     return {
@@ -216,6 +259,7 @@ export const useCourseStore = defineStore("courseStore", () => {
         editCourse,
         removeCourse,
         addChapter,
-        editChapter
+        editChapter,
+        removeChapter
     }
 })

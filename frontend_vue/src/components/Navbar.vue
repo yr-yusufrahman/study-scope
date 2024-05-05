@@ -20,7 +20,7 @@ function logout() {
       
       <div class="dropdown dropdown-end">
         <div tabindex="0" role="button" class="btn btn-ghost rounded-btn">Dropdown</div>
-        <ul tabindex="0" class="menu dropdown-content z-[1] p-2 shadow bg-base-100 rounded-box w-52 mt-4">
+        <ul tabindex="0" class="menu dropdown-content z-[1] p-2 shadow bg-base-100 rounded-box w-52 mt-4 shadow-xl">
           <li><a>Item 1</a></li> 
           <li><RouterLink to="/" @click="logout">Logout</RouterLink></li>
         </ul>

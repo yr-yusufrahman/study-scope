@@ -51,7 +51,6 @@ function handleEdit(e, id, original_title) {
 
 // Deletes course
 function handleDelete(id) {
-  //const id = Number(e.target.value)
   store.removeCourse(id)
 }
 

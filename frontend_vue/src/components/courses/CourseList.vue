@@ -14,6 +14,8 @@ const router = useRouter()
 
 // State
 const store = useCourseStore()
+const edit_store = useToggleEditStore()
+const addId = -1
 
 
 // Check for logged in
@@ -37,6 +39,12 @@ onMounted(() => {
         router.push('/login')
     }
 })
+
+
+// Opens input for adding new course
+function toggleEdit() {
+  edit_store.setEdit(addId)
+}
 
 
 // Sends changes to backend
@@ -73,8 +81,9 @@ function saveChanges() {
             <CourseCard v-for="course in store.courses" 
             :id="course.id" 
             :title="course.title" />
+            <AddCourse v-show="edit_store.isEdit(addId)" />
         </div>
-        <AddCourse/>
+        <button class="btn btn-info" @click="toggleEdit(addId)">Add Course</button>
         <button class="btn btn-accent" @click="saveChanges">Save Changes</button>       
     </div>
 </template>

@@ -5,49 +5,59 @@ import AddChapter from './AddChapter.vue'
 
 import { useRouter } from 'vue-router'
 import { RouterLink } from 'vue-router'
-import { ref, onBeforeMount, onMounted } from 'vue'
+import { ref, nextTick, onMounted } from 'vue'
 import axios from 'axios'
 import refresh from '../helpers/refresh.js'
 import { useCourseStore } from '../../stores/CourseStore.js'
+import { useToggleEditStore } from '../../stores/ToggleEditStore.js'
 
 const router = useRouter()
 
 
 // State
 const store = useCourseStore()
-const chapters = ref([]) // Get chapters from selected course
-const add = ref(false)
+const edit_store = useToggleEditStore()
+const addId = -1
 
 
 // Check for logged in
 onMounted(() => {
     const token = localStorage.getItem('token')
-    const getChapters = async () => {
-        const success = await store.getCourses()
-        if (success) {
-            chapters.value = store.selectedChapters()
-        } else {
-            const refreshed = await refresh()
-            if (refreshed) {
-                store.getCourses()
-                chapters.value = store.selectedChapters()
-            } else {
-                router.push('/login')
-            }
-        }
-    }
 
     if (token) {
-        chapters.value = store.selectedChapters()
-        // If no chapters, get courses again
-        if (!chapters.value) {
-            getChapters()
+        let chapters = store.selectedChapters()
+        const getChapters = async () => {
+            const success = await store.getCourses()
+
+            // If unsuccessful, refresh token
+            if (!success) {
+                const refreshed = await refresh()
+                if (refreshed) {
+                    store.getCourses()
+                } else {
+                    router.push('/login')
+                }                
+            }
+        }
+        
+        // If no course was selected, go back to courses
+        if (chapters === null) {
+            router.push('/courses')
         } 
+        // If no chapters, get courses once more and check for chapters
+        else if (!chapters) {
+            getChapters()
+        }
     } else {
         router.push('/login')
     }
 })
 
+
+// Opens input for adding new chapter
+function toggleEdit() {
+  edit_store.setEdit(addId)
+}
 
 // Sends changes to backend
 function saveChanges() {
@@ -58,7 +68,7 @@ function saveChanges() {
 
 
 <template>
-    <div id="panel" class="shadow-xl flex flex-col gap-4 overflow-y-auto">  
+    <div id="panel" class="shadow-2xl flex flex-col gap-4 overflow-y-auto">  
         <div class="text-m breadcrumbs">
             <ul>
                 <li><RouterLink to="/courses">Courses</RouterLink></li> 
@@ -69,15 +79,16 @@ function saveChanges() {
         <EditChapterModal />
         <div class="divider">Chapters</div>
 
+        <!-- selectedChapters returns the chapters rather than storing state copy -->
         <div class="flex flex-col gap-3 mt-3">
-            <ChapterCard v-for="chapter in chapters" :id="chapter.id" :title="chapter.title" />
+            <ChapterCard v-for="chapter in store.selectedChapters()" :id="chapter.id" :title="chapter.title" />
         </div>
 
-        <AddChapter v-show="add" />    
+        <AddChapter v-show="edit_store.isEdit(addId)" />    
 
         <div class="divider">Add new</div>
         <div class="card">
-            <button class="btn btn-primary" @click="add = !add">Add Chapter</button>  
+            <button class="btn btn-primary" @click="toggleEdit">Add Chapter</button>  
             <button class="btn btn-accent" @click="saveChanges">Save Changes</button>    
         </div>
         
