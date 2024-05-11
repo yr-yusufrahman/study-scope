@@ -1,6 +1,7 @@
 <script setup>
 import { ref, nextTick } from 'vue'
-import { useCourseStore } from '../../stores/CourseStore.js'
+import { useChapterStore } from '@/stores/ChapterStore'
+import { useCardStore } from '@/stores/CardStore'
 import { useToggleEditStore } from '../../stores/ToggleEditStore.js'
 
 defineProps({
@@ -8,9 +9,17 @@ defineProps({
   title: String,
 })
 
-const store = useCourseStore()
+const chapter_store = useChapterStore()
+const card_store = useCardStore()
 const edit_store = useToggleEditStore()
 const input = ref('')
+
+
+// Selects chapter to view flashcards
+function selectChapter(id) {
+  card_store.setChapter(id)
+  //localStorage.setItem('selectedChapter', id)
+}
 
 
 // Opens input for editing chapter title
@@ -29,7 +38,7 @@ function handleEdit(e, id, original_title) {
   /**/
   const new_title = e.target[0].value
   if (new_title !== original_title) {
-    store.editChapter(id, new_title)
+    chapter_store.editChapter(id, new_title)
   } else {
     console.log('Chapter already exists with this name')
   }
@@ -39,7 +48,7 @@ function handleEdit(e, id, original_title) {
 
 // Deletes chapter
 function handleDelete(id) {
-  store.removeChapter(id)
+  chapter_store.removeChapter(id)
 }
 
 </script>
@@ -48,7 +57,7 @@ function handleDelete(id) {
 <template>
   <div class=" flex flex-row bg-base-200 rounded-lg">
     <div class=" w-full">
-      <button v-show="!edit_store.isEdit(id)" class="btn btn-ghost">{{ title }}</button>
+      <button v-show="!edit_store.isEdit(id)" @click="selectChapter(id)" class="btn btn-ghost">{{ title }}</button>
 
       <form v-show="edit_store.isEdit(id)" @submit.prevent="(event) => handleEdit(event, id, title)">
         <input ref="input" :value=title type="text" placeholder="Title" class="input input-bordered" />  

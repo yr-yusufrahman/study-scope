@@ -1,10 +1,12 @@
 <script setup>
 import { ref, nextTick, onMounted, watch } from 'vue'
 import { useCourseStore } from '../../stores/CourseStore.js'
+import { useChapterStore } from '../../stores/ChapterStore.js'
 import { useToggleEditStore } from '../../stores/ToggleEditStore.js'
 
 // State
 const store = useCourseStore()
+const chapter_store = useChapterStore()
 const edit_store = useToggleEditStore()
 const addId = -1
 const new_title = ref('')
@@ -24,7 +26,7 @@ watch(() => edit_store.isEdit(addId), (value) => {
 function handleAdd(e) {
     const new_title = e.target[0]
     const new_chapter = new_title.value
-    let success = store.addChapter(new_chapter)
+    let success = chapter_store.addChapter(new_chapter)
     if (success) {
         new_title.value = ''
     } else {

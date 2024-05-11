@@ -9,6 +9,7 @@ import { ref, nextTick, onMounted } from 'vue'
 import axios from 'axios'
 import refresh from '../helpers/refresh.js'
 import { useCourseStore } from '../../stores/CourseStore.js'
+import { useChapterStore } from '../../stores/ChapterStore.js'
 import { useToggleEditStore } from '../../stores/ToggleEditStore.js'
 
 const router = useRouter()
@@ -16,6 +17,7 @@ const router = useRouter()
 
 // State
 const store = useCourseStore()
+const chapter_store = useChapterStore()
 const edit_store = useToggleEditStore()
 const addId = -1
 
@@ -25,7 +27,7 @@ onMounted(() => {
     const token = localStorage.getItem('token')
 
     if (token) {
-        let chapters = store.selectedChapters()
+        let chapters = chapter_store.selectedChapters()
         const getChapters = async () => {
             const success = await store.getCourses()
 
@@ -81,7 +83,7 @@ function saveChanges() {
 
         <!-- selectedChapters returns the chapters rather than storing state copy -->
         <div class="flex flex-col gap-3 mt-3">
-            <ChapterCard v-for="chapter in store.selectedChapters()" :id="chapter.id" :title="chapter.title" />
+            <ChapterCard v-for="chapter in chapter_store.selectedChapters()" :id="chapter.id" :title="chapter.title" />
         </div>
 
         <AddChapter v-show="edit_store.isEdit(addId)" />    

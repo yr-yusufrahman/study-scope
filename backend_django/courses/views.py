@@ -4,7 +4,7 @@ from rest_framework import status, generics, permissions
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .models import Course, Chapter
+from .models import Course, Chapter, Card
 
 # Returns all course data for a user
 @api_view(["GET"])
@@ -84,3 +84,32 @@ def change_courses(request):
         }
         return Response(bad_response, status=status.HTTP_401_UNAUTHORIZED)
     
+
+# Make changes to a user's chapters within a course
+    
+
+
+# Get flashcards for a chapter using the chapter id
+@api_view(["POST"])
+def get_cards(request):
+    # First confirm if user access token is valid
+    user = request.user
+    if user:
+        # Get the chapter id
+        chapter_id = request.data.get('chapter_id')
+        cards = Card.objects.filter(chapter=chapter_id)
+        card_data = []
+        for card in cards:
+            card_data.append({
+                'id': card.id,
+                'question': card.question,
+                'answer': card.answer,
+                'order': card.order,
+            })
+        
+        response = {
+            'cards': card_data,
+        }
+        return Response(response, status=status.HTTP_200_OK)
+    
+    return Response(status=status.HTTP_401_UNAUTHORIZED)

@@ -9,3 +9,10 @@ class Course(models.Model):
 class Chapter(models.Model):
     chapter_title = models.CharField(max_length=255)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
+
+# Flashcards
+class Card(models.Model):
+    question = models.CharField(max_length=255)
+    answer = models.TextField()
+    order = models.IntegerField()
+    chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE)
