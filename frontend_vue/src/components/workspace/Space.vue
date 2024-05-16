@@ -7,7 +7,7 @@ import { RouterLink } from 'vue-router';
 
 
 <template>
-  <div class="layout grid grid-cols-10 gap-4">
+  <div class="layout grid grid-cols-10">
 
     <div class="col-span-3">
       <ChapterDirectory />

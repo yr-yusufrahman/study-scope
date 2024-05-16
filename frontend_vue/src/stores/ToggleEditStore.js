@@ -4,7 +4,7 @@ import { defineStore } from "pinia";
 export const useToggleEditStore = defineStore("toggleEditStore", () => {
     // ----- State -----
     const active_edit = ref('') // Id of the course being edited
-    const active_edit_chapter = ref('') // Id of the chapter being edited
+
 
     // ----- Getters -----
 
@@ -25,10 +25,14 @@ export const useToggleEditStore = defineStore("toggleEditStore", () => {
         }
     }
 
+    function clear() {
+        active_edit.value = ''
+    }
 
     return {
         active_edit,
         isEdit,
-        setEdit
+        setEdit,
+        clear
     }
 })

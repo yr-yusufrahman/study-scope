@@ -5,7 +5,7 @@ import AddChapter from './AddChapter.vue'
 
 import { useRouter } from 'vue-router'
 import { RouterLink } from 'vue-router'
-import { ref, nextTick, onMounted } from 'vue'
+import { ref, onUnmounted, onMounted } from 'vue'
 import axios from 'axios'
 import refresh from '../helpers/refresh.js'
 import { useCourseStore } from '../../stores/CourseStore.js'
@@ -55,6 +55,10 @@ onMounted(() => {
     }
 })
 
+// Before leaving
+onUnmounted(() => {
+    edit_store.clear()
+})
 
 // Opens input for adding new chapter
 function toggleEdit() {

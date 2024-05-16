@@ -66,7 +66,7 @@ function handleDelete(id) {
 
     <div class="dropdown dropdown-hover">
       <div tabindex="0" role="button" class="btn" >...</div>
-      <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+      <ul tabindex="0" class="glass-light dropdown-content z-[1] menu p-2 shadow rounded-box w-52">
         <li><button @click="toggleEdit(id)">Edit</button></li>
         <li><button @click="handleDelete(id)">Delete</button></li>
       </ul>

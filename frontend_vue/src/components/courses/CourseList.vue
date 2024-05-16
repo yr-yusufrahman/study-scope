@@ -3,7 +3,7 @@ import CourseCard from './CourseCard.vue'
 import AddCourse from './AddCourse.vue'
 
 import { useRouter } from 'vue-router'
-import { ref, onBeforeMount, onMounted } from 'vue'
+import { ref, onUnmounted, onMounted } from 'vue'
 import axios from 'axios'
 import refresh from '../helpers/refresh.js'
 import { useCourseStore } from '../../stores/CourseStore.js'
@@ -38,6 +38,11 @@ onMounted(() => {
     } else {
         router.push('/login')
     }
+})
+
+// When leaving page
+onUnmounted(() => {
+    edit_store.clear()
 })
 
 

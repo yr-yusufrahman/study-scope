@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router';
 import { ref, nextTick } from 'vue'
 import { useCourseStore } from '../../stores/CourseStore.js'
+import { useCardStore } from '@/stores/CardStore';
 import { useToggleEditStore } from '../../stores/ToggleEditStore.js'
 
 defineProps({
@@ -11,13 +12,18 @@ defineProps({
 
 const router = useRouter()
 const store = useCourseStore()
+const card_store = useCardStore()
 const edit_store = useToggleEditStore()
 const input = ref('')
 
 
 // Selects course for workspace
 function selectCourse(id) {
-  localStorage.setItem('selectedCourse', id)
+  const current = localStorage.getItem('selectedCourse')
+  if (current != id) {
+    card_store.clear()
+    localStorage.setItem('selectedCourse', id)
+  }
   router.push('/workspace')
 }
 

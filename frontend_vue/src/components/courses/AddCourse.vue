@@ -32,7 +32,7 @@ function handleAdd(e) {
 
 
 <template>
-    <div v-show="edit_store.isEdit(addId)" class="card w-96 bg-base-100 shadow-xl">
+    <div class="card w-96 bg-base-100 shadow-xl">
         <form class="card-body" @submit.prevent="handleAdd" >
             <div class="form-control">
                 <label class="label">
