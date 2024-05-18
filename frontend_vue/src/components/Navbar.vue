@@ -9,7 +9,7 @@ function logout() {
 
 
 <template>
-  <div id="navbar" class="navbar bg-base-100">
+  <div id="navbar" class="navbar">
     <div id="nav-logo" class="flex-1">
       <RouterLink to="/" class="btn btn-ghost text-xl">Study App</RouterLink>
     </div>
@@ -32,6 +32,8 @@ function logout() {
 <style scoped>
 #navbar {
   background-image: linear-gradient(45deg, #7BCDC8, #35ACDA);
+  position: fixed;
+  z-index: 1;
 }
 
 div {

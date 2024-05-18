@@ -36,7 +36,7 @@ function chapterInCourse(chapterId) {}
 
 
 <template>
-    <div class="overflow-y-auto p-5">
+    <div id="cards" class="p-5">
         <h1>Flashcards should be here:</h1>
         <div class="card-list">    
             <Flashcard v-for="card in card_store.currentCards" 
@@ -46,12 +46,17 @@ function chapterInCourse(chapterId) {}
             :order="card.order" />
             <AddCard v-show="edit_store.isEdit(addId)" />
         </div>
-        <button v-show="card_store.currentChapter" class="btn btn-info" @click="toggleEdit(addId)">Add Card</button>
+        <button v-show="card_store.currentChapter" class="btn btn-info" @click="toggleEdit(addId)">Add or Remove Card</button>
     </div>
 </template>
 
 
 <style scoped>
+#cards {
+    width: 90%;
+    max-width: 1200px;
+}
+
 .card-list {
     display: flex;
     flex-direction: column;

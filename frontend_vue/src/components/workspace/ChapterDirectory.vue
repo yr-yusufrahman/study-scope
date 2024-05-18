@@ -74,8 +74,8 @@ function saveChanges() {
 
 
 <template>
-    <div id="panel" class="shadow-2xl flex flex-col gap-4 overflow-y-auto">  
-        <div class="text-m breadcrumbs">
+    <div id="panel" class="shadow-2xl flex flex-col gap-4 fixed">  
+        <div class="text-m breadcrumbs overflow-x-clip">
             <ul>
                 <li><RouterLink to="/courses">Courses</RouterLink></li> 
                 <li><a>Selected course</a></li> 
@@ -86,7 +86,7 @@ function saveChanges() {
         <div class="divider">Chapters</div>
 
         <!-- selectedChapters returns the chapters rather than storing state copy -->
-        <div class="flex flex-col gap-3 mt-3">
+        <div class="flex flex-col gap-3 mt-3 overflow-y-auto">
             <ChapterCard v-for="chapter in chapter_store.selectedChapters()" :id="chapter.id" :title="chapter.title" />
         </div>
 
@@ -107,6 +107,9 @@ function saveChanges() {
 #panel {
     height: 100%;
     padding: 0.5rem;
+    background-color: white;
+    width: 23%;
+    max-width: 350px;
 }
 
 </style>

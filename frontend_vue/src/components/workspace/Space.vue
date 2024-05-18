@@ -1,21 +1,21 @@
 <script setup>
 import FlashcardArea from './FlashcardArea.vue';
-
 import ChapterDirectory from './ChapterDirectory.vue';
-import { RouterLink } from 'vue-router';
 </script>
 
 
 <template>
-  <div class="layout grid grid-cols-10">
-
-    <div class="col-span-3">
-      <ChapterDirectory />
+  <div class="layout flex flex-row">
+    
+    <div class="directory">
+      <ChapterDirectory />  
     </div>
-    <div class="col-span-7">
+    <!--
+    <div class="directory"></div>-->
+
+    <div id="card-area">
       <FlashcardArea />
     </div>
-
   </div>
 </template>
 
@@ -23,5 +23,16 @@ import { RouterLink } from 'vue-router';
 <style scoped>
 .layout {
   height: 80vh;
+}
+
+.directory {
+  width: 30vw;
+  max-width: 350px;
+}
+
+#card-area {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 </style>

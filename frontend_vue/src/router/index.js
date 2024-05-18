@@ -4,6 +4,8 @@ import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import CoursesView from '@/views/CoursesView.vue'
 import WorkspaceView from '@/views/WorkspaceView.vue'
+import EditView from '@/views/EditView.vue'
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -31,6 +33,11 @@ const router = createRouter({
       path: '/workspace',
       name:'workspace',
       component: WorkspaceView,
+    },
+    {
+      path: '/edit',
+      name:'edit',
+      component: EditView,
     }
   ]
 })
