@@ -10,8 +10,6 @@ import ChapterDirectory from './ChapterDirectory.vue';
     <div class="directory">
       <ChapterDirectory />  
     </div>
-    <!--
-    <div class="directory"></div>-->
 
     <div id="card-area">
       <FlashcardArea />
@@ -32,6 +30,7 @@ import ChapterDirectory from './ChapterDirectory.vue';
 
 #card-area {
   width: 100%;
+  padding-top: 4rem;
   display: flex;
   justify-content: center;
 }

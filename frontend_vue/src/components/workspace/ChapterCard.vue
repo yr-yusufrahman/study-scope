@@ -3,6 +3,7 @@ import { ref, nextTick } from 'vue'
 import { useChapterStore } from '@/stores/ChapterStore'
 import { useCardStore } from '@/stores/CardStore'
 import { useToggleEditStore } from '../../stores/ToggleEditStore.js'
+import autoResize from '../helpers/textResize'
 
 defineProps({
   id: Number,
@@ -13,6 +14,7 @@ const chapter_store = useChapterStore()
 const card_store = useCardStore()
 const edit_store = useToggleEditStore()
 const input = ref('')
+const form = ref(null)
 
 
 // Selects chapter to view flashcards
@@ -34,16 +36,19 @@ function toggleEdit(id) {
 
 
 // Handles editing chapter title
-function handleEdit(e, id, original_title) {
-  /**/
-  const new_title = e.target[0].value
-  if (new_title !== original_title) {
-    chapter_store.editChapter(id, new_title)
+function handleEdit(form_data, id, original_title) {
+  const new_title = form_data[0]
+  const new_chapter = new_title.value
+
+  if (new_chapter !== original_title && new_chapter.trim() !== '') {
+    chapter_store.editChapter(id, new_chapter)
   } else {
-    console.log('Chapter already exists with this name')
+    console.log('Chapter already exists with this name or empty input.')
+    new_title.value = original_title
   }
+
+  // Close edit input
   edit_store.setEdit(id)
-  
 }
 
 // Deletes chapter
@@ -57,16 +62,30 @@ function handleDelete(id) {
 <template>
   <div class=" flex flex-row bg-base-200 rounded-lg">
     <div class=" w-full">
-      <button v-show="!edit_store.isEdit(id)" @click="selectChapter(id)" class="btn btn-ghost">{{ title }}</button>
+      <button v-show="!edit_store.isEdit(id)" @click="selectChapter(id)" class="btn btn-ghost h-auto chapter-name">{{ title }}</button>
 
-      <form v-show="edit_store.isEdit(id)" @submit.prevent="(event) => handleEdit(event, id, title)">
+
+      <form ref="form" v-show="edit_store.isEdit(id)" @submit.prevent="handleEdit(form, id, title)">
+        <!-- 
         <input ref="input" :value=title type="text" placeholder="Title" class="input input-bordered" />  
+        -->
+        <textarea 
+          rows="1"
+          ref="input" 
+          :value=title
+          type="text" 
+          placeholder="Title" 
+          class="textarea textarea-bordered card-edit overflow-y-hidden" 
+          required
+          @input="autoResize($event.target)"
+          @keydown.enter.prevent="handleEdit(form, id, title)"
+        ></textarea>
       </form>
     </div>  
 
-    <div class="dropdown dropdown-hover">
+    <div class="relative dropdown dropdown-hover">
       <div tabindex="0" role="button" class="btn" >...</div>
-      <ul tabindex="0" class="glass-light dropdown-content z-[1] menu p-2 shadow rounded-box w-52">
+      <ul tabindex="0" class="absolute glass-light dropdown-content z-[1] menu p-2 shadow rounded-box right-0">
         <li><button @click="toggleEdit(id)">Edit</button></li>
         <li><button @click="handleDelete(id)">Delete</button></li>
       </ul>
@@ -75,7 +94,8 @@ function handleDelete(id) {
 </template>
 
 <style scoped>
-.dropdown {
-  position: initial;
+.chapter-name {
+  font-weight: bold;
+  word-break: break-word;
 }
 </style>

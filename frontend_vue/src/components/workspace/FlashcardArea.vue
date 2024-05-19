@@ -2,7 +2,6 @@
 import { onMounted, watch, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Flashcard from './Flashcard.vue'
-import AddCard from './AddCard.vue'
 import { useCardStore } from '@/stores/CardStore.js'
 import { useToggleEditStore } from '@/stores/ToggleEditStore.js'
 
@@ -30,23 +29,25 @@ function toggleEdit() {
   edit_store.setEdit(addId)
 }
 
-
-function chapterInCourse(chapterId) {} 
+function editing() {
+    if (card_store.currentChapter) {
+        router.push('/edit')  
+    }
+}
 </script>
 
 
 <template>
-    <div id="cards" class="p-5">
+    <div id="cards" class="p-5 card-width">
         <h1>Flashcards should be here:</h1>
-        <div class="card-list">    
+        <div class="card-list">
             <Flashcard v-for="card in card_store.currentCards" 
             :id="card.id" 
             :question="card.question" 
             :answer="card.answer"
             :order="card.order" />
-            <AddCard v-show="edit_store.isEdit(addId)" />
+            <button v-show="card_store.currentChapter" class="btn btn-info" @click="editing">Add or Remove Card</button>
         </div>
-        <button v-show="card_store.currentChapter" class="btn btn-info" @click="toggleEdit(addId)">Add or Remove Card</button>
     </div>
 </template>
 
@@ -54,12 +55,6 @@ function chapterInCourse(chapterId) {}
 <style scoped>
 #cards {
     width: 90%;
-    max-width: 1200px;
 }
 
-.card-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-}
 </style>

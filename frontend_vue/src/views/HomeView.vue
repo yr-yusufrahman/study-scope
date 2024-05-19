@@ -1,6 +1,6 @@
 <script setup>
-import Landing from '../components/Landing.vue'
-import Bottom from '@/components/Bottom.vue'
+import Landing from '../components/structure/Landing.vue'
+import Bottom from '../components/structure/Bottom.vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -12,10 +12,12 @@ if (token) {
 </script>
 
 <template>
-  <main>
-    <Landing />
-  </main>
-  <footer>
-    <Bottom />
-  </footer>
+  <div class=" pt-16">
+    <main>
+      <Landing />
+    </main>
+    <footer>
+      <Bottom />
+    </footer>
+  </div>
 </template>

@@ -12,7 +12,7 @@ if (token) {
 
 
 <template>
-  <div class="bg">
+  <div class="bg pt-16">
     <LoginForm />  
   </div>
 </template>

@@ -3,6 +3,7 @@ import { ref, nextTick, onMounted, watch } from 'vue'
 import { useCourseStore } from '../../stores/CourseStore.js'
 import { useChapterStore } from '../../stores/ChapterStore.js'
 import { useToggleEditStore } from '../../stores/ToggleEditStore.js'
+import autoResize from '../helpers/textResize.js'
 
 // State
 const store = useCourseStore()
@@ -36,14 +37,6 @@ function handleAdd(e) {
     }*/
 }
 
-function autoResize(textarea) {
-    //const textarea = new_question.value
-    textarea.style.height = 'auto'; // Reset height to auto to calculate the actual height needed
-    textarea.style.height = textarea.scrollHeight + 'px'; // Set the height to the scrollHeight
-    if (textarea.scrollHeight < textarea.clientHeight) {
-        textarea.style.height = textarea.clientHeight + 'px'; // Set the height to the current client height if it's smaller than scroll height
-    }
-}
 
 </script>
 
@@ -54,21 +47,23 @@ function autoResize(textarea) {
             <div class="form-control">
                 <div class="flex w-full flex-row">
                     <!---->
-                    <textarea 
+                    <textarea
+                        rows="1"
                         ref="new_question" 
                         type="text" 
                         placeholder="Question" 
-                        class="w-1/3 card-edit" 
+                        class="w-1/3 card-edit textarea textarea-bordered break-words overflow-y-hidden" 
                         required
                         @input="autoResize($event.target)"
                     ></textarea> 
 
                     <div class="divider divider-horizontal"></div>
                     <textarea
+                        rows="1"
                         ref="new_answer"
                         type="text"
                         placeholder="Answer"
-                        class="w-full card-edit"
+                        class="w-2/3 card-edit textarea textarea-bordered break-words overflow-y-hidden"
                         required
                         @input="autoResize($event.target)"
                     ></textarea>

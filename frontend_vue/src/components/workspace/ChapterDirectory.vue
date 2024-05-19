@@ -74,11 +74,13 @@ function saveChanges() {
 
 
 <template>
-    <div id="panel" class="shadow-2xl flex flex-col gap-4 fixed">  
+    <div id="panel" class="shadow-2xl flex flex-col gap-1 fixed">
+        <div class=" h-16"></div>
+
         <div class="text-m breadcrumbs overflow-x-clip">
-            <ul>
+            <ul class="whitespace-normal">
                 <li><RouterLink to="/courses">Courses</RouterLink></li> 
-                <li><a>Selected course</a></li> 
+                <li><p>Selected course</p></li> 
             </ul>
         </div> 
 
@@ -86,14 +88,14 @@ function saveChanges() {
         <div class="divider">Chapters</div>
 
         <!-- selectedChapters returns the chapters rather than storing state copy -->
-        <div class="flex flex-col gap-3 mt-3 overflow-y-auto">
+        <div class="flex flex-col gap-2 pr-1 overflow-y-auto min-h-28 pb-28" >
             <ChapterCard v-for="chapter in chapter_store.selectedChapters()" :id="chapter.id" :title="chapter.title" />
         </div>
 
         <AddChapter v-show="edit_store.isEdit(addId)" />    
 
         <div class="divider">Add new</div>
-        <div class="card">
+        <div>
             <button class="btn btn-primary" @click="toggleEdit">Add Chapter</button>  
             <button class="btn btn-accent" @click="saveChanges">Save Changes</button>    
         </div>

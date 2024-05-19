@@ -4,7 +4,7 @@ import CourseList from '@/components/courses/CourseList.vue';
 
 
 <template>
-  <div class="bg">
+  <div class="bg p-16">
     <CourseList />
   </div>
 </template>
