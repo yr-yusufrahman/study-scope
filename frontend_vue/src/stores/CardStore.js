@@ -14,8 +14,8 @@ export const useCardStore = defineStore('cardStore', () => {
     const removals = ref([]) // Cards removed
   
     // Getters
-    const currentChapter = computed(() => chapter.value)
-    const currentCards = computed(() => cards.value)
+    const getChapter = computed(() => chapter.value)
+    const getCards = computed(() => cards.value)
 
 
     // Sets the current chapter
@@ -75,13 +75,39 @@ export const useCardStore = defineStore('cardStore', () => {
         removals.value = []
         */
     }
-  
+
+
+    // Add card to chapter
+    function addCard(new_question, new_answer, index) {
+
+        // No need to check if card exists, user can add multiple cards with same question
+        // Give card a local id for editing
+        const generateId = () => {
+            let id = Math.floor(Math.random() * 1000)
+            let exists = cards.value.find(card => card.id === id)
+            while (exists) {
+                id = Math.floor(Math.random() * 1000)
+                exists = cards.value.find(card => card.id === id)
+            }
+            return id
+        }
+        let new_card = {id: generateId(), question: new_question, answer: new_answer, order: index}
+
+        // Add card to additions
+        additions.value.push(new_card)
+
+        // Update state by inserting card at correct index
+        cards.value.splice(index, 0, new_card);
+    }
+
+
     return { 
         chapter,
-        currentChapter,
-        currentCards,
+        getChapter,
+        getCards,
         setChapter,
         getCardsRequest,
-        clear
+        clear,
+        addCard
     }
   })

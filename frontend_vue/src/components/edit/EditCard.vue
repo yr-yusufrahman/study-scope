@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import AddCard from './AddCard.vue'
+import { useCardStore } from '@/stores/CardStore';
 import { useToggleEditStore } from '@/stores/ToggleEditStore';
 import autoResize from '../helpers/textResize.js'
 
@@ -9,10 +10,10 @@ defineProps({
     question: String,
     answer: String,
     order: Number,
-    lastAdd: Boolean,
     addIndex: Number
 })
 
+const card_store = useCardStore()
 const edit_store = useToggleEditStore()
 const add_below = ref(false)
 const new_question = ref('')
@@ -82,7 +83,7 @@ function handleDelete(id) {
         
         <!-- Gap between cards and add card button -->
         <div class="flex justify-center h-7" 
-            v-show="lastAdd && !edit_store.isEdit(addIndex)" 
+            v-show="!edit_store.isEdit(addIndex) && (card_store.getCards.length-1 !== addIndex)" 
             @mouseover="add_below = true" 
             @mouseleave="add_below = false"
         >
@@ -98,9 +99,11 @@ function handleDelete(id) {
         </div>
 
         <!-- Add input below this specific card -->
-        <div class="pt-7 pb-7" v-show="lastAdd && edit_store.isEdit(addIndex)">
-            <AddCard class="w-full" :add-index="addIndex" />    
-        </div>
+        <Transition>
+            <div class="pt-7 pb-7" v-show="edit_store.isEdit(addIndex) && (card_store.getCards.length-1 !== addIndex)">
+                <AddCard class="w-full" :add-index="addIndex" />    
+            </div>
+        </Transition>
     </div>
 </template>
 

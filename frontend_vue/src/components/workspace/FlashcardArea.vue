@@ -15,7 +15,7 @@ const addId = -2
 // When the user leaves and clicks on another course, the 
 
 // Watches for changes in selected chapter
-watch(() => card_store.currentChapter, (value) => {
+watch(() => card_store.getChapter, (value) => {
     console.log('selectedChapter:', value);
     let request = card_store.getCardsRequest();
     if (!request) {
@@ -30,7 +30,7 @@ function toggleEdit() {
 }
 
 function editing() {
-    if (card_store.currentChapter) {
+    if (card_store.getChapter) {
         router.push('/edit')  
     }
 }
@@ -41,12 +41,12 @@ function editing() {
     <div id="cards" class="p-5 card-width">
         <h1>Flashcards should be here:</h1>
         <div class="card-list">
-            <Flashcard v-for="card in card_store.currentCards" 
+            <Flashcard v-for="card in card_store.getCards" 
             :id="card.id" 
             :question="card.question" 
             :answer="card.answer"
             :order="card.order" />
-            <button v-show="card_store.currentChapter" class="btn btn-info" @click="editing">Add or Remove Card</button>
+            <button v-show="card_store.getChapter" class="btn btn-info" @click="editing">Add or Remove Card</button>
         </div>
     </div>
 </template>

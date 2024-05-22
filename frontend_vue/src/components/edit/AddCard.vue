@@ -1,7 +1,5 @@
 <script setup>
-import { ref, nextTick, onMounted, watch } from 'vue'
-import { useCourseStore } from '../../stores/CourseStore.js'
-import { useChapterStore } from '../../stores/ChapterStore.js'
+import { ref, nextTick, onMounted, watch, onUpdated } from 'vue'
 import { useCardStore } from '../../stores/CardStore.js'
 import { useToggleEditStore } from '../../stores/ToggleEditStore.js'
 import autoResize from '../helpers/textResize.js'
@@ -11,15 +9,14 @@ const props = defineProps({
 })
 
 // State
-const store = useCourseStore()
-const chapter_store = useChapterStore()
 const card_store = useCardStore()
 const edit_store = useToggleEditStore()
 const new_question = ref('')
 const new_answer = ref('')
+const form = ref(null)
 
 
-// Focuses input for adding new chapter by watching for edit state, the value is the result of isEdit
+// Focuses question input for adding card by watching edit store, the value is the result of isEdit
 watch(() => edit_store.isEdit(props.addIndex), (value) => {
     if (value) {
         nextTick(() => {
@@ -29,17 +26,27 @@ watch(() => edit_store.isEdit(props.addIndex), (value) => {
 })
 
 
+// Focuses question input after adding card
+onUpdated(() => new_question.value.focus())
+
+
 // Adds new chapter
-function handleAdd(e) {
-    /*
-    const new_title = e.target[0]
-    const new_chapter = new_title.value
-    let success = chapter_store.addChapter(new_chapter)
-    if (success) {
-        new_title.value = ''
-    } else {
-        console.log('Failed to add chapter')
-    }*/
+function handleAdd(form_data) {
+    const question_input = form_data[0]
+    const answer_input = form_data[1]
+
+    const new_question = question_input.value
+    const new_answer = answer_input.value
+    const new_index = props.addIndex + 1
+    if (new_question.trim() !== '') {
+        card_store.addCard(new_question, new_answer, new_index)
+
+        // Clear input fields
+        question_input.value = ''
+        answer_input.value = ''
+        question_input.style.height = '3rem'
+        edit_store.setEdit(new_index)
+    }
 }
 
 
@@ -50,7 +57,7 @@ function close() {
 
 
 <template>
-    <div class="rounded-xl shadow-md bg-base-100 p-3">
+    <div class="rounded-xl shadow-md p-3 bg-base-100 border-2 border-solid border-sky-400">
 
         <!-- Move and delete add card input -->
         <div class="flex flex-row w-full pb-3">
@@ -66,7 +73,7 @@ function close() {
         </div>
 
         <!-- Add card input -->
-        <form @submit.prevent="handleAdd" >
+        <form @submit.prevent="handleAdd(form)" ref="form" >
             <div class="form-control">
                 <div class="flex w-full flex-row">
                     <textarea
@@ -86,7 +93,6 @@ function close() {
                         type="text"
                         placeholder="Answer"
                         class="w-2/3 card-edit textarea textarea-bordered break-words overflow-y-hidden"
-                        required
                         @input="autoResize($event.target)"
                     ></textarea>
                 </div>
@@ -94,7 +100,7 @@ function close() {
             
             <!-- Submit button -->
             <div class="form-control mt-6">
-                <button class="btn bg-teal-100">Add</button>
+                <button class="btn bg-teal-100" >Add</button>
             </div>
         </form>
     </div>

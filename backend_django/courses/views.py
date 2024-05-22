@@ -97,7 +97,7 @@ def get_cards(request):
     if user:
         # Get the chapter id
         chapter_id = request.data.get('chapter_id')
-        cards = Card.objects.filter(chapter=chapter_id)
+        cards = Card.objects.filter(chapter=chapter_id).order_by('order')
         card_data = []
         for card in cards:
             card_data.append({

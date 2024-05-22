@@ -47,7 +47,7 @@ export const useChapterStore = defineStore('chapterStore', () => {
             }
             let new_chapter = {id: generateId(), title: new_title}
 
-            // Add chapter to course state
+            // Add chapter to course object
             course.chapters.push(new_chapter)
 
             // Add to chapter additions

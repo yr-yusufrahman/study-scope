@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { RouterLink } from 'vue-router'
 import Flashcard from '../workspace/Flashcard.vue'
@@ -13,11 +13,11 @@ const router = useRouter()
 
 const card_store = useCardStore()
 const edit_store = useToggleEditStore()
-const addIndex = card_store.currentCards?.length - 1
+//const addIndex = -1
 
 
 onMounted(() => {
-  if (!card_store.currentChapter) {
+  if (!card_store.getChapter) {
     router.push('/workspace')
   }
 })
@@ -29,7 +29,7 @@ function back() {
 }
 
 // Opens input for adding new card
-function toggleEdit() {
+function toggleEdit(addIndex) {
   edit_store.setEdit(addIndex)
 }
 </script>
@@ -43,20 +43,45 @@ function toggleEdit() {
 
     <div class="card-list gap-0 items-center card-width">
       <!-- last-add ensures hidden add input is not displayed in the last card. add-index is add under the card -->
-      <EditCard v-for="(card, index) in card_store.currentCards"
+      <EditCard v-for="(card, index) in card_store.getCards"
         :id="card.id" 
         :question="card.question" 
         :answer="card.answer"
         :order="card.order"
-        :last-add="index !== addIndex"
         :add-index="index"
         class=" w-full"
       />
 
       <div class="h-7"></div>
-      <AddCard class="w-full" :add-index="addIndex" v-show="edit_store.isEdit(addIndex)" />
-      <button v-show="card_store.currentChapter" class="btn btn-info" @click="toggleEdit(addIndex)">Add Card</button>
+
+      <Transition>
+        <div class="w-full" v-show="edit_store.isEdit(card_store.getCards.length-1)">
+          <AddCard class="w-full" :add-index="card_store.getCards.length-1" />
+          
+          <div class="h-7"></div>
+        </div>
+      </Transition>
+
+      
+
+      <button 
+        v-show="card_store.getChapter"
+        class="btn btn-info"
+        @click="toggleEdit(card_store.getCards.length-1)"
+      >Add Card</button>
     </div>
-    
   </div>
 </template>
+
+
+<style>
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+}
+</style>
