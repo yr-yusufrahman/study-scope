@@ -13,7 +13,7 @@ const router = useRouter()
 
 const card_store = useCardStore()
 const edit_store = useToggleEditStore()
-const addId = -1
+const addIndex = card_store.currentCards?.length - 1
 
 
 onMounted(() => {
@@ -30,28 +30,32 @@ function back() {
 
 // Opens input for adding new card
 function toggleEdit() {
-  edit_store.setEdit(addId)
+  edit_store.setEdit(addIndex)
 }
 </script>
 
 
 <template>
   <div class="p-5 flex flex-col justify-center items-center">
-    <div class=" w-full">
+    <div class=" w-full pb-1">
       <button class="btn btn-ghost" @click="back">Back</button>
     </div>
 
-    <div class="card-list items-center card-width">
-      <EditCard v-for="card in card_store.currentCards"
+    <div class="card-list gap-0 items-center card-width">
+      <!-- last-add ensures hidden add input is not displayed in the last card. add-index is add under the card -->
+      <EditCard v-for="(card, index) in card_store.currentCards"
         :id="card.id" 
         :question="card.question" 
         :answer="card.answer"
         :order="card.order"
-        class=" w-full" 
+        :last-add="index !== addIndex"
+        :add-index="index"
+        class=" w-full"
       />
 
-      <AddCard class="w-full" v-show="edit_store.isEdit(addId)" />
-      <button v-show="card_store.currentChapter" class="btn btn-info" @click="toggleEdit(addId)">Add Card</button>
+      <div class="h-7"></div>
+      <AddCard class="w-full" :add-index="addIndex" v-show="edit_store.isEdit(addIndex)" />
+      <button v-show="card_store.currentChapter" class="btn btn-info" @click="toggleEdit(addIndex)">Add Card</button>
     </div>
     
   </div>
