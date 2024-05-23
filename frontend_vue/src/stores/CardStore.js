@@ -114,6 +114,36 @@ export const useCardStore = defineStore('cardStore', () => {
         cards.value = cards.value.filter(card => card.id !== id)
     }
 
+    // Edit card in chapter
+    function editCard(id, new_question, new_answer) {
+        // Check if card is new
+        if (additions.value.find(card => card.id === id)) {
+            additions.value.forEach((item, index) => {
+                if (item.id === id) {
+                    additions.value[index].question = new_question
+                    additions.value[index].answer = new_answer
+                }
+            })
+        } else if (edits.value.find(card => card.id === id)) {
+            edits.value.forEach((item, index) => {
+                if (item.id === id) {
+                    edits.value[index].question = new_question
+                    edits.value[index].answer = new_answer
+                }
+            })
+        } else {
+            edits.value.push({id, new_question, new_answer})
+        }
+
+        // Update state
+        cards.value.forEach(card => {
+            if (card.id === id) {
+                card.question = new_question
+                card.answer = new_answer
+            }
+        })
+    }
+
     return { 
         chapter,
         getChapter,
@@ -122,6 +152,7 @@ export const useCardStore = defineStore('cardStore', () => {
         getCardsRequest,
         clear,
         addCard,
-        removeCard
+        removeCard,
+        editCard
     }
   })

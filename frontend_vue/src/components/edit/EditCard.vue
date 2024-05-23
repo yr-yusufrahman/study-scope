@@ -32,8 +32,20 @@ function toggleEdit(addIndex) {
 }
 
 
+// Deletes card
 function handleDelete(id) {
     card_store.removeCard(id)
+}
+
+
+// This function should run after the user clicks outside the textarea
+function handleEdit(id, original_question, original_answer) {
+    const edit_question = new_question.value.value
+    const edit_answer = new_answer.value.value
+
+    if (edit_question !== original_question || edit_answer !== original_answer) {
+        card_store.editCard(id, edit_question, edit_answer)
+    }
 }
 </script>
 
@@ -56,14 +68,15 @@ function handleDelete(id) {
             </div>
 
             <!-- Question and answer input -->
-            <div class="flex w-full flex-row">           
+            <div class="flex w-full flex-row">
                 <textarea
                     :value="question"
                     placeholder="Question" 
                     ref="new_question" 
                     type="text" 
                     required
-                    @input="autoResize($event.target)"                
+                    @input="autoResize($event.target)"
+                    @focusout="handleEdit(id, question, answer)"      
                     class="w-1/3 card-edit textarea textarea-bordered break-words overflow-y-hidden" 
                 ></textarea> 
 
@@ -75,9 +88,10 @@ function handleDelete(id) {
                     ref="new_answer" 
                     type="text" 
                     required
-                    @input="autoResize($event.target)"                
+                    @input="autoResize($event.target)"
+                    @focusout="handleEdit(id, question, answer)"          
                     class="w-2/3 card-edit textarea textarea-bordered break-words overflow-y-hidden" 
-                ></textarea> 
+                ></textarea>
             </div>
         </div>
         
