@@ -42,15 +42,18 @@ function toggleEdit(addIndex) {
     </div>
 
     <div class="card-list gap-0 items-center card-width">
-      <!-- last-add ensures hidden add input is not displayed in the last card. add-index is add under the card -->
-      <EditCard v-for="(card, index) in card_store.getCards"
-        :id="card.id" 
-        :question="card.question" 
-        :answer="card.answer"
-        :order="card.order"
-        :add-index="index"
-        class=" w-full"
-      />
+      <!-- add-index is add under the card -->
+      <TransitionGroup name="display">
+        <EditCard v-for="(card, index) in card_store.getCards"
+          :key="card.id"
+          :id="card.id" 
+          :question="card.question" 
+          :answer="card.answer"
+          :order="card.order"
+          :add-index="index"
+          class=" w-full"
+        />
+      </TransitionGroup>
 
       <div class="h-7"></div>
 
@@ -82,6 +85,16 @@ function toggleEdit(addIndex) {
 
 .v-enter-from,
 .v-leave-to {
+  opacity: 0;
+}
+
+
+/* Fade out after deleting */
+.display-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.display-leave-to {
   opacity: 0;
 }
 </style>

@@ -33,7 +33,7 @@ function toggleEdit(addIndex) {
 
 
 function handleDelete(id) {
-    console.log('Delete card:', id)
+    card_store.removeCard(id)
 }
 </script>
 

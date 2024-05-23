@@ -16,8 +16,9 @@ const new_answer = ref('')
 const form = ref(null)
 
 
-// Focuses question input for adding card by watching edit store, the value is the result of isEdit
+// Focuses question input after add button is clicked
 watch(() => edit_store.isEdit(props.addIndex), (value) => {
+    // the value is the result of isEdit
     if (value) {
         nextTick(() => {
             new_question.value.focus()
@@ -27,6 +28,7 @@ watch(() => edit_store.isEdit(props.addIndex), (value) => {
 
 
 // Focuses question input after adding card
+onMounted(() => new_question.value.focus())
 onUpdated(() => new_question.value.focus())
 
 

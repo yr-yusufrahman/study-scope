@@ -100,6 +100,19 @@ export const useCardStore = defineStore('cardStore', () => {
         cards.value.splice(index, 0, new_card);
     }
 
+    // Remove card from chapter
+    function removeCard(id) {
+        // Check if card is new
+        if (additions.value.find(card => card.id === id)) {
+            additions.value = additions.value.filter(card => card.id !== id)
+        } else {
+            removals.value.push(id)
+        }
+
+        // Remove from edits and Update state
+        edits.value = edits.value.filter(card => card.id !== id)
+        cards.value = cards.value.filter(card => card.id !== id)
+    }
 
     return { 
         chapter,
@@ -108,6 +121,7 @@ export const useCardStore = defineStore('cardStore', () => {
         setChapter,
         getCardsRequest,
         clear,
-        addCard
+        addCard,
+        removeCard
     }
   })
