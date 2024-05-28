@@ -144,6 +144,14 @@ export const useCardStore = defineStore('cardStore', () => {
         })
     }
 
+    function setMoveCard(current_index, new_index) {
+        // Remove card from current index
+        const card = cards.value.splice(current_index, 1)[0]
+
+        // Insert card at new index
+        cards.value.splice(new_index, 0, card)
+    }
+
     return { 
         chapter,
         getChapter,
@@ -153,6 +161,7 @@ export const useCardStore = defineStore('cardStore', () => {
         clear,
         addCard,
         removeCard,
-        editCard
+        editCard,
+        setMoveCard
     }
   })

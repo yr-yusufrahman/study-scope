@@ -60,7 +60,7 @@ function handleDelete(id) {
 
 
 <template>
-  <div class=" flex flex-row bg-base-200 rounded-lg">
+  <div class=" flex flex-row bg-base-200 rounded-lg p-1">
     <div class=" w-full">
       <button v-show="!edit_store.isEdit(id)" @click="selectChapter(id)" class="btn btn-ghost h-auto chapter-name">{{ title }}</button>
 

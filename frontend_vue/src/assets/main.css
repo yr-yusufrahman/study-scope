@@ -23,3 +23,15 @@
     width: 90%;
     max-width: 1200px;
 }
+
+.new-line {
+    word-break: break-word;
+}
+
+.dragging {
+    opacity: 0.5;
+}
+
+.drag-cursor {
+    cursor: move;
+}

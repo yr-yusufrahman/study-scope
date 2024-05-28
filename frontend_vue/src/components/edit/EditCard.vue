@@ -18,6 +18,7 @@ const edit_store = useToggleEditStore()
 const add_below = ref(false)
 const new_question = ref('')
 const new_answer = ref('')
+const dragging = ref(false)
 
 // Resize textareas
 onMounted(() => {
@@ -47,21 +48,34 @@ function handleEdit(id, original_question, original_answer) {
         card_store.editCard(id, edit_question, edit_answer)
     }
 }
+
+function dragState(state) {
+    dragging.value = state
+}
+
+// Allows dragging of cards
+function startDrag(e, index) {
+    //console.log('dragging', index)
+    dragging.value = true
+    e.dataTransfer.dropEffect = 'move'
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('cardIndex', index)
+}
+
+
 </script>
 
 
 <template>
-    <div>
+    <div name="card" :draggable="dragging" @dragstart="startDrag($event, addIndex)" @dragend="dragState(false)" :class="{'dragging': dragging}">
         <!-- Card contents -->
-        <div class="rounded-xl shadow-md bg-base-100 p-4 w-full">
+        <div class="rounded-xl shadow-md bg-base-100 p-4 w-full" >
             <!-- Move and delete button header -->
-            <div class="flex flex-row w-full pb-3">
-                <div class="flex w-full pl-3 items-center">
-                    <p>Question</p>
-                    <div class="w-1/3"></div>
-                    <p>Answer</p>
-                    <div class=" w-5/12"></div>
-                    <button class="btn btn-ghost">Move</button>          
+            <div class="flex flex-row w-full pb-3 items-center">
+
+                <!-- Draggable -->
+                <div class="w-full drag-cursor" @mousedown="dragState(true)" @mouseup="dragState(false)">
+                    <button class="btn btn-ghost">Move</button>    
                 </div>
                 
                 <button class="btn btn-error" @click="handleDelete(id)">Delete</button>
@@ -69,52 +83,69 @@ function handleEdit(id, original_question, original_answer) {
 
             <!-- Question and answer input -->
             <div class="flex w-full flex-row">
-                <textarea
-                    :value="question"
-                    placeholder="Question" 
-                    ref="new_question" 
-                    type="text" 
-                    required
-                    @input="autoResize($event.target)"
-                    @focusout="handleEdit(id, question, answer)"      
-                    class="w-1/3 card-edit textarea textarea-bordered break-words overflow-y-hidden" 
-                ></textarea> 
+                <label class="form-control w-1/3">
+                    <textarea
+                        id="question"
+                        :value="question"
+                        placeholder="Question" 
+                        ref="new_question" 
+                        type="text" 
+                        required
+                        @input="autoResize($event.target)"
+                        @focusout="handleEdit(id, question, answer)"      
+                        class="w-full card-edit textarea textarea-bordered break-words overflow-y-hidden" 
+                    ></textarea> 
+
+                    <div class="label">
+                        <span class="label-text-alt">Question</span>
+                    </div>
+                </label>
 
                 <div class="divider divider-horizontal"></div> 
 
-                <textarea
-                    :value="answer"
-                    placeholder="Answer" 
-                    ref="new_answer" 
-                    type="text" 
-                    required
-                    @input="autoResize($event.target)"
-                    @focusout="handleEdit(id, question, answer)"          
-                    class="w-2/3 card-edit textarea textarea-bordered break-words overflow-y-hidden" 
-                ></textarea>
+                <label class="form-control w-2/3">
+                    <textarea
+                        id="answer"
+                        :value="answer"
+                        placeholder="Answer" 
+                        ref="new_answer" 
+                        type="text" 
+                        required
+                        @input="autoResize($event.target)"
+                        @focusout="handleEdit(id, question, answer)"          
+                        class="w-full card-edit textarea textarea-bordered break-words overflow-y-hidden" 
+                    ></textarea>
+
+                    <div class="label">
+                        <span class="label-text-alt">Answer</span>
+                    </div>
+                </label>
             </div>
         </div>
         
         <!-- Gap between cards and add card button -->
-        <div class="flex justify-center h-7" 
-            v-show="!edit_store.isEdit(addIndex) && (card_store.getCards.length-1 !== addIndex)" 
-            @mouseover="add_below = true" 
-            @mouseleave="add_below = false"
-        >
-            <Transition>    
-                <button
-                    v-show="add_below"
-                    class="btn btn-info absolute"
-                    @click="toggleEdit(addIndex)"
-                    @mouseover="add_below = true" 
-                    @mouseleave="add_below = false"
-                >Add Card</button>
-            </Transition>
+        <div class="h-7" >
+            <div
+                class="w-full h-full flex justify-center"
+                v-show="!edit_store.isEdit(addIndex) && (card_store.getCards.length-1 !== addIndex)" 
+                @mouseover="add_below = true" 
+                @mouseleave="add_below = false"            
+            >
+                <Transition>    
+                    <button
+                        v-show="add_below"
+                        class="btn btn-info absolute"
+                        @click="toggleEdit(addIndex)"
+                        @mouseover="add_below = true" 
+                        @mouseleave="add_below = false"
+                    >Add Card</button>
+                </Transition>
+            </div>
         </div>
 
         <!-- Add input below this specific card -->
         <Transition>
-            <div class="pt-7 pb-7" v-show="edit_store.isEdit(addIndex) && (card_store.getCards.length-1 !== addIndex)">
+            <div class=" pb-7" v-show="edit_store.isEdit(addIndex) && (card_store.getCards.length-1 !== addIndex)">
                 <AddCard class="w-full" :add-index="addIndex" />    
             </div>
         </Transition>
