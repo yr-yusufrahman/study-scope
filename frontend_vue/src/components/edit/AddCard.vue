@@ -42,7 +42,7 @@ function handleAdd(form_data) {
     const new_index = props.addIndex + 1
     if (new_question.trim() !== '') {
         card_store.addCard(new_question, new_answer, new_index)
-
+        console.log('Added card at index: ', new_index)
         // Clear input fields
         question_input.value = ''
         answer_input.value = ''

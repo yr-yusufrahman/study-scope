@@ -14,6 +14,8 @@ const router = useRouter()
 const card_store = useCardStore()
 const edit_store = useToggleEditStore()
 const list = ref(null)
+const drag_index = ref(null)
+const update = ref(0)
 
 
 onMounted(() => {
@@ -34,29 +36,54 @@ function toggleEdit(addIndex) {
   edit_store.setEdit(addIndex)
 }
 
+const dropUpdate = () => {
+  update.value += 1
+}
 
 // Changes the order of the cards in state when dropped
-function onDrop(event, new_index) {
-  const card_index = event.dataTransfer.getData('cardIndex')
-  console.log("Dropped item was at: ", card_index, ", now at: ", new_index)
-  if (card_index !== new_index) {
-    
-    card_store.setMoveCard(card_index, new_index)
+function onDrop(event) {
+  if (drag_index.value !== null) {
+    const id = Number(event.dataTransfer.getData('cardId'))
+    let moving_to_last = card_store.setMoveCard(id, drag_index.value)
+
+    if (moving_to_last) {
+      dropUpdate()
+      console.log("refresh")
+    }
+    console.log("Dropped item id: ", id, ", now at: ", drag_index.value)
   }
+}
+
+
+function onDragLeave(event) {
+  console.log("Leave")
+  //drag_index.value = null
 }
 
 
 // Adds card template when dragging over
 function onDragOver(event) {
-  const afterElement = getDragAfterItem(event.clientY)
-  const draggable = list.value.querySelector('.dragging')
+  let new_index = 0
+  let draggable = list.value.querySelector('.dragging')
 
-  // If there is no element after the dragged card, add it to the end
-  if (afterElement == null) {
+  // Find the card being dragged and its index 
+  list.value.querySelectorAll('[name="card"]').forEach((card, index) => {
+    if (card.classList.contains('dragging')) {
+      new_index = index
+    }
+  })
+
+  // Get the element after the dragged card
+  const afterElement = getDragAfterItem(event.clientY).element
+
+  // If there is no element add it to the end - this is causing problems, adding to the end of the list
+  if (!afterElement) {
     list.value.appendChild(draggable)
   } else {
     list.value.insertBefore(draggable, afterElement)
   }
+  drag_index.value = new_index
+  //console.log("Dragged over item: ", new_index)
 }
 
 
@@ -73,25 +100,26 @@ function getDragAfterItem(y) {
     } else {
       return closest
     }
-  }, { offset: Number.NEGATIVE_INFINITY }).element
+  }, { offset: Number.NEGATIVE_INFINITY })
   
 }
 
 </script>
 
 
-<template>
-  <div class="p-5 flex flex-col justify-center items-center">
+<template >
+  <div class="p-5 flex flex-col justify-center items-center"  @drop.prevent="onDrop" @dragover.prevent="onDragOver" @dragleave.prevent="onDragLeave">
     <div class=" w-full pb-1 flex flex-row">
       <button class="btn btn-ghost" @click="back">Back</button>
       <div class="w-full"></div>
       <button class="btn btn-success">Save</button>
     </div>
 
-    <div class="card-list gap-0 items-center card-width"  @dragover.prevent>
+    <div class="card-list gap-0 items-center card-width">
 
       <!-- add-index is add under the card -->
-      <div class=" w-full" ref="list"> 
+      <div class=" w-full" ref="list" :key="update"> 
+
         <TransitionGroup name="display">
           <EditCard v-for="(card, index) in card_store.getCards"
             :key="card.id"
@@ -101,9 +129,6 @@ function getDragAfterItem(y) {
             :order="card.order"
             :add-index="index"
             class=" w-full"
-            @dragenter.prevent
-            @dragover.prevent="onDragOver"
-            @drop="onDrop($event, index)" 
           />
         </TransitionGroup>
       </div>
@@ -111,7 +136,6 @@ function getDragAfterItem(y) {
       <Transition>
         <div class="w-full" v-show="edit_store.isEdit(card_store.getCards.length-1)">
           <AddCard class="w-full" :add-index="card_store.getCards.length-1" />
-          
           <div class="h-7"></div>
         </div>
       </Transition>

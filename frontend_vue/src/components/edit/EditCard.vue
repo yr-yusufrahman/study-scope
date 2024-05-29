@@ -54,12 +54,11 @@ function dragState(state) {
 }
 
 // Allows dragging of cards
-function startDrag(e, index) {
-    //console.log('dragging', index)
+function startDrag(e, id) {
     dragging.value = true
     e.dataTransfer.dropEffect = 'move'
     e.dataTransfer.effectAllowed = 'move'
-    e.dataTransfer.setData('cardIndex', index)
+    e.dataTransfer.setData('cardId', id)
 }
 
 
@@ -67,7 +66,13 @@ function startDrag(e, index) {
 
 
 <template>
-    <div name="card" :draggable="dragging" @dragstart="startDrag($event, addIndex)" @dragend="dragState(false)" :class="{'dragging': dragging}">
+    <div 
+        name="card"
+        :class="{'dragging': dragging}"
+        :draggable="dragging" 
+        @dragstart="startDrag($event, id)" 
+        @dragend="dragState(false)"
+    >
         <!-- Card contents -->
         <div class="rounded-xl shadow-md bg-base-100 p-4 w-full" >
             <!-- Move and delete button header -->

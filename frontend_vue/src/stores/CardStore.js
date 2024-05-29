@@ -144,12 +144,25 @@ export const useCardStore = defineStore('cardStore', () => {
         })
     }
 
-    function setMoveCard(current_index, new_index) {
-        // Remove card from current index
-        const card = cards.value.splice(current_index, 1)[0]
+    function setMoveCard(id, new_index) {
+        let moving_to_last = false
+        // Get current index
+        const current_index = cards.value.findIndex(card => card.id === id)
 
-        // Insert card at new index
-        cards.value.splice(new_index, 0, card)
+        if (current_index !== new_index) {
+            const card = cards.value[current_index]
+
+            // Remove card from current index and insert at new index - update state store only once
+            let new_cards = cards.value.filter(card => card.id !== id)
+            new_cards.splice(new_index, 0, card)
+            cards.value = new_cards
+
+            if (new_index === cards.value.length-1) {
+                moving_to_last = true
+            }
+            //console.log("MOVED")
+        }
+        return moving_to_last
     }
 
     return { 
