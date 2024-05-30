@@ -36,28 +36,22 @@ function toggleEdit(addIndex) {
   edit_store.setEdit(addIndex)
 }
 
+
+// Updates the state value to trigger a re-render
 const dropUpdate = () => {
   update.value += 1
 }
 
+
 // Changes the order of the cards in state when dropped
 function onDrop(event) {
   if (drag_index.value !== null) {
-    const id = Number(event.dataTransfer.getData('cardId'))
-    let moving_to_last = card_store.setMoveCard(id, drag_index.value)
-
-    if (moving_to_last) {
+    const moved = card_store.setMoveCard(drag_index.value)
+    if (moved) {
       dropUpdate()
-      console.log("refresh")
+      console.log("Dropped item id: ", card_store.getDragging, ", now at: ", drag_index.value)      
     }
-    console.log("Dropped item id: ", id, ", now at: ", drag_index.value)
   }
-}
-
-
-function onDragLeave(event) {
-  console.log("Leave")
-  //drag_index.value = null
 }
 
 
@@ -107,8 +101,13 @@ function getDragAfterItem(y) {
 </script>
 
 
-<template >
-  <div class="p-5 flex flex-col justify-center items-center"  @drop.prevent="onDrop" @dragover.prevent="onDragOver" @dragleave.prevent="onDragLeave">
+<template>
+  <div 
+    class="p-5 flex flex-col justify-center items-center"
+    @drop="onDrop"
+    @dragover.prevent="onDragOver"
+    @dragenter.prevent
+  >
     <div class=" w-full pb-1 flex flex-row">
       <button class="btn btn-ghost" @click="back">Back</button>
       <div class="w-full"></div>

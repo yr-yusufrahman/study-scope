@@ -12,10 +12,12 @@ export const useCardStore = defineStore('cardStore', () => {
     const additions = ref([]) // New cards added
     const edits = ref([]) // Cards edited: {question, answer, order}
     const removals = ref([]) // Cards removed
+    const dragging = ref(null)
   
     // Getters
     const getChapter = computed(() => chapter.value)
     const getCards = computed(() => cards.value)
+    const getDragging = computed(() => dragging.value)
 
 
     // Sets the current chapter
@@ -144,37 +146,46 @@ export const useCardStore = defineStore('cardStore', () => {
         })
     }
 
-    function setMoveCard(id, new_index) {
-        let moving_to_last = false
-        // Get current index
-        const current_index = cards.value.findIndex(card => card.id === id)
+    // Move card in state
+    function setMoveCard(new_index) {
+        let changed = false
+        const id = dragging.value
 
-        if (current_index !== new_index) {
-            const card = cards.value[current_index]
+        if (id !== null) {
+            // Get current index
+            const current_index = cards.value.findIndex(card => card.id === id)
 
-            // Remove card from current index and insert at new index - update state store only once
-            let new_cards = cards.value.filter(card => card.id !== id)
-            new_cards.splice(new_index, 0, card)
-            cards.value = new_cards
+            if (current_index !== new_index) {
+                const card = cards.value[current_index]
 
-            if (new_index === cards.value.length-1) {
-                moving_to_last = true
-            }
-            //console.log("MOVED")
+                // Remove card from current index and insert at new index - update state store only once
+                let new_cards = cards.value.filter(card => card.id !== id)
+                new_cards.splice(new_index, 0, card)
+                cards.value = new_cards
+
+                changed = true
+                //console.log("MOVED")
+            }            
         }
-        return moving_to_last
+        return changed
+    }
+
+    function setDragging(id) {
+        dragging.value = id
     }
 
     return { 
         chapter,
         getChapter,
         getCards,
+        getDragging,
         setChapter,
         getCardsRequest,
         clear,
         addCard,
         removeCard,
         editCard,
-        setMoveCard
+        setMoveCard,
+        setDragging
     }
   })

@@ -19,6 +19,8 @@ const add_below = ref(false)
 const new_question = ref('')
 const new_answer = ref('')
 const dragging = ref(false)
+const scrollInterval = ref(null)
+const item = ref(null)
 
 // Resize textareas
 onMounted(() => {
@@ -58,9 +60,56 @@ function startDrag(e, id) {
     dragging.value = true
     e.dataTransfer.dropEffect = 'move'
     e.dataTransfer.effectAllowed = 'move'
-    e.dataTransfer.setData('cardId', id)
+    card_store.setDragging(id)
+    //startAutoScroll()
 }
 
+function stopDrag() {
+    dragging.value = false
+    card_store.setDragging(null)
+    //stopAutoScroll()
+}
+
+// --- Auto scroll when dragging ---
+
+// When the dragged card is near the bottom of the window (viewport), the window should scroll down
+// When the dragged card is near the top of the window, below navbar (viewport), the window should scroll up
+
+function startAutoScroll() {
+    /*
+    scrollInterval.value = setInterval(() => {
+        const scrollBuffer = 50
+        const scrollSpeed = 10
+        const card = document.querySelector('.dragging')
+        const rect = card.getBoundingClientRect()
+
+        if (rect) {}
+    }, 16)
+    */
+    scrollInterval.value = setInterval(() => {
+        const card = item.value
+        console.log(card)
+        /*
+        //const rect = card.getBoundingClientRect()
+        const top = rect.top
+        const bottom = rect.bottom
+        const height = rect.height
+        const scrollSpeed = 10
+
+        if (top < 0) {
+            window.scrollBy(0, -scrollSpeed)
+        } else if (bottom > window.innerHeight) {
+            window.scrollBy(0, scrollSpeed)
+        }*/
+
+    }, 16)
+    
+}
+
+function stopAutoScroll() {
+    clearInterval(scrollInterval)
+    scrollInterval.value = null
+}
 
 </script>
 
@@ -71,7 +120,8 @@ function startDrag(e, id) {
         :class="{'dragging': dragging}"
         :draggable="dragging" 
         @dragstart="startDrag($event, id)" 
-        @dragend="dragState(false)"
+        @dragend="stopDrag()"
+        ref="item"
     >
         <!-- Card contents -->
         <div class="rounded-xl shadow-md bg-base-100 p-4 w-full" >
