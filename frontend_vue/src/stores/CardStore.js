@@ -8,16 +8,20 @@ import refresh from "@/components/helpers/refresh";
 export const useCardStore = defineStore('cardStore', () => {
 
     const chapter = ref(null)
+    const dragging = ref(null)
+    const isScrolling = ref(false)
     const cards = ref([])
     const additions = ref([]) // New cards added
     const edits = ref([]) // Cards edited: {question, answer, order}
-    const removals = ref([]) // Cards removed
-    const dragging = ref(null)
+    const removals = ref([]) // ID of cards removed
+    const moves = ref([]) // Cards moved: Use ID and new index like {id, new_index} or store list of ID representing new order
+    // When adding and deleting, make changes to moves list as well
   
     // Getters
     const getChapter = computed(() => chapter.value)
     const getCards = computed(() => cards.value)
     const getDragging = computed(() => dragging.value)
+    const getScrolling = computed(() => isScrolling.value)
 
 
     // Sets the current chapter
@@ -27,6 +31,10 @@ export const useCardStore = defineStore('cardStore', () => {
 
     function setCards(cards_list) {
         cards.value = cards_list
+    }
+
+    function setMoves(cards_list) {
+        moves.value = cards_list.map(card => card.id)
     }
 
     // Get cards for the selected chapter
@@ -43,11 +51,13 @@ export const useCardStore = defineStore('cardStore', () => {
 
                 const response = await axios.post('http://127.0.0.1:8000/courses/cards', body, { headers })
                 const data = await response.data
-                console.log("Response in getCards in card store: ", data?.cards)
+
                 setCards(data?.cards)
+                setMoves(data?.cards)
+
                 success = true       
             } catch (error) {
-                console.log("Error getting cards for chapter: ", error)
+                console.log("Error getting cards for chapter: ")
             }
             return success
         }
@@ -100,6 +110,9 @@ export const useCardStore = defineStore('cardStore', () => {
 
         // Update state by inserting card at correct index
         cards.value.splice(index, 0, new_card);
+
+        // Update order of cards
+        setMoves(cards.value)
     }
 
     // Remove card from chapter
@@ -114,6 +127,9 @@ export const useCardStore = defineStore('cardStore', () => {
         // Remove from edits and Update state
         edits.value = edits.value.filter(card => card.id !== id)
         cards.value = cards.value.filter(card => card.id !== id)
+
+        // Update order of cards
+        setMoves(cards.value)
     }
 
     // Edit card in chapter
@@ -163,6 +179,9 @@ export const useCardStore = defineStore('cardStore', () => {
                 new_cards.splice(new_index, 0, card)
                 cards.value = new_cards
 
+                // Update order of cards
+                setMoves(new_cards)
+
                 changed = true
                 //console.log("MOVED")
             }            
@@ -174,11 +193,16 @@ export const useCardStore = defineStore('cardStore', () => {
         dragging.value = id
     }
 
+    function setScrolling(state) {
+        isScrolling.value = state
+    }
+
     return { 
         chapter,
         getChapter,
         getCards,
         getDragging,
+        getScrolling,
         setChapter,
         getCardsRequest,
         clear,
@@ -186,6 +210,7 @@ export const useCardStore = defineStore('cardStore', () => {
         removeCard,
         editCard,
         setMoveCard,
-        setDragging
+        setDragging,
+        setScrolling
     }
   })

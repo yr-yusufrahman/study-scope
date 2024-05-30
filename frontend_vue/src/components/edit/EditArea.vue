@@ -2,7 +2,6 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { RouterLink } from 'vue-router'
-import Flashcard from '../workspace/Flashcard.vue'
 import EditCard from './EditCard.vue'
 import AddCard from './AddCard.vue'
 import { useCardStore } from '@/stores/CardStore.js'
@@ -47,11 +46,11 @@ const dropUpdate = () => {
 function onDrop(event) {
   if (drag_index.value !== null) {
     const moved = card_store.setMoveCard(drag_index.value)
-    if (moved) {
-      dropUpdate()
-      console.log("Dropped item id: ", card_store.getDragging, ", now at: ", drag_index.value)      
+    if (moved || drag_index.value === card_store.getCards.length-1) {
+      dropUpdate() 
     }
   }
+  stopAutoScroll()
 }
 
 
@@ -77,7 +76,8 @@ function onDragOver(event) {
     list.value.insertBefore(draggable, afterElement)
   }
   drag_index.value = new_index
-  //console.log("Dragged over item: ", new_index)
+
+  scroll(event)
 }
 
 
@@ -96,6 +96,46 @@ function getDragAfterItem(y) {
     }
   }, { offset: Number.NEGATIVE_INFINITY })
   
+}
+
+
+// Auto scroll when dragging up or down
+function scroll(event) {
+  const scrollSpeed = 18
+  const threshold = 100
+
+  // Event.clientY is the position of the mouse pointer relative to the top of the viewport
+  if (event.clientY < threshold) {
+    startAutoScroll(-scrollSpeed)
+  } else if (event.clientY > window.innerHeight - threshold) {
+    startAutoScroll(scrollSpeed)
+  } else {
+    stopAutoScroll()
+  }
+}
+
+function startAutoScroll(speed) {
+  
+  if (card_store.getScrolling) {
+    return
+  }
+
+  card_store.setScrolling(true)
+
+  const scrollStep = () => {
+    if (!card_store.getScrolling) {
+      return
+    }
+    window.scrollBy(0, speed)
+    requestAnimationFrame(scrollStep)
+  }
+
+  requestAnimationFrame(scrollStep)
+  
+}
+
+function stopAutoScroll() {
+  card_store.setScrolling(false)
 }
 
 </script>
