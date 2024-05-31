@@ -13,8 +13,6 @@ const router = useRouter()
 const card_store = useCardStore()
 const edit_store = useToggleEditStore()
 const list = ref(null)
-const drag_index = ref(null)
-const update = ref(0)
 
 
 onMounted(() => {
@@ -36,20 +34,16 @@ function toggleEdit(addIndex) {
 }
 
 
-// Updates the state value to trigger a re-render
-const dropUpdate = () => {
-  update.value += 1
-}
-
-
-// Changes the order of the cards in state when dropped
+// Changes the order of the cards in state when dropped in the droppable area
 function onDrop(event) {
-  if (drag_index.value !== null) {
-    const moved = card_store.setMoveCard(drag_index.value)
-    if (moved || drag_index.value === card_store.getCards.length-1) {
-      dropUpdate() 
-    }
+  card_store.setDroppedCorrectly(true)
+  const update = card_store.setMoveCard()
+
+  if (update) {
+    // Forces DOM to update list of cards
+    card_store.setDropUpdate()
   }
+  
   stopAutoScroll()
 }
 
@@ -75,7 +69,8 @@ function onDragOver(event) {
   } else {
     list.value.insertBefore(draggable, afterElement)
   }
-  drag_index.value = new_index
+
+  card_store.setDragIndex(new_index)
 
   scroll(event)
 }
@@ -147,6 +142,7 @@ function stopAutoScroll() {
     @drop="onDrop"
     @dragover.prevent="onDragOver"
     @dragenter.prevent
+    @dragleave.prevent="onDragLeave"
   >
     <div class=" w-full pb-1 flex flex-row">
       <button class="btn btn-ghost" @click="back">Back</button>
@@ -157,7 +153,7 @@ function stopAutoScroll() {
     <div class="card-list gap-0 items-center card-width">
 
       <!-- add-index is add under the card -->
-      <div class=" w-full" ref="list" :key="update"> 
+      <div class=" w-full" ref="list" :key="card_store.getUpdate"> 
 
         <TransitionGroup name="display">
           <EditCard v-for="(card, index) in card_store.getCards"

@@ -1,15 +1,17 @@
 import { computed, ref } from "vue";
 import { defineStore } from "pinia";
 import axios from "axios";
-import { useCourseStore } from "./CourseStore";
-import { useChapterStore } from "./ChapterStore";
 import refresh from "@/components/helpers/refresh";
 
 export const useCardStore = defineStore('cardStore', () => {
 
     const chapter = ref(null)
     const dragging = ref(null)
+    const drag_index = ref(null)
     const isScrolling = ref(false)
+    const droppedCorrectly = ref(null)
+    const update = ref(0)
+
     const cards = ref([])
     const additions = ref([]) // New cards added
     const edits = ref([]) // Cards edited: {question, answer, order}
@@ -22,6 +24,8 @@ export const useCardStore = defineStore('cardStore', () => {
     const getCards = computed(() => cards.value)
     const getDragging = computed(() => dragging.value)
     const getScrolling = computed(() => isScrolling.value)
+    const getDroppedCorrectly = computed(() => droppedCorrectly.value)
+    const getUpdate = computed(() => update.value)
 
 
     // Sets the current chapter
@@ -163,14 +167,17 @@ export const useCardStore = defineStore('cardStore', () => {
     }
 
     // Move card in state
-    function setMoveCard(new_index) {
-        let changed = false
+    function setMoveCard() {
+        const new_index = drag_index.value
         const id = dragging.value
+        let force_update = false
 
-        if (id !== null) {
+        // Check if card is dragged and moved to a position
+        if (id !== null && new_index !== null) {
             // Get current index
             const current_index = cards.value.findIndex(card => card.id === id)
 
+            // Check if card was moved
             if (current_index !== new_index) {
                 const card = cards.value[current_index]
 
@@ -182,11 +189,12 @@ export const useCardStore = defineStore('cardStore', () => {
                 // Update order of cards
                 setMoves(new_cards)
 
-                changed = true
-                //console.log("MOVED")
-            }            
+                force_update = true
+            } else if (new_index === cards.value.length-1) {
+                force_update = true
+            }         
         }
-        return changed
+        return force_update
     }
 
     function setDragging(id) {
@@ -197,12 +205,27 @@ export const useCardStore = defineStore('cardStore', () => {
         isScrolling.value = state
     }
 
+    function setDroppedCorrectly(state) {
+        droppedCorrectly.value = state
+    }
+
+    function setDragIndex(index) {
+        drag_index.value = index
+    }
+
+    function setDropUpdate() {
+        update.value += 1
+    }
+
     return { 
         chapter,
         getChapter,
         getCards,
         getDragging,
         getScrolling,
+        getDroppedCorrectly,
+        getUpdate,
+
         setChapter,
         getCardsRequest,
         clear,
@@ -211,6 +234,9 @@ export const useCardStore = defineStore('cardStore', () => {
         editCard,
         setMoveCard,
         setDragging,
-        setScrolling
+        setScrolling,
+        setDroppedCorrectly,
+        setDragIndex,
+        setDropUpdate
     }
   })
