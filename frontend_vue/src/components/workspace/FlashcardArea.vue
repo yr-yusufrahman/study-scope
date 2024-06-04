@@ -34,19 +34,33 @@ function editing() {
         router.push('/edit')  
     }
 }
+
+function goToQuiz() {
+    if (card_store.getChapter) {
+        router.push('/quiz')
+    }
+}
 </script>
 
 
 <template>
     <div id="cards" class="p-5 card-width">
-        <h1>Flashcards should be here:</h1>
+        <button 
+            v-show="card_store.getChapter && card_store.getCards.length != 0" 
+            class="btn btn-primary"
+            @click="goToQuiz"
+        >Begin Quiz</button>
         <div class="card-list">
             <Flashcard v-for="card in card_store.getCards" 
             :id="card.id" 
             :question="card.question" 
             :answer="card.answer"
             :order="card.order" />
-            <button v-show="card_store.getChapter" class="btn btn-info" @click="editing">Add or Remove Card</button>
+            <button 
+                v-show="card_store.getChapter" 
+                class="btn btn-info" 
+                @click="editing"
+            >Add or Remove Card</button>
         </div>
     </div>
 </template>

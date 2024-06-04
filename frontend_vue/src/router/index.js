@@ -5,6 +5,7 @@ import LoginView from '../views/LoginView.vue'
 import CoursesView from '@/views/CoursesView.vue'
 import WorkspaceView from '@/views/WorkspaceView.vue'
 import EditView from '@/views/EditView.vue'
+import QuizView from '@/views/QuizView.vue'
 
 
 const router = createRouter({
@@ -38,6 +39,11 @@ const router = createRouter({
       path: '/edit',
       name:'edit',
       component: EditView,
+    },
+    {
+      path: '/quiz',
+      name:'quiz',
+      component: QuizView,
     }
   ]
 })

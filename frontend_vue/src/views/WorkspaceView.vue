@@ -1,10 +1,17 @@
 <script setup>
-import Space from '@/components/workspace/Space.vue';
+import Navbar from '@/components/structure/Navbar.vue'
+import Space from '@/components/workspace/Space.vue'
 </script>
 
 
 <template>
-  <div class="bg">
+  <header>
+    <nav>
+      <Navbar />
+    </nav>
+  </header>
+
+  <main class="bg">
     <Space />
-  </div>
+  </main>
 </template>

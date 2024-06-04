@@ -1,10 +1,17 @@
 <script setup>
-import CourseList from '@/components/courses/CourseList.vue';
+import Navbar from '@/components/structure/Navbar.vue'
+import CourseList from '@/components/courses/CourseList.vue'
 </script>
 
 
 <template>
-  <div class="bg p-16">
+  <header>
+    <nav>
+      <Navbar />
+    </nav>
+  </header>
+
+  <main class="bg p-16">
     <CourseList />
-  </div>
+  </main>
 </template>
