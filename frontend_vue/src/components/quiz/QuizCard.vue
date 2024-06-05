@@ -12,14 +12,6 @@ const reveal = ref(false)
 const boundary = ref(false)
 
 
-onBeforeMount(() => {
-    const chapter = card_store.getChapter
-    if (!chapter) {
-        router.push('/workspace')
-    }
-})
-
-
 function toggle() {
     reveal.value = !reveal.value
 }

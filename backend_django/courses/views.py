@@ -6,9 +6,9 @@ from rest_framework.response import Response
 
 from .models import Course, Chapter, Card
 
-# Returns all course data for a user
+# Returns all course data and chapter for a user
 @api_view(["GET"])
-def all_courses(request):
+def getCourses(request):
     # First confirm if user access token is valid
     user = request.user
     if user:
@@ -41,7 +41,7 @@ def all_courses(request):
 
 # Makes changes to a user's courses
 @api_view(["POST"])
-def change_courses(request):
+def changeCourses(request):
     # First confirm if user access token is valid
     user = request.user
     if user:
@@ -91,7 +91,7 @@ def change_courses(request):
 
 # Get flashcards for a chapter using the chapter id
 @api_view(["POST"])
-def get_cards(request):
+def getCards(request):
     # First confirm if user access token is valid
     user = request.user
     if user:
