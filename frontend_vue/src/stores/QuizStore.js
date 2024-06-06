@@ -8,15 +8,21 @@ export const useQuizStore = defineStore('quizStore', () => {
     const card_store = useCardStore()
 
     const quiz = ref([])
+    const loading = ref(true)
 
 
     // Getters
     const getQuiz = computed(() => quiz.value)
+    const getLoading = computed(() => loading.value)
 
 
     // Setters
     function setQuiz(quiz_list) {
         quiz.value = quiz_list
+    }
+
+    function setLoading(loading_state) {
+        loading.value = loading_state
     }
 
 
@@ -28,8 +34,9 @@ export const useQuizStore = defineStore('quizStore', () => {
             try {
                 const token = localStorage.getItem('token')
                 const headers = {"Authorization": `Bearer ${token}`}
-                const body = { 
-                    chapter_id: card_store.getChapter
+                const body = {
+                    cards: card_store.getCards,
+                    //chapter_id: card_store.getChapter
                 }
 
                 const response = await axios.post('http://127.0.0.1:8000/predictor/get-quiz', body, { headers })
@@ -39,6 +46,8 @@ export const useQuizStore = defineStore('quizStore', () => {
   
             } catch (error) {
                 console.log("Error getting quiz for chapter: ")
+            } finally {
+                loading.value = false
             }
             return success
         }
@@ -60,6 +69,9 @@ export const useQuizStore = defineStore('quizStore', () => {
     }
 
     return {
-        getQuizRequest
+        getQuizRequest,
+        getQuiz,
+        getLoading,
+        setLoading,
     }
 })

@@ -273,30 +273,14 @@ def generateOptions(keywords, blanked):
     for blanked_word in blanked:
         NUMBER_OF_OPTIONS = 3
         generated = getOptions(blanked_word, priority, extra, NUMBER_OF_OPTIONS)
+
+        # If there are not enough options
+        if len(generated) < NUMBER_OF_OPTIONS:
+            return []
         options.append(generated)
     return options
 # END generateOptions
 
 
-
-''' Main run '''
-
-# Blank words was already identified
-#blanked1 = ['gradient function']
-
-# Keywords has already been extracted by RAKE, they are needed for using the right sense
-#keywords1 = ['differentiation', 'gradient function']
-
-
-#blanked2 = ['area', 'curve']
-#keywords2 = ['process', 'finding', 'area', 'underneath', 'curve', 'useful', 'mechanics', 'analyze', 'scenarios']
-
-#options = generateOptions(keywords2, blanked2)
-#print(options)
-
 # Efficiency needs improving, this takes 4 seconds minimum to generate 3 options for a single question!
 # You have used loads of loops and nested loops, try thinking in parallel?
-
-
-
-

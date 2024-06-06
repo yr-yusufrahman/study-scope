@@ -1,7 +1,5 @@
-#from blankWords import multipleBlank
 from predictor.helpers.blankWords import multipleBlank
 from predictor.helpers.createOptions import generateOptions
-#from createOptions import generateOptions
 from rake_nltk import Rake
 
 # Have a global content dictionary
@@ -46,24 +44,25 @@ def createQuiz(cards):
             'blanked': [],
             'options': []
         }
-        keywords, blanked_words = getBlanks(rake, card.answer)
+        keywords, blanked_words = getBlanks(rake, card['answer'])
         
         # If keywords are found in the answer, generate options
         if keywords:
-            question_words = extractKeywords(rake, card.question)
+            question_words = extractKeywords(rake, card['question'])
             all_keywords = question_words + keywords           
 
             choices = generateOptions(all_keywords, blanked_words)
 
             if len(choices) == 0:
-                quiz_obj['multiple_choice'] = False
+                card['multiple_choice'] = False
             else:
-                quiz_obj['blanked'] = blanked_words
-                quiz_obj['options'] = choices
+                card['multiple_choice'] = True
+                card['blanked'] = blanked_words
+                card['options'] = choices
         else:
-            quiz_obj['multiple_choice'] = False
+            card['multiple_choice'] = False
 
-        quiz_content.append(quiz_obj)
+        quiz_content.append(card)
 
     return quiz_content
 
