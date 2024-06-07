@@ -7,7 +7,6 @@ import { useCardStore } from '@/stores/CardStore.js'
 const router = useRouter()
 
 const quiz_store = useQuizStore()
-const card_store = useCardStore()
 
 const location = ref(0)
 const reveal = ref(false)
@@ -39,7 +38,9 @@ function navigate(new_location) {
             boundary.value = false
         }
     }
-    location.value = new_location       
+    quiz_store.setLocation(new_location)
+    quiz_store.clearOptions()
+    location.value = new_location
     reveal.value = false
     resetMCQ()
 }
@@ -53,8 +54,8 @@ function end() {
 // Split the answer into parts to be displayed
 function splitTextIntoParts(location) {
     let parts = [];
-    let remainingString = quiz_store.getQuiz[location]?.answer
-    let wordsToBlank = quiz_store.getQuiz[location]?.blanked
+    let remainingString = quiz_store.getAnswer
+    let wordsToBlank = quiz_store.getBlanks
 
     wordsToBlank.forEach((word, index) => {
     const wordIndex = remainingString.indexOf(word);
@@ -77,10 +78,7 @@ function splitTextIntoParts(location) {
 
 // Sets the options for the chosen blanked word
 function chooseBlank(index) {
-    answering_index.value = index
-    let option_list = quiz_store.getQuiz[location.value]?.options[index]
-    option_list.push(quiz_store.getQuiz[location.value]?.blanked[index])
-    options.value = option_list
+    quiz_store.setOptions(index)
 }
 
 
@@ -90,79 +88,50 @@ function resetMCQ() {
     answering_index.value = -1
 
 }
+
+
+function selectOption(option) {
+    if (option === quiz_store.getBlankAnswer) {
+        console.log('Correct')
+    } else {
+        console.log('Incorrect')
+    }
+}
 </script>
 
 
-<template>
-    <div class="h-full w-full flex flex-col items-center justify-center ">
-        
-        <div class="h-2/5 content-center font-semibold text-xl">
-            <h1>{{ quiz_store.getQuiz[location]?.question }}</h1>    
-        </div>
-        
+<template>   
 
-        <!-- Main question area -->
-        <div class="h-full w-full flex flex-col items-center gap-6">
-            <!-- Card -->
-            <div 
-                v-show="!quiz_store.getQuiz[location]?.multiple_choice"
-                class="h-full w-3/5 shadow-lg border-4 rounded-lg flex flex-col items-center justify-center p-6"
-            >
-                <!-- Rating type -->
-                <div>
-                    <p v-show="reveal" class=" text-base blue">{{ quiz_store.getQuiz[location]?.answer }}</p>
-                    <button v-show="!reveal" @click="toggle" class="btn btn-ghost blue">Reveal</button>             
-                </div>
-
+    <!-- Main question area -->
+    <div class="h-full w-full flex flex-col items-center gap-6">
+        <!-- Card -->
+        <div 
+            v-show="!quiz_store.isMultipleChoice"
+            class="h-full w-3/5 shadow-lg border-4 rounded-lg flex flex-col items-center justify-center p-6"
+        >
+            <!-- Rating type -->
+            <div>
+                <p v-show="reveal" class=" text-base blue">{{ quiz_store.getAnswer }}</p>
+                <button v-show="!reveal" @click="toggle" class="btn btn-ghost blue">Reveal</button>             
             </div>
 
-            <!-- Inputs for rating -->
-            <div v-show="!quiz_store.getQuiz[location]?.multiple_choice && reveal" class="flex flex-col items-center gap-6">
-                <div class="text-base">
-                    <p>Could you remember the answer?</p>
-                </div>
-
-                <div class="w-full flex flex-row justify-center gap-6">
-                    <button class="btn btn-ghost w-24">No</button>
-                    <button class="btn btn-ghost w-24">Almost</button>
-                    <button class="btn btn-ghost w-24">Yes</button>
-                </div>                
-            </div>
-
-            <!-- Multiple choice blanked answer -->
-            <div v-show="quiz_store.getQuiz[location]?.multiple_choice">
-                <p>
-                    <span v-for="(part, index) in blanked_answer" :key="index">
-                        <span v-if="part.isWord">
-                            <button @click="chooseBlank(part.index)" class="btn btn-ghost h-6 min-h-0">
-                                <p class="blue">{{ part.text }}</p>
-                            </button>
-                        </span>
-                        <span v-else>{{ part.text }}</span>
-                    </span>
-                </p>
-
-            </div>
-
-            <!-- Options -->
-            <div class="flex flex-col" v-show="options.length != 0">
-                <TransitionGroup name="options">
-                    <div v-for="(option, index) in options" :key="index">
-                        <button class="btn btn-ghost">{{ option }}</button>
-                    </div>
-                </TransitionGroup>
-            </div>
         </div>
 
+        <!-- Inputs for rating -->
+        <div v-show="!quiz_store.isMultipleChoice && reveal" class="flex flex-col items-center gap-6">
+            <div class="text-base">
+                <p>Could you remember the answer?</p>
+            </div>
 
-        <!-- Navigation buttons -->
-        <div class="divider pt-8"></div> 
-        <div class=" w-4/5 flex flex-row justify-between">
-            <button class="btn btn-primary" @click="navigate(location-1)" :disabled="location <= 0">Back</button>
-            <button class="btn btn-ghost" v-show="boundary && reveal" @click="end">Done</button>
-            <button class="btn btn-accent" @click="navigate(location+1)" :disabled="boundary">Next</button>
+            <div class="w-full flex flex-row justify-center gap-6">
+                <button class="btn btn-ghost w-24">No</button>
+                <button class="btn btn-ghost w-24">Almost</button>
+                <button class="btn btn-ghost w-24">Yes</button>
+            </div>                
         </div>
     </div>
+
+
 </template>
 
 

@@ -33,17 +33,14 @@ def getBlanks(rake, answer):
     return sorted_keywords, blanked
 
 
-# Returns a the quiz as an array
+# Returns a the quiz as an array when given an array of card objects
 def createQuiz(cards):
     rake = Rake()
     quiz_content = []
+    total = 0
+    history = [] # Template for recording user answers: -1 for unanswered, 0 for wrong, 1 for correct
     
     for card in cards:
-        quiz_obj = {
-            'multiple_choice': True,
-            'blanked': [],
-            'options': []
-        }
         keywords, blanked_words = getBlanks(rake, card['answer'])
         
         # If keywords are found in the answer, generate options
@@ -55,15 +52,24 @@ def createQuiz(cards):
 
             if len(choices) == 0:
                 card['multiple_choice'] = False
+                total += 1
+                history.append([-1])
             else:
                 card['multiple_choice'] = True
                 card['blanked'] = blanked_words
                 card['options'] = choices
+                total += len(blanked_words)
+                history.append([-1]*len(blanked_words))
         else:
             card['multiple_choice'] = False
 
         quiz_content.append(card)
 
-    return quiz_content
+    quiz = {
+        'quiz_content': quiz_content,
+        'total': total,
+        'history': history,
+    }
+    return quiz
 
 
