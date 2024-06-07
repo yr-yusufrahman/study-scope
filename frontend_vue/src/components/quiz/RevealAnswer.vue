@@ -5,17 +5,20 @@ import { useQuizStore } from '@/stores/QuizStore'
 const quiz_store = useQuizStore()
 
 const answered = ref(false)
-
+const rating = ref(-1)
 
 onBeforeUpdate(() => {
     if (quiz_store.isAnswered) {
         if (quiz_store.isAnswered[0] === -1) {
             answered.value = false
+            rating.value = -1
         } else {
             answered.value = true
+            rating.value = quiz_store.isAnswered[0]
         }
     } else {
         answered.value = false
+        rating.value = -1
     }
 })
 
@@ -25,18 +28,26 @@ function toggle() {
 }
 
 
-function selectRating(rating) {
+function selectRating(selected) {
     answered.value = true
-    if (rating === 0) {
+    if (selected === 0) {
         quiz_store.setMistakes(quiz_store.getMistakes + 2)
         quiz_store.recordRateAnswer(0)
-    } else if (rating === 1) {
+        rating.value = 0
+    } else if (selected === 1) {
         quiz_store.setMistakes(quiz_store.getMistakes + 1)
         quiz_store.recordRateAnswer(1)
+        rating.value = 1
     } else {
         quiz_store.recordRateAnswer(2)
+        rating.value = 2
     }
     quiz_store.setMarks(quiz_store.getMarks + 1)
+}
+
+
+function matchesRating(type) {
+    return type === rating.value
 }
 </script>
 
@@ -63,9 +74,24 @@ function selectRating(rating) {
 
             <!-- Colour code the given rating using conditional classes -->
             <div class="w-full flex flex-row justify-center gap-6">
-                <button @click="selectRating(0)" :disabled="answered" class="btn btn-ghost w-24">No</button>
-                <button @click="selectRating(1)" :disabled="answered" class="btn btn-ghost w-24">Almost</button>
-                <button @click="selectRating(2)" :disabled="answered" class="btn btn-ghost w-24">Yes</button>
+                <button 
+                    @click="selectRating(0)" 
+                    :disabled="answered" 
+                    class="btn btn-ghost w-24" 
+                    :class="{'red-panel': matchesRating(0)}"
+                >No</button>
+                <button 
+                    @click="selectRating(1)" 
+                    :disabled="answered" 
+                    class="btn btn-ghost w-24" 
+                    :class="{'amber-panel': matchesRating(1)}"
+                >Almost</button>
+                <button 
+                    @click="selectRating(2)" 
+                    :disabled="answered" 
+                    class="btn btn-ghost w-24" 
+                    :class="{'green-panel': matchesRating(2)}"
+                >Yes</button>
             </div>                
         </div>
     </div>
@@ -73,4 +99,15 @@ function selectRating(rating) {
 
 
 <style scoped>
+.red-panel {
+    background-color: #FFD6D6;
+}
+
+.amber-panel {
+    background-color: #FFEDD5;
+}
+
+.green-panel {
+    background-color: #76DB74;
+}
 </style>

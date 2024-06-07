@@ -7,11 +7,12 @@ const quiz_store = useQuizStore()
 
 const blanked_answer = ref([])
 const selected_options = ref([false, false, false, false]) // Disable option buttons that have been selected
-
+const reload = ref(0)
 
 onBeforeUpdate(() => {
     if (quiz_store.isMultipleChoice) {
         blanked_answer.value = splitTextIntoParts()
+        reload.value = quiz_store.getHistory.length
     }
 })
 
@@ -103,7 +104,8 @@ function clearQuestion() {
     <div class="h-full w-full flex flex-col items-center justify-center gap-6">
         <!-- Multiple choice blanked answer -->
         <div v-show="quiz_store.isMultipleChoice" class="w-4/5" >
-            <p>
+            <p v-if="!quiz_store.isAnswered"></p>
+            <p v-else>
                 <span v-for="(part, index) in blanked_answer" :key="index">
                     <span v-if="part.isWord">
 
