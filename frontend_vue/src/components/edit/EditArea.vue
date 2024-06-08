@@ -133,6 +133,15 @@ function stopAutoScroll() {
   card_store.setScrolling(false)
 }
 
+
+// Sends changes to backend
+function saveChanges() {
+  let success = card_store.saveCardsRequest()
+  if (!success) {
+    router.push('/login')
+  }
+}
+// END saveChanges
 </script>
 
 
@@ -145,9 +154,9 @@ function stopAutoScroll() {
     @dragleave.prevent="onDragLeave"
   >
     <div class=" w-full pb-1 flex flex-row">
-      <button class="btn btn-ghost" @click="back">Back</button>
+      <button @click="back" class="btn btn-ghost">Back</button>
       <div class="w-full"></div>
-      <button class="btn btn-success">Save</button>
+      <button @click="saveChanges" class="btn btn-success">Save</button>
     </div>
 
     <div class="card-list gap-0 items-center card-width">

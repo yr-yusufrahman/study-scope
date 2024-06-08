@@ -1,6 +1,7 @@
 import { computed, ref } from "vue";
 import { defineStore } from "pinia";
 import axios from "axios";
+import makeRequest from "@/components/helpers/requestFlow";
 import refresh from "@/components/helpers/refresh";
 
 export const useCardStore = defineStore('cardStore', () => {
@@ -41,46 +42,6 @@ export const useCardStore = defineStore('cardStore', () => {
         moves.value = cards_list.map(card => card.id)
     }
 
-    // Get cards for the selected chapter
-    function getCardsRequest() {
-        // Get cards for the selected chapter
-        const getCards =  async () => {
-            let success = false
-            try {
-                const token = localStorage.getItem('token')
-                const headers = {"Authorization": `Bearer ${token}`}
-                const body = { 
-                    chapter_id: chapter.value
-                }
-
-                const response = await axios.post('http://127.0.0.1:8000/courses/cards', body, { headers })
-                const data = await response.data
-
-                setCards(data?.cards)
-                setMoves(data?.cards)
-
-                success = true       
-            } catch (error) {
-                console.log("Error getting cards for chapter: ")
-            }
-            return success
-        }
-
-        let success = getCards()
-        if (!success) {
-
-            // Refresh token
-            let refreshed = refresh()
-            if (refreshed) {
-                success = getCards()
-            }
-            else {
-                // Failed to refresh token
-                success = false
-            }
-        }
-        return success
-    }
 
     function clear() {
         chapter.value = null
@@ -217,6 +178,76 @@ export const useCardStore = defineStore('cardStore', () => {
         update.value += 1
     }
 
+    
+    // ----- Requests -----
+    
+    // Get cards for the selected chapter
+    function getCardsRequest() {
+        // Get cards for the selected chapter
+        const getCards =  async () => {
+            let success = false
+            try {
+                const token = localStorage.getItem('token')
+                const headers = {"Authorization": `Bearer ${token}`}
+                const body = { 
+                    chapter_id: chapter.value
+                }
+
+                const response = await axios.post('http://127.0.0.1:8000/courses/get-cards', body, { headers })
+                const data = await response.data
+
+                setCards(data?.cards)
+                //setMoves(data?.cards)
+
+                success = true       
+            } catch (error) {
+                console.log("Error getting cards for chapter: ")
+            }
+            return success
+        }
+
+        let success = makeRequest(getCards)
+        return success
+    }
+
+    function saveCardsRequest() {
+        const additions_list = additions.value
+        const edits_list = edits.value
+        const removals_list = removals.value
+        const moves_list = moves.value
+    
+        // If changes were made
+        if (additions_list.length > 0 || edits_list.length > 0 || removals_list.length > 0 || moves_list.length > 0) {
+
+            // Save changes to courses
+            const saveChanges =  async () => {
+                let success = false
+                try {
+                    const chapter_id = chapter.value
+                    const token = localStorage.getItem('token')
+                    const headers = {"Authorization": `Bearer ${token}`}
+                    const body = { 
+                        add: additions_list,
+                        edit: edits_list,
+                        remove: removals_list,
+                        move: moves_list,
+                        chapter_id: chapter_id
+                    }
+
+                    await axios.post('http://127.0.0.1:8000/courses/change-cards', body, { headers })
+                    success = true
+                } catch (error) {
+                    console.log("Error saving changes: ")
+                }
+                return success
+            }
+
+            // Request flow for saving changes and refreshing token
+            let success = makeRequest(saveChanges)
+            return success
+        }
+    }
+
     return { 
         chapter,
         getChapter,
@@ -227,7 +258,6 @@ export const useCardStore = defineStore('cardStore', () => {
         getUpdate,
 
         setChapter,
-        getCardsRequest,
         clear,
         addCard,
         removeCard,
@@ -237,6 +267,9 @@ export const useCardStore = defineStore('cardStore', () => {
         setScrolling,
         setDroppedCorrectly,
         setDragIndex,
-        setDropUpdate
+        setDropUpdate,
+
+        getCardsRequest,
+        saveCardsRequest
     }
   })

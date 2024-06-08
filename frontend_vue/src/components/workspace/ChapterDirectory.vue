@@ -5,10 +5,7 @@ import AddChapter from './AddChapter.vue'
 
 import { useRouter } from 'vue-router'
 import { RouterLink } from 'vue-router'
-import { ref, onUnmounted, onMounted } from 'vue'
-import axios from 'axios'
-import refresh from '../helpers/refresh.js'
-import { useCourseStore } from '../../stores/CourseStore.js'
+import { ref, onUnmounted, onMounted, onBeforeMount } from 'vue'
 import { useChapterStore } from '../../stores/ChapterStore.js'
 import { useToggleEditStore } from '../../stores/ToggleEditStore.js'
 
@@ -16,41 +13,23 @@ const router = useRouter()
 
 
 // State
-const store = useCourseStore()
 const chapter_store = useChapterStore()
 const edit_store = useToggleEditStore()
 const addId = -1
 
 
+// Check if course was selected
+onBeforeMount(() => {
+    const chapter = Number(localStorage.getItem('selectedCourse'))
+    if (chapter === null) {
+        router.push('/courses')
+    }
+})
+
 // Check for logged in
 onMounted(() => {
-    const token = localStorage.getItem('token')
-
-    if (token) {
-        let chapters = chapter_store.selectedChapters()
-        const getChapters = async () => {
-            const success = await store.getCourses()
-
-            // If unsuccessful, refresh token
-            if (!success) {
-                const refreshed = await refresh()
-                if (refreshed) {
-                    store.getCourses()
-                } else {
-                    router.push('/login')
-                }                
-            }
-        }
-        
-        // If no course was selected, go back to courses
-        if (chapters === null) {
-            router.push('/courses')
-        } 
-        // If no chapters, get courses once more and check for chapters
-        else if (!chapters) {
-            getChapters()
-        }
-    } else {
+    let success = chapter_store.getChaptersRequest()
+    if (!success) {
         router.push('/login')
     }
 })
@@ -59,6 +38,7 @@ onMounted(() => {
 onUnmounted(() => {
     edit_store.clear()
 })
+
 
 // Opens input for adding new chapter
 function toggleEdit() {
@@ -89,7 +69,12 @@ function saveChanges() {
 
         <!-- selectedChapters returns the chapters rather than storing state copy -->
         <div class="flex flex-col gap-2 pr-1 overflow-y-auto min-h-28 pb-28" >
-            <ChapterCard v-for="chapter in chapter_store.selectedChapters()" :id="chapter.id" :title="chapter.title" />
+            <ChapterCard 
+                v-for="(chapter, index) in chapter_store.getChapters" 
+                :id="chapter.id" 
+                :title="chapter.title"
+                :key="index"
+            />
         </div>
 
         <AddChapter v-show="edit_store.isEdit(addId)" />    

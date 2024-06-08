@@ -1,9 +1,11 @@
 import { computed, ref } from "vue";
 import { defineStore } from "pinia";
 import axios from "axios";
+import makeRequest from "@/components/helpers/requestFlow"
+import refresh from "@/components/helpers/refresh"
 
 export const useCourseStore = defineStore("courseStore", () => {
-    // ----- State -----
+
     const courses = ref([])
     const additions = ref([]) // New courses added
     const edits = ref([]) // Courses edited: {id, new_title}
@@ -11,26 +13,9 @@ export const useCourseStore = defineStore("courseStore", () => {
     
 
     // ----- Getters ----- try and use computed?
+    const getCourses = computed(() => courses.value)
 
     // ----- Actions -----
-
-    // Get courses
-    const getCourses =  async () => {
-        try {
-            const token = localStorage.getItem('token')
-            const headers = {"Authorization": `Bearer ${token}`}
-
-            const response = await axios.get('http://127.0.0.1:8000/courses/get', { headers })
-            const data = await response.data
-            setCourses(data?.courses)
-            return true            
-        } catch (error) {
-            console.log("Error getting courses: ", error)
-            // Refresh token
-            return false
-        }
-    }
-
 
     // Sets the list of courses
     function setCourses(courses_list) {
@@ -113,17 +98,112 @@ export const useCourseStore = defineStore("courseStore", () => {
     }
 
 
+    // ----- Requests -----
+
+    function getCoursesRequest() {
+        // Get courses
+        const getCourses =  async () => {
+            let success = false
+            try {
+                const token = localStorage.getItem('token')
+                const headers = {"Authorization": `Bearer ${token}`}
+
+                const response = await axios.get('http://127.0.0.1:8000/courses/get-courses', { headers })
+                const data = await response.data
+                setCourses(data?.courses)
+
+                success = true       
+            } catch (error) {
+                console.log("Error getting courses: ")
+            }
+            return success
+        }
+
+        let success = makeRequest(getCourses)
+        return success
+    }
+
+    function getCoursesRequestWorks() {
+        // Get courses
+        const getCourses =  async () => {
+            let success = false
+            try {
+                const token = localStorage.getItem('token')
+                const headers = {"Authorization": `Bearer ${token}`}
+
+                const response = await axios.get('http://127.0.0.1:8000/courses/get-courses', { headers })
+                const data = await response.data
+                setCourses(data?.courses)
+
+                success = true       
+            } catch (error) {
+                console.log("Error getting courses: ")
+            }
+            return success
+        }
+
+        let success = getCourses()
+        if (!success) {
+
+            // Refresh token
+            let refreshed = refresh()
+            if (refreshed) {
+                success = getCourses()
+            }
+            else {
+                // Failed to refresh token
+                success = false
+            }
+        }
+        return success
+    }
+
+    function saveCoursesRequest() {
+        const additions_list = additions.value
+        const edits_list = edits.value
+        const removals_list = removals.value
+    
+        // If changes were made
+        if (additions_list.length > 0 || edits_list.length > 0 || removals_list.length > 0) {
+
+            // Save changes to courses
+            const saveChanges =  async () => {
+                let success = false
+                try {
+                    const token = localStorage.getItem('token')
+                    const headers = {"Authorization": `Bearer ${token}`}
+                    const body = { 
+                        add: additions_list,
+                        edit: edits_list,
+                        remove: removals_list
+                    }
+
+                    await axios.post('http://127.0.0.1:8000/courses/change-courses', body, { headers })
+                    success = true
+                } catch (error) {
+                    console.log("Error saving changes: ")
+                }
+                return success
+            }
+
+            // Request flow for saving changes and refreshing token
+            let success = makeRequest(saveChanges)
+            return success
+        }
+    }
+
     return {
-        courses,
+        getCourses,
         additions,
         edits,
         removals,
-
-        getCourses,
 
         setCourses,
         addCourse,
         editCourse,
         removeCourse,
+
+        getCoursesRequest,
+        saveCoursesRequest
     }
 })
