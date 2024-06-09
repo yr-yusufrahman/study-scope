@@ -122,7 +122,52 @@ def getChapters(request):
 
 
 # Make changes to a user's chapters within a course
+@api_view(["POST"])
+def changeChapters(request):
+    # First confirm if user access token is valid
+    user = request.user
+    if user:
+        additions = request.data.get('add')
+        edits = request.data.get('edit')
+        removals = request.data.get('remove')
 
+        course_id = request.data.get('course_id')
+        course = Course.objects.filter(owner=user, id=course_id).first()
+
+        # Remove chapters
+        if removals:
+            for removal in removals:
+                chapter_id = removal.get('id')
+                chapter = Chapter.objects.filter(course=course, id=chapter_id).first()
+                if chapter:
+                    chapter.delete()
+
+        # Add new chapters
+        if additions:
+            for addition in additions:
+                chapter_title = addition.get('title')
+                chapter = Chapter.objects.create(course=course, chapter_title=chapter_title)
+                chapter.save()
+        
+        # Edit existing chapters
+        if edits:
+            for edit in edits:
+                chapter_id = edit.get('id')
+                chapter_title = edit.get('new_title')
+                chapter = Chapter.objects.filter(course=course, id=chapter_id).first()
+                if chapter:
+                    # Check if the title was changed
+                    if chapter_title != chapter.chapter_title:
+                        chapter.chapter_title = chapter_title
+                        chapter.save()
+        
+        return Response(status=status.HTTP_200_OK)
+
+    else:
+        bad_response = {
+            'error': 'User not authenticated.',
+        }
+        return Response(bad_response, status=status.HTTP_401_UNAUTHORIZED) 
 
 
 # Get flashcards for a chapter using the chapter id
@@ -166,7 +211,7 @@ def changeCards(request):
         chapter = Chapter.objects.filter(id=chapter_id).first()
         confirmed_order = [] # List of card ids that have already been placed in correct order
 
-        # Remove courses
+        # Remove cards
         if removals:
             for removal in removals:
                 card_id = removal.get('id')
@@ -175,7 +220,7 @@ def changeCards(request):
                     card.delete()
 
 
-        # Add new courses
+        # Add new cards
         if additions:
             for addition in additions:
                 temp_id = addition.get('id')
@@ -187,7 +232,7 @@ def changeCards(request):
                 card.save()
                 confirmed_order.append(temp_id)
         
-        # Edit existing courses
+        # Edit existing cards
         if edits:
             for edit in edits:
                 card_id = edit.get('id')

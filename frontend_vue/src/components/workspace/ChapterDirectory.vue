@@ -20,8 +20,8 @@ const addId = -1
 
 // Check if course was selected
 onBeforeMount(() => {
-    const chapter = Number(localStorage.getItem('selectedCourse'))
-    if (chapter === null) {
+    const course = Number(localStorage.getItem('selectedCourse'))
+    if (course === null) {
         router.push('/courses')
     }
 })
@@ -47,7 +47,10 @@ function toggleEdit() {
 
 // Sends changes to backend
 function saveChanges() {
-
+    let success = chapter_store.saveChaptersRequest()
+    if (!success) {
+        router.push('/login')
+    }
 }
 // END saveChanges
 </script>

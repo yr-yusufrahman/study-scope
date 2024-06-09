@@ -68,6 +68,9 @@ function end() {
     quiz_store.endQuiz()
     router.push('/workspace')
 }
+
+// When the quiz is done, display a short message, maybe in a modal. The user can then go back to the workspace by
+// clicking a done button which will redirect them to the workspace and save the quiz results in the revision database table
 </script>
 
 

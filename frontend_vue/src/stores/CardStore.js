@@ -86,7 +86,7 @@ export const useCardStore = defineStore('cardStore', () => {
         if (additions.value.find(card => card.id === id)) {
             additions.value = additions.value.filter(card => card.id !== id)
         } else {
-            removals.value.push(id)
+            removals.value.push({id: id})
         }
 
         // Remove from edits and Update state

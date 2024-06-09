@@ -16,7 +16,6 @@ const addId = -2
 
 // Watches for changes in selected chapter
 watch(() => card_store.getChapter, (value) => {
-    console.log('selectedChapter:', value);
     let request = card_store.getCardsRequest();
     if (!request) {
         router.push('/login')

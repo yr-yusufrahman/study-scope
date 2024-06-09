@@ -159,6 +159,8 @@ export const useQuizStore = defineStore('quizStore', () => {
         return success
     }
 
+    function saveRevision() {}
+
     return {
         getLoading,
         getQuiz,

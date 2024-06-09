@@ -8,6 +8,7 @@ class Course(models.Model):
 
 class Chapter(models.Model):
     chapter_title = models.CharField(max_length=255)
+    next_due = models.DateTimeField(null=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
 
 # Flashcards

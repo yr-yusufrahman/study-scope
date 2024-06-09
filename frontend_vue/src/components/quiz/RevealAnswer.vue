@@ -99,15 +99,5 @@ function matchesRating(type) {
 
 
 <style scoped>
-.red-panel {
-    background-color: #FFD6D6;
-}
 
-.amber-panel {
-    background-color: #FFEDD5;
-}
-
-.green-panel {
-    background-color: #76DB74;
-}
 </style>

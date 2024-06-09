@@ -89,7 +89,7 @@ export const useCourseStore = defineStore("courseStore", () => {
         if (additions.value.find(course => course.id === id)) {
             additions.value = additions.value.filter(course => course.id !== id)
         } else {
-            removals.value.push(id)
+            removals.value.push({id: id})
         }
         // Remove course from edit list as it is going to be deleted
         edits.value = edits.value.filter(course => course.id !== id)
@@ -99,29 +99,6 @@ export const useCourseStore = defineStore("courseStore", () => {
 
 
     // ----- Requests -----
-
-    function getCoursesRequest() {
-        // Get courses
-        const getCourses =  async () => {
-            let success = false
-            try {
-                const token = localStorage.getItem('token')
-                const headers = {"Authorization": `Bearer ${token}`}
-
-                const response = await axios.get('http://127.0.0.1:8000/courses/get-courses', { headers })
-                const data = await response.data
-                setCourses(data?.courses)
-
-                success = true       
-            } catch (error) {
-                console.log("Error getting courses: ")
-            }
-            return success
-        }
-
-        let success = makeRequest(getCourses)
-        return success
-    }
 
     function getCoursesRequestWorks() {
         // Get courses
@@ -155,6 +132,29 @@ export const useCourseStore = defineStore("courseStore", () => {
                 success = false
             }
         }
+        return success
+    }
+
+    function getCoursesRequest() {
+        // Get courses
+        const getCourses =  async () => {
+            let success = false
+            try {
+                const token = localStorage.getItem('token')
+                const headers = {"Authorization": `Bearer ${token}`}
+
+                const response = await axios.get('http://127.0.0.1:8000/courses/get-courses', { headers })
+                const data = await response.data
+                setCourses(data?.courses)
+
+                success = true       
+            } catch (error) {
+                console.log("Error getting courses: ")
+            }
+            return success
+        }
+
+        let success = makeRequest(getCourses)
         return success
     }
 

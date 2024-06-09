@@ -2,7 +2,7 @@ import axios from "axios";
 import refresh from "./refresh";
 
 // Request flow for getting courses and refreshing token
-export default function makeRequest(requestCall) {
+function makeRequestNot(requestCall) {
     let success = requestCall()
     if (!success) {
 
@@ -16,9 +16,9 @@ export default function makeRequest(requestCall) {
             success = false
         }
     }
-
+    console.log("In makeRequest success: ", success)
     return success
-} 
+}
 
 async function makeRequestOld(requestCall) {
     let success = false
@@ -37,3 +37,19 @@ async function makeRequestOld(requestCall) {
     }
     return success
 } 
+
+
+export default async function makeRequest(requestCall) {
+    let success = await requestCall();
+    if (!success) {
+        // Refresh token
+        const refreshed = await refresh();
+        if (refreshed) {
+            success = await requestCall();
+        } else {
+            // Failed to refresh token
+            success = false;
+        }
+    }
+    return success;
+}

@@ -8,9 +8,9 @@ export const useChapterStore = defineStore('chapterStore', () => {
 
     const course = ref(-1) // Selected course, use this first then localStorage. localStorage is to persist data
     const chapters = ref([])
-    const chapter_additions = ref([]) // New chapters added
-    const chapter_edits = ref([]) // Chapters edited: {id, new_title}
-    const chapter_removals = ref([]) // Chapters removed
+    const additions = ref([]) // New chapters added
+    const edits = ref([]) // Chapters edited: {id, new_title}
+    const removals = ref([]) // Chapters removed
   
     // Getters
     const getChapters = computed(() => chapters.value)
@@ -45,7 +45,7 @@ export const useChapterStore = defineStore('chapterStore', () => {
             let new_chapter = {id: generateId(), title: new_title}
 
             // Add to chapter additions
-            chapter_additions.value.push(new_chapter)
+            additions.value.push(new_chapter)
 
             // Update state
             chapters.value.push(new_chapter) 
@@ -63,18 +63,18 @@ export const useChapterStore = defineStore('chapterStore', () => {
         if (!exists()) {
 
             // Check if chapter is new
-            if (chapter_additions.value.some(chapter => chapter.id === id)) {
-                const add_index = chapter_additions.value.findIndex(chapter => chapter.id === id)
-                chapter_additions.value[add_index].title = new_title
+            if (additions.value.some(chapter => chapter.id === id)) {
+                const add_index = additions.value.findIndex(chapter => chapter.id === id)
+                additions.value[add_index].title = new_title
             }
 
             // Check if chapter has been edited before
-            else if (chapter_edits.value.some(chapter => chapter.id === id)) {
-                const edit_index = chapter_additions.value.findIndex(chapter => chapter.id === id)
-                chapter_additions.value[edit_index].title = new_title
+            else if (edits.value.some(chapter => chapter.id === id)) {
+                const edit_index = additions.value.findIndex(chapter => chapter.id === id)
+                additions.value[edit_index].title = new_title
 
             } else {
-                chapter_edits.value.push({id, new_title})
+                edits.value.push({id, new_title})
             }
 
             // Update state
@@ -90,15 +90,15 @@ export const useChapterStore = defineStore('chapterStore', () => {
     function removeChapter(id) {
 
         // If chapter is new, remove it from additions
-        const isNew = () => chapter_additions.value.some(chapter => chapter.id === id)
+        const isNew = () => additions.value.some(chapter => chapter.id === id)
         if (isNew()) {
-            chapter_additions.value = chapter_additions.value.filter(chapter => chapter.id !== id)
+            additions.value = additions.value.filter(chapter => chapter.id !== id)
         } else {
-            chapter_removals.value.push(id) // Using id to delete will work as the id is given by backend
+            removals.value.push({id: id}) // Using id to delete will work as the id is given by backend
         }
 
         // Remove course from edit list as it is going to be deleted
-        chapter_edits.value = chapter_edits.value.filter(chapter => chapter.id !== id)
+        edits.value = edits.value.filter(chapter => chapter.id !== id)
         
         // Update state
         chapters.value = chapters.value.filter(chapter => chapter.id !== id)
@@ -135,6 +135,43 @@ export const useChapterStore = defineStore('chapterStore', () => {
         return success
     }
 
+    function saveChaptersRequest() {
+        const additions_list = additions.value
+        const edits_list = edits.value
+        const removals_list = removals.value
+        //const moves_list = moves.value
+    
+        // If changes were made
+        if (additions_list.length > 0 || edits_list.length > 0 || removals_list.length > 0) {
+
+            // Save changes to courses
+            const saveChanges =  async () => {
+                let success = false
+                try {
+                    const course_id = Number(localStorage.getItem('selectedCourse'))
+                    const token = localStorage.getItem('token')
+                    const headers = {"Authorization": `Bearer ${token}`}
+                    const body = { 
+                        add: additions_list,
+                        edit: edits_list,
+                        remove: removals_list,
+                        //move: moves_list,
+                        course_id: course_id
+                    }
+
+                    await axios.post('http://127.0.0.1:8000/courses/change-chapters', body, { headers })
+                    success = true
+                } catch (error) {
+                    console.log("Error saving changes: ")
+                }
+                return success
+            }
+
+            // Request flow for saving changes and refreshing token
+            let success = makeRequest(saveChanges)
+            return success
+        }
+    }
 
     return { 
         getChapters,
@@ -143,6 +180,7 @@ export const useChapterStore = defineStore('chapterStore', () => {
         editChapter,
         removeChapter,
 
-        getChaptersRequest
+        getChaptersRequest,
+        saveChaptersRequest
     }
   })
