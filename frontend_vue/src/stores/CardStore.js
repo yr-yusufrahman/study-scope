@@ -7,6 +7,7 @@ import refresh from "@/components/helpers/refresh";
 export const useCardStore = defineStore('cardStore', () => {
 
     const chapter = ref(null)
+    const chapter_name = ref('')
     const dragging = ref(null)
     const drag_index = ref(null)
     const isScrolling = ref(false)
@@ -30,8 +31,12 @@ export const useCardStore = defineStore('cardStore', () => {
 
 
     // Sets the current chapter
-    function setChapter(chapter_id) {
-        chapter.value = chapter_id
+    function setChapter(id, title) {
+        chapter.value = id
+        chapter_name.value = title
+
+        localStorage.setItem('selectedChapter', id)
+        localStorage.setItem('selectedChapterName', title)
     }
 
     function setCards(cards_list) {
@@ -45,6 +50,7 @@ export const useCardStore = defineStore('cardStore', () => {
 
     function clear() {
         chapter.value = null
+        chapter_name.value = ''
         cards.value = []
         /*
         additions.value = []

@@ -1,10 +1,13 @@
 <script setup>
-import { ref, onBeforeMount, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onBeforeMount, onMounted, onBeforeUnmount } from 'vue'
+import { useRouter, onBeforeRouteLeave } from 'vue-router'
 
+// Components
 import MultipleChoice from './MultipleChoice.vue'
 import RevealAnswer from './RevealAnswer.vue'
+import FinishModal from './FinishModal.vue'
 
+// Stores
 import { useCardStore } from '@/stores/CardStore'
 import { useQuizStore } from '@/stores/QuizStore'
 
@@ -13,10 +16,14 @@ const router = useRouter()
 const card_store = useCardStore()
 const quiz_store = useQuizStore()
 
+// State
 const start_flag = ref(true)
 const end_flag = ref(false)
 const progress = ref(0)
+const finished = () => quiz_store.getMarks === quiz_store.getTotal
 
+
+// Check if user has a chapter selected
 onBeforeMount(() => {
     const chapter = card_store.getChapter
     if (!chapter) {
@@ -24,14 +31,36 @@ onBeforeMount(() => {
     } 
 })
 
-
 onMounted(() => {
     let request = quiz_store.getQuizRequest()
     if (!request) {
         router.push('/login')
+    } else {
+        // Prevent the user from leaving the quiz by refreshing the page
+        window.addEventListener('beforeunload', refreshHandler)
     }
 })
 
+onBeforeUnmount(() => {
+    window.removeEventListener('beforeunload', refreshHandler)
+})
+
+// Check if the user is leaving the quiz
+onBeforeRouteLeave((to, from) => {
+    if (!finished()) {
+        const answer = window.confirm(
+            'Quiz progress will be lost. Are you sure you want to leave?'
+        )
+        // cancel the navigation and stay on the same page
+        if (!answer) return false
+    }
+})
+
+
+// Prevent the user from refreshing the page
+function refreshHandler(e) {
+    e.preventDefault()
+}
 
 // Go to a different question
 function navigate(new_location) {
@@ -63,13 +92,6 @@ function navigate(new_location) {
 }
 
 
-// End the quiz
-function end() {
-    quiz_store.endQuiz()
-    router.push('/workspace')
-}
-
-// When the quiz is done, display a short message, maybe in a modal. The user can then go back to the workspace by
 // clicking a done button which will redirect them to the workspace and save the quiz results in the revision database table
 </script>
 
@@ -106,13 +128,10 @@ function end() {
         <div class="divider pt-8"></div>
         <div class=" w-4/5 flex flex-row justify-between">
             <button @click="navigate(quiz_store.getLocation-1)" :disabled="start_flag" class="btn btn-primary">Back</button>
-            <button 
-                v-show="end_flag && (quiz_store.getMarks === quiz_store.getTotal)" 
-                @click="end"
-                class="btn btn-ghost" 
-            >Done</button>
 
-            <p v-show="end_flag && (quiz_store.getMarks !== quiz_store.getTotal)">All questions have not been answered</p>
+            <FinishModal />
+
+            <p v-show="end_flag && (!finished())">All questions have not been answered</p>
             <button @click="navigate(quiz_store.getLocation+1)" :disabled="end_flag" class="btn btn-accent">Next</button>
         </div>
     </div>

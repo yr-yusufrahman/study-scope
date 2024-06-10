@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, watch, ref } from 'vue'
+import { onBeforeMount, onMounted, watch, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Flashcard from './Flashcard.vue'
 import { useCardStore } from '@/stores/CardStore.js'
@@ -10,15 +10,19 @@ const router = useRouter()
 
 const card_store = useCardStore()
 const edit_store = useToggleEditStore()
+
+const chapter_name = ref('')
 const addId = -2
 
-// When the user leaves and clicks on another course, the 
+
 
 // Watches for changes in selected chapter
 watch(() => card_store.getChapter, (value) => {
     let request = card_store.getCardsRequest();
     if (!request) {
         router.push('/login')
+    } else {
+        chapter_name.value = localStorage.getItem('selectedChapterName')
     }
 })
 
@@ -44,6 +48,7 @@ function goToQuiz() {
 
 <template>
     <div id="cards" class="p-5 card-width">
+        <h1 class=" font-bold text-center">{{ chapter_name }}</h1>
         <button 
             v-show="card_store.getChapter && card_store.getCards.length != 0" 
             class="btn btn-primary"

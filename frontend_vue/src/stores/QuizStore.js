@@ -1,6 +1,7 @@
 import { computed, ref } from "vue"
 import { defineStore } from "pinia"
 import axios from "axios"
+import makeRequest from "@/components/helpers/requestFlow"
 import refresh from "@/components/helpers/refresh"
 import { useCardStore } from "./CardStore"
 
@@ -20,20 +21,20 @@ export const useQuizStore = defineStore('quizStore', () => {
 
 
     // Getters
-    const getLoading = computed(() => loading.value)
-    const getQuiz = computed(() => quiz.value)
-    const getHistory = computed(() => history.value)
-    const getTotal = computed(() => total.value)
-    const getMarks = computed(() => marks.value)
-    const getLocation = computed(() => location.value)
-    const isMultipleChoice = computed(() => quiz.value[location.value]?.multiple_choice)
-    const getQuestion = computed(() => quiz.value[location.value]?.question)
-    const getAnswer = computed(() => quiz.value[location.value]?.answer)
-    const getBlanks = computed(() => quiz.value[location.value]?.blanked)
-    const getBlankAnswer = computed(() => quiz.value[location.value]?.blanked[blank_index.value])
-    const getMistakes = computed(() => mistakes.value)
-    const isAnswered = computed(() => history.value[location.value])
-    const getReveal = computed(() => reveal.value)
+    const getLoading = computed(() => loading.value) // Is the quiz loading?
+    const getQuiz = computed(() => quiz.value) // quiz content
+    const getHistory = computed(() => history.value) // user's quiz answer history so far
+    const getTotal = computed(() => total.value) // total number of potential answers in the quiz
+    const getMarks = computed(() => marks.value) // user's total marks
+    const getLocation = computed(() => location.value) // current question index
+    const isMultipleChoice = computed(() => quiz.value[location.value]?.multiple_choice) // is current question an mcq
+    const getQuestion = computed(() => quiz.value[location.value]?.question) // current question
+    const getAnswer = computed(() => quiz.value[location.value]?.answer) // current answer
+    const getBlanks = computed(() => quiz.value[location.value]?.blanked) // current blanked words for MCQ
+    const getBlankAnswer = computed(() => quiz.value[location.value]?.blanked[blank_index.value]) // answer with blanka
+    const getMistakes = computed(() => mistakes.value) // number of mistakes made by the user
+    const isAnswered = computed(() => history.value[location.value]) // has the user answered the current question?
+    const getReveal = computed(() => reveal.value) // has the user revealed the answer?
     
     // MCQ Options for the current blank word
     const getOptions = computed(() => {
@@ -85,6 +86,7 @@ export const useQuizStore = defineStore('quizStore', () => {
         options.value = option_list
     }
 
+    // Deselect the current blanked word and hide its options in an MCQ
     function clearOptions() {
         blank_index.value = -1
         options.value = []
@@ -96,6 +98,7 @@ export const useQuizStore = defineStore('quizStore', () => {
 
     function endQuiz() {
         clearOptions()
+        setHistory([])
         setMistakes(0)
         setTotal(0)
         setMarks(0)
@@ -159,7 +162,37 @@ export const useQuizStore = defineStore('quizStore', () => {
         return success
     }
 
-    function saveRevision() {}
+    function saveRevision() {
+        // Save the user's quiz results
+        const saveResults = async () => {
+            let success = false
+            try {
+                const token = localStorage.getItem('token')
+
+                // Count the number of reveal questions
+                const reveal_count = quiz.value.filter(card => card.multiple_choice === false).length                  
+                const headers = {"Authorization": `Bearer ${token}`}
+                const body = {
+                    mistakes: mistakes.value,
+                    inputs: total.value,
+                    number_of_reveals: reveal_count,
+                    chapter_id: card_store.getChapter
+                }
+
+                await axios.post('http://127.0.0.1:8000/predictor/save-results', body, { headers })
+            } catch (error) {
+                console.log("Error saving quiz: ")
+            } 
+            return success
+        }
+
+        // Request flow for saving changes and refreshing token
+        let success = makeRequest(saveResults)
+        if (success) {
+            endQuiz()
+        }
+        return success
+    }
 
     return {
         getLoading,
@@ -189,6 +222,7 @@ export const useQuizStore = defineStore('quizStore', () => {
         recordRateAnswer,
         setReveal,
 
-        getQuizRequest
+        getQuizRequest,
+        saveRevision
     }
 })

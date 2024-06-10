@@ -7,6 +7,7 @@ import makeRequest from "@/components/helpers/requestFlow";
 export const useChapterStore = defineStore('chapterStore', () => {
 
     const course = ref(-1) // Selected course, use this first then localStorage. localStorage is to persist data
+    const course_name = ref('')
     const chapters = ref([])
     const additions = ref([]) // New chapters added
     const edits = ref([]) // Chapters edited: {id, new_title}
@@ -22,6 +23,14 @@ export const useChapterStore = defineStore('chapterStore', () => {
     // Sets all chapters for the selected course
     function setChapters(chapter_list) {
         chapters.value = chapter_list
+    }
+
+    function selectCourse(id, name) {
+        localStorage.setItem('selectedCourse', id)
+        localStorage.setItem('selectedCourseName', name)
+
+        course.value = id
+        course_name.value = name
     }
 
     // Add chapter to course
@@ -173,9 +182,10 @@ export const useChapterStore = defineStore('chapterStore', () => {
         }
     }
 
-    return { 
+    return {
         getChapters,
 
+        selectCourse,
         addChapter,
         editChapter,
         removeChapter,

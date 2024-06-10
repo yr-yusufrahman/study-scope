@@ -2,27 +2,32 @@
 import { useRouter } from 'vue-router';
 import { ref, nextTick } from 'vue'
 import { useCourseStore } from '../../stores/CourseStore.js'
+import { useChapterStore } from '@/stores/ChapterStore';
 import { useCardStore } from '@/stores/CardStore';
 import { useToggleEditStore } from '../../stores/ToggleEditStore.js'
 
-defineProps({
+let props = defineProps({
   id: Number,
   title: String,
 })
 
 const router = useRouter()
-const store = useCourseStore()
+const course_store = useCourseStore()
+const chapter_store = useChapterStore()
 const card_store = useCardStore()
 const edit_store = useToggleEditStore()
 const input = ref('')
 
 
 // Selects course for workspace
-function selectCourse(id) {
+function selectCourse() {
+  const id = props.id
+  const title = props.title
   const current = localStorage.getItem('selectedCourse')
   if (current != id) {
     card_store.clear()
-    localStorage.setItem('selectedCourse', id)
+    chapter_store.selectCourse(id, title)
+
   }
   router.push('/workspace')
 }
@@ -44,7 +49,7 @@ function handleEdit(e, id, original_title) {
   id = Number(id)
   const new_title = e.target[0].value
   if (new_title !== original_title) {
-    let success = store.editCourse(id, new_title)
+    let success = course_store.editCourse(id, new_title)
     if (!success) {
       console.log('Course already exists with this name')
     }
@@ -57,7 +62,7 @@ function handleEdit(e, id, original_title) {
 
 // Deletes course
 function handleDelete(id) {
-  store.removeCourse(id)
+  course_store.removeCourse(id)
 }
 
 </script>
@@ -68,7 +73,7 @@ function handleDelete(id) {
     <div class="card-body">
       
       <h2 v-show="!edit_store.isEdit(id)"  class="card-title">
-        <button @click="selectCourse(id)">{{ title }}</button>
+        <button @click="selectCourse()">{{ title }}</button>
       </h2>
       
 

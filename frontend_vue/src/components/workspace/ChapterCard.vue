@@ -5,7 +5,7 @@ import { useCardStore } from '@/stores/CardStore'
 import { useToggleEditStore } from '../../stores/ToggleEditStore.js'
 import autoResize from '../helpers/textResize'
 
-defineProps({
+const props = defineProps({
   id: Number,
   title: String,
 })
@@ -18,8 +18,10 @@ const form = ref(null)
 
 
 // Selects chapter to view flashcards
-function selectChapter(id) {
-  card_store.setChapter(id)
+function selectChapter() {
+  const id = props.id
+  const title = props.title
+  card_store.setChapter(id, title)
   //localStorage.setItem('selectedChapter', id)
 }
 
@@ -62,7 +64,7 @@ function handleDelete(id) {
 <template>
   <div class=" flex flex-row bg-base-200 rounded-lg p-1">
     <div class=" w-full">
-      <button v-show="!edit_store.isEdit(id)" @click="selectChapter(id)" class="btn btn-ghost h-auto chapter-name">{{ title }}</button>
+      <button v-show="!edit_store.isEdit(id)" @click="selectChapter()" class="btn btn-ghost h-auto chapter-name">{{ title }}</button>
 
 
       <form ref="form" v-show="edit_store.isEdit(id)" @submit.prevent="handleEdit(form, id, title)">

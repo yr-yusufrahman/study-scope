@@ -11,10 +11,11 @@ import { useToggleEditStore } from '../../stores/ToggleEditStore.js'
 
 const router = useRouter()
 
-
-// State
 const chapter_store = useChapterStore()
 const edit_store = useToggleEditStore()
+
+// State
+const course_name = ref('')
 const addId = -1
 
 
@@ -23,6 +24,8 @@ onBeforeMount(() => {
     const course = Number(localStorage.getItem('selectedCourse'))
     if (course === null) {
         router.push('/courses')
+    } else {
+        course_name.value = localStorage.getItem('selectedCourseName')
     }
 })
 
@@ -63,7 +66,7 @@ function saveChanges() {
         <div class="text-m breadcrumbs overflow-x-clip">
             <ul class="whitespace-normal">
                 <li><RouterLink to="/courses">Courses</RouterLink></li> 
-                <li><p>Selected course</p></li> 
+                <li><p>{{ course_name }}</p></li> 
             </ul>
         </div> 
 
