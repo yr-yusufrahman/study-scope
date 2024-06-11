@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onBeforeMount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { RouterLink } from 'vue-router'
 import EditCard from './EditCard.vue'
@@ -9,16 +9,22 @@ import { useToggleEditStore } from '@/stores/ToggleEditStore.js'
 
 
 const router = useRouter()
-
 const card_store = useCardStore()
 const edit_store = useToggleEditStore()
+
 const list = ref(null)
+const chapter_name = ref('')
 
 
-onMounted(() => {
+onBeforeMount(() => {
   if (!card_store.getChapter) {
     router.push('/workspace')
   }
+})
+
+
+onMounted(() => {
+  chapter_name.value = localStorage.getItem("selectedChapterName")
 })
 
 
@@ -153,6 +159,8 @@ function saveChanges() {
     @dragenter.prevent
     @dragleave.prevent="onDragLeave"
   >
+    <h1 class="font-bold">{{ chapter_name }}</h1>
+
     <div class=" w-full pb-1 flex flex-row">
       <button @click="back" class="btn btn-ghost">Back</button>
       <div class="w-full"></div>

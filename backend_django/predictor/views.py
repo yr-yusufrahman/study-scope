@@ -3,12 +3,12 @@ from django.shortcuts import render
 from rest_framework import status, generics, permissions
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+
 from random import shuffle
 from datetime import datetime
 
 from predictor.models import Revision
 from courses.models import Chapter, Card
-
 from predictor.helpers.mcq import createQuiz
 
 
@@ -73,3 +73,16 @@ def saveResults(request):
     
     # User not authenticated
     return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+
+# Make a prediction
+def makePrediction(request):
+    user = request.user
+    if user:
+        return Response(status=status.HTTP_200_OK)
+    
+    # User not authenticated
+    return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+
+# To get a prediction, just get the value from the next_due field in the Chapter model
