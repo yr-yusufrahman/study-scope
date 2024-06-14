@@ -3,9 +3,11 @@ import { defineStore } from "pinia"
 import axios from "axios"
 import makeRequest from "@/components/helpers/requestFlow"
 import refresh from "@/components/helpers/refresh"
+import { useChapterStore } from "./ChapterStore"
 import { useCardStore } from "./CardStore"
 
 export const useQuizStore = defineStore('quizStore', () => {
+    const chapter_store = useChapterStore()
     const card_store = useCardStore()
 
     const loading = ref(true)
@@ -170,16 +172,20 @@ export const useQuizStore = defineStore('quizStore', () => {
                 const token = localStorage.getItem('token')
 
                 // Count the number of reveal questions
-                const reveal_count = quiz.value.filter(card => card.multiple_choice === false).length                  
+                const reveal_count = quiz.value.filter(card => card.multiple_choice === false).length               
                 const headers = {"Authorization": `Bearer ${token}`}
                 const body = {
                     mistakes: mistakes.value,
                     inputs: total.value,
                     number_of_reveals: reveal_count,
-                    chapter_id: card_store.getChapter
+                    chapter_id: card_store.getChapter,
+                    course_id: Number(localStorage.getItem('selectedCourse'))
                 }
-
-                await axios.post('http://127.0.0.1:8000/predictor/save-results', body, { headers })
+                
+                const response = await axios.post('http://127.0.0.1:8000/predictor/save-results', body, { headers })
+                const data = await response.data
+                console.log("Quiz saved, interval prediction: ", data)
+                success = true
             } catch (error) {
                 console.log("Error saving quiz: ")
             } 

@@ -1,18 +1,21 @@
 from django.db import models
-from datetime import datetime
 from django.contrib.auth.models import User
 from courses.models import Course, Chapter
+
+from datetime import datetime
+from predictor.helpers.loadModel import defaultModelParams
+import joblib, io, os, numpy as np
 
 # Create your models here.
 
 class Revision(models.Model):
     mistakes = models.IntegerField()
     inputs = models.IntegerField()
-    number_of_reveals = models.IntegerField(default=0) # Number of reveal questions
+    percentage_of_reveals = models.FloatField(default=0)
     date = models.DateTimeField(auto_now_add=True)
 
     # Calculated by looking at the previous and next revision session
-    days_since = models.IntegerField(default=-1) # Days since last revision session
+    days_since = models.IntegerField(default=-1) # calculated in save method
     interval = models.IntegerField(default=-1) # Days until next revision session
     mistake_rate = models.FloatField(default=-1) # Change in mistake score from now to the next revision session
     is_loss = models.BooleanField(default=False) # True if there was a drop off
@@ -20,25 +23,18 @@ class Revision(models.Model):
     chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE)
 
 
-    # Override save method to calculate other field values
-    def save(self, *args, **kwargs):
+    # Create method to calculate other field values
+    def complete(self, *args, **kwargs):
         # Get the most recent revision for the same chapter
-        previous = Revision.objects.filter(chapter=self.chapter).order_by('-date')
-        last_revision = previous.first()
+        last_revision = Revision.objects.filter(chapter=self.chapter).exclude(id=self.pk).order_by('-date').first()
         
         # Check if the chapter was revised before
         if last_revision:
-            # Days since: Calculate the difference in days between the last revision date and the one before it
-            penultimate = previous[1]
-            if penultimate:
-                since = last_revision.date.date() - penultimate.date.date()
-                last_revision.days_since = since.days
+            # Interval: Get the days since the last revision
+            #delta = self.date.date() - last_revision.date.date()
+            last_interval = self.days_since #delta.days
 
-            # Interval: Calculate the difference in days between now and the last revision date
-            delta = self.date.date() - last_revision.date.date()
-            last_interval = delta.days
-
-            # Check if there was a drop off
+            # Check if there was a drop off since the last revision
             # If mistakes score increased by 25% = small drop off
             # If mistakes score increased by 40% = large drop off
             last_mistake_score = (last_revision.mistakes / last_revision.inputs) * 100
@@ -57,14 +53,21 @@ class Revision(models.Model):
                 last_interval = int(last_interval * 0.8)
 
             # Complete the last revision session values
-            last_revision.interval = last_interval
+            last_revision.interval = last_interval # If there was no drop off, interval of last revision = days_since for this
             last_revision.mistake_rate = change
             last_revision.is_loss = loss
-            last_revision.save()
+            last_revision.save() # this causes error as it will use the modified save method which will cause an infinite loop 
 
-        # Save the current revision session
-        super().save(*args, **kwargs)
 
+    def setDaysSince(self):
+        last_revision = Revision.objects.filter(chapter=self.chapter).exclude(id=self.pk).order_by('-date').first()
+        if last_revision:
+            # Set the days since the last revision
+            delta = self.date.date() - last_revision.date.date()
+            days_since = delta.days
+            self.days_since = days_since
+            self.save()
+                  
 
 
 # mistake score, inputs, number of reveals
@@ -94,7 +97,13 @@ class Revision(models.Model):
 
 # Model for storing predictor parameters. Two for each course? To handle drop-offs and non-drop-offs.
 class Predictor(models.Model):
-    parameters = models.JSONField()
+    parameters = models.JSONField(default=dict, null=True, blank=True)
     drop_off = models.BooleanField()
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
 
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            # Save the parameters
+            params = defaultModelParams()
+            self.parameters = params
+        super().save(*args, **kwargs)

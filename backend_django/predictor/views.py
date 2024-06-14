@@ -6,10 +6,15 @@ from rest_framework.response import Response
 
 from random import shuffle
 from datetime import datetime
+import os
+import joblib
+from sklearn.preprocessing import StandardScaler
+import numpy as np
 
-from predictor.models import Revision
-from courses.models import Chapter, Card
+from predictor.models import Revision, Predictor
+from courses.models import Course, Chapter, Card
 from predictor.helpers.mcq import createQuiz
+from predictor.helpers.loadModel import queryModel
 
 
 # Create a quiz with cards from a given chapter
@@ -43,9 +48,10 @@ def saveResults(request):
         inputs = request.data.get('inputs')
         number_of_reveals = request.data.get('number_of_reveals')
         chapter_id = request.data.get('chapter_id')
+        course_id = request.data.get('course_id')
 
         chapter = Chapter.objects.get(id=chapter_id)
-        if chapter:
+        if chapter and inputs > 0:
             # Check if the chapter already had a previous revision on the same date
             last_revision = Revision.objects.filter(chapter=chapter).order_by('-date').first()
 
@@ -55,18 +61,29 @@ def saveResults(request):
                     # Make no changes
                     return Response(status=status.HTTP_200_OK)
                 
+            percentage_of_reveals = (number_of_reveals / inputs) * 100
+            percentage_of_reveals = round(percentage_of_reveals, 2)
 
             # Save the results
             revision = Revision.objects.create(
                 mistakes=mistakes,
                 inputs=inputs,
-                number_of_reveals=number_of_reveals,
+                percentage_of_reveals=percentage_of_reveals,
                 chapter=chapter
             )
             revision.save()
+            revision.setDaysSince() # Calculate the days since last revision
+            revision.complete() # Calculate the other field values from last revision data point
+            
 
+            # Make a prediction
+            course = Course.objects.get(id=course_id)
+            prediction = makePrediction(revision, course)
+            data = {
+                'next_due': prediction
+            }
             # Save successful
-            return Response(status=status.HTTP_200_OK)
+            return Response(data, status=status.HTTP_200_OK)
 
         # Chapter not found
         return Response(status=status.HTTP_404_NOT_FOUND)
@@ -75,14 +92,33 @@ def saveResults(request):
     return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 
-# Make a prediction
-def makePrediction(request):
-    user = request.user
-    if user:
-        return Response(status=status.HTTP_200_OK)
+# Make a prediction after a quiz
+def makePrediction(revision_obj, course_obj):
+    days_since = revision_obj.days_since
+    mistake_score = (revision_obj.mistakes / revision_obj.inputs) * 100
+    mistake_score = round(mistake_score, 4)
+    inputs = revision_obj.inputs
+    percentage_of_reveals = revision_obj.percentage_of_reveals
+
+    # Prepare the input for the model
+    raw_data = np.array([
+        [
+            days_since,
+            mistake_score, 
+            inputs, 
+            percentage_of_reveals
+        ],
+    ])
     
-    # User not authenticated
-    return Response(status=status.HTTP_401_UNAUTHORIZED)
+    # Get the course model parameters
+    predictor = Predictor.objects.get_or_create(course=course_obj)
+
+    params = predictor[0].parameters
+
+    # Make a prediction
+    prediction = queryModel(params, raw_data)
+    print(f"Prediction: {prediction}\n")
+    return prediction
 
 
 # To get a prediction, just get the value from the next_due field in the Chapter model
