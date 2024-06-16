@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from courses.models import Course, Chapter
 
 from datetime import datetime
-from predictor.helpers.loadModel import defaultModelParams
+from predictor.helpers.loadModel import defaultModelParams, defaultTree
 import joblib, io, os, numpy as np
 
 # Create your models here.
@@ -97,13 +97,17 @@ class Revision(models.Model):
 
 # Model for storing predictor parameters. Two for each course? To handle drop-offs and non-drop-offs.
 class Predictor(models.Model):
-    parameters = models.JSONField(default=dict, null=True, blank=True)
+    #parameters = models.JSONField(default=dict, null=True, blank=True)
     drop_off = models.BooleanField()
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    tree = models.BinaryField(default=None)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, default=None)
+    #course = models.ForeignKey(Course, on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):
         if not self.pk:
             # Save the parameters
-            params = defaultModelParams()
-            self.parameters = params
+            #params = defaultModelParams()
+            #self.parameters = params
+            self.drop_off = True
+            self.tree = defaultTree()
         super().save(*args, **kwargs)

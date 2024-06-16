@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from random import shuffle
 from datetime import datetime
 import os
-import joblib
+import joblib, pickle
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 
@@ -122,3 +122,28 @@ def makePrediction(revision_obj, course_obj):
 
 
 # To get a prediction, just get the value from the next_due field in the Chapter model
+
+
+
+# Test purposes...
+@api_view(["GET"])
+def getTree(request):
+    user = request.user
+    if user:
+        predictor = Predictor.objects.get_or_create(user=user) # Returns a tuple [0] contains obj, [1] boolean success
+        print(f"Predictor: {predictor}\n")
+        model_serialized = predictor[0].tree
+        model = pickle.loads(model_serialized)
+
+        # Strange case test
+        more = np.array([[4, 137.5, 10]])
+        more_pred = model.predict(more)
+        print(f"\nThis should be around 7-12: {more_pred}")
+
+
+        return Response(status=status.HTTP_200_OK)
+    
+    # User not authenticated
+    return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+

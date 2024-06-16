@@ -47,6 +47,14 @@ function saveChanges() {
     }
 }
 // END saveChanges
+
+function treeTest() {
+    let success = course_store.treeRequest()
+    if (!success) {
+        router.push('/login')
+    }
+}
+
 </script>
 
 
@@ -60,7 +68,8 @@ function saveChanges() {
             <AddCourse v-show="edit_store.isEdit(addId)" />
         </div>
         <button class="btn btn-info" @click="toggleEdit(addId)">Add Course</button>
-        <button class="btn btn-accent" @click="saveChanges">Save Changes</button>       
+        <button class="btn btn-accent" @click="saveChanges">Save Changes</button>      
+        <button class="btn btn-accent" @click="treeTest">Tree Test</button>
     </div>
 </template>
 

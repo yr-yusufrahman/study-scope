@@ -192,6 +192,29 @@ export const useCourseStore = defineStore("courseStore", () => {
         }
     }
 
+    function treeRequest() {
+        // Get courses
+        const getTree =  async () => {
+            let success = false
+            try {
+                const token = localStorage.getItem('token')
+                const headers = {"Authorization": `Bearer ${token}`}
+
+                const response = await axios.get('http://127.0.0.1:8000/predictor/get-tree', { headers })
+                const data = await response.data
+                //setCourses(data?.courses)
+
+                success = true       
+            } catch (error) {
+                console.log("Error getting tree: ")
+            }
+            return success
+        }
+
+        let success = makeRequest(getTree)
+        return success
+    }
+
     return {
         getCourses,
         additions,
@@ -204,6 +227,9 @@ export const useCourseStore = defineStore("courseStore", () => {
         removeCourse,
 
         getCoursesRequest,
-        saveCoursesRequest
+        saveCoursesRequest,
+
+
+        treeRequest
     }
 })
