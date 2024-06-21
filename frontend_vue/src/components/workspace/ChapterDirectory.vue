@@ -79,6 +79,7 @@ function saveChanges() {
                 v-for="(chapter, index) in chapter_store.getChapters" 
                 :id="chapter.id" 
                 :title="chapter.title"
+                :due="chapter.next_due"
                 :key="index"
             />
         </div>

@@ -28,7 +28,7 @@ def defaultModelParams():
 
 
 # Make a prediction by building a model from the parameters
-def queryModel(params, input):
+def queryModelOld(params, input):
     # Standardize the new data
     scaler = StandardScaler()
     scaled_input = scaler.fit_transform(input)
@@ -41,6 +41,15 @@ def queryModel(params, input):
     # Make prediction
     prediction = model.predict(scaled_input)
 
+    return prediction
+
+
+def queryModel(predictor_obj, input):
+    model_serialized = predictor_obj.tree
+    model = pickle.loads(model_serialized)
+
+    # Make prediction
+    prediction = model.predict(input)
     return prediction
 
 

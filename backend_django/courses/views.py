@@ -3,6 +3,8 @@ from django.shortcuts import render
 from rest_framework import status, generics, permissions
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.utils import timezone
+from datetime import datetime
 
 from .models import Course, Chapter, Card
 
@@ -101,10 +103,20 @@ def getChapters(request):
             chapters_data = []
 
             for chapter in chapters:
-                chapters_data.append({
+                data = {
                     'id': chapter.id,
                     'title': chapter.chapter_title,
-                })
+                    'next_due': {},
+                }
+
+                # Check if the chapter has a next due date
+                if chapter.next_due:
+                    data['next_due'] = {
+                        'date': chapter.next_due.strftime('%Y-%m-%d'),
+                        'days': (chapter.next_due - timezone.now()).days,
+                    }
+
+                chapters_data.append(data)
             
             response = {
                 'chapters': chapters_data,
@@ -118,6 +130,7 @@ def getChapters(request):
     bad_response = {
         'error': 'User not authenticated.',
     }
+    # User not authenticated
     return Response(bad_response, status=status.HTTP_401_UNAUTHORIZED)
 
 

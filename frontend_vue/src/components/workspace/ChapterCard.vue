@@ -8,6 +8,7 @@ import autoResize from '../helpers/textResize'
 const props = defineProps({
   id: Number,
   title: String,
+  due: Object
 })
 
 const chapter_store = useChapterStore()
@@ -21,7 +22,9 @@ const form = ref(null)
 function selectChapter() {
   const id = props.id
   const title = props.title
-  card_store.setChapter(id, title)
+  const due = props.due
+
+  card_store.setChapter(id, title, due)
   //localStorage.setItem('selectedChapter', id)
 }
 

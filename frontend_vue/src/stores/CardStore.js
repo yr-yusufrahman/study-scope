@@ -3,11 +3,14 @@ import { defineStore } from "pinia";
 import axios from "axios";
 import makeRequest from "@/components/helpers/requestFlow";
 import refresh from "@/components/helpers/refresh";
+import { useChapterStore } from "./ChapterStore";
 
 export const useCardStore = defineStore('cardStore', () => {
 
     const chapter = ref(null)
     const chapter_name = ref('')
+    const due_date = ref(null)
+    const due_days = ref(0)
     const dragging = ref(null)
     const drag_index = ref(null)
     const isScrolling = ref(false)
@@ -23,6 +26,8 @@ export const useCardStore = defineStore('cardStore', () => {
   
     // Getters
     const getChapter = computed(() => chapter.value)
+    const getDueDate = computed(() => due_date.value)
+    const getDueDays = computed(() => due_days.value)
     const getCards = computed(() => cards.value)
     const getDragging = computed(() => dragging.value)
     const getScrolling = computed(() => isScrolling.value)
@@ -31,9 +36,12 @@ export const useCardStore = defineStore('cardStore', () => {
 
 
     // Sets the current chapter
-    function setChapter(id, title) {
+    function setChapter(id, title, due) {
         chapter.value = id
         chapter_name.value = title
+        console.log("Due date: ", due)
+        due_date.value = due.date
+        due_days.value = due.days
 
         localStorage.setItem('selectedChapter', id)
         localStorage.setItem('selectedChapterName', title)
@@ -257,6 +265,8 @@ export const useCardStore = defineStore('cardStore', () => {
     return { 
         chapter,
         getChapter,
+        getDueDate,
+        getDueDays,
         getCards,
         getDragging,
         getScrolling,

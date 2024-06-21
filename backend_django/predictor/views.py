@@ -78,12 +78,11 @@ def saveResults(request):
 
             # Make a prediction
             course = Course.objects.get(id=course_id)
-            prediction = makePrediction(revision, course)
-            data = {
-                'next_due': prediction
-            }
+            prediction = makePrediction(revision, user)
+            chapter.setDue(prediction) # Set the next due date for the chapter
+
             # Save successful
-            return Response(data, status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_200_OK)
 
         # Chapter not found
         return Response(status=status.HTTP_404_NOT_FOUND)
@@ -93,12 +92,12 @@ def saveResults(request):
 
 
 # Make a prediction after a quiz
-def makePrediction(revision_obj, course_obj):
+def makePrediction(revision_obj, user_obj):
     days_since = revision_obj.days_since
     mistake_score = (revision_obj.mistakes / revision_obj.inputs) * 100
     mistake_score = round(mistake_score, 4)
     inputs = revision_obj.inputs
-    percentage_of_reveals = revision_obj.percentage_of_reveals
+    #percentage_of_reveals = revision_obj.percentage_of_reveals
 
     # Prepare the input for the model
     raw_data = np.array([
@@ -106,19 +105,19 @@ def makePrediction(revision_obj, course_obj):
             days_since,
             mistake_score, 
             inputs, 
-            percentage_of_reveals
+            #percentage_of_reveals
         ],
     ])
     
     # Get the course model parameters
-    predictor = Predictor.objects.get_or_create(course=course_obj)
-
-    params = predictor[0].parameters
+    predictor = Predictor.objects.get_or_create(user=user_obj)
+    model = predictor[0]
 
     # Make a prediction
-    prediction = queryModel(params, raw_data)
-    print(f"Prediction: {prediction}\n")
-    return prediction
+    prediction = queryModel(model, raw_data)
+    days = round(prediction[0])
+    print(f"Post-quiz Prediction: {prediction}\nRounded: {days}\n")
+    return days
 
 
 # To get a prediction, just get the value from the next_due field in the Chapter model
@@ -134,12 +133,6 @@ def getTree(request):
         print(f"Predictor: {predictor}\n")
         model_serialized = predictor[0].tree
         model = pickle.loads(model_serialized)
-
-        # Strange case test
-        more = np.array([[4, 137.5, 10]])
-        more_pred = model.predict(more)
-        print(f"\nThis should be around 7-12: {more_pred}")
-
 
         return Response(status=status.HTTP_200_OK)
     

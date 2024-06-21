@@ -182,9 +182,7 @@ export const useQuizStore = defineStore('quizStore', () => {
                     course_id: Number(localStorage.getItem('selectedCourse'))
                 }
                 
-                const response = await axios.post('http://127.0.0.1:8000/predictor/save-results', body, { headers })
-                const data = await response.data
-                console.log("Quiz saved, interval prediction: ", data)
+                await axios.post('http://127.0.0.1:8000/predictor/save-results', body, { headers })
                 success = true
             } catch (error) {
                 console.log("Error saving quiz: ")
