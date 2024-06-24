@@ -1,10 +1,12 @@
 <script setup>
 import CourseCard from './CourseCard.vue'
 import AddCourse from './AddCourse.vue'
+import ConfirmModal from '../helpers/ConfirmModal.vue'
 
 import { useRouter } from 'vue-router'
 import { ref, onUnmounted, onMounted, onBeforeMount } from 'vue'
 import axios from 'axios'
+import logout from '../helpers/logout.js'
 import refresh from '../helpers/refresh.js'
 import { useCourseStore } from '../../stores/CourseStore.js'
 import { useToggleEditStore } from '../../stores/ToggleEditStore.js'
@@ -20,11 +22,15 @@ const addId = -1
 
 // Check for logged in
 onMounted(() => {
-    let success = course_store.getCoursesRequest()
-    if (!success) {
-        router.push('/login')
-    }
+    const request = course_store.getCoursesRequest()
+    request.then((success) => {
+        if (!success) {
+            logout()
+            router.push('/login')
+        }
+    })
 })
+
 
 // When leaving page
 onUnmounted(() => {
@@ -70,6 +76,8 @@ function treeTest() {
         <button class="btn btn-info" @click="toggleEdit(addId)">Add Course</button>
         <button class="btn btn-accent" @click="saveChanges">Save Changes</button>      
         <button class="btn btn-accent" @click="treeTest">Tree Test</button>
+
+        <ConfirmModal />
     </div>
 </template>
 

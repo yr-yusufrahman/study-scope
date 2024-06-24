@@ -29,27 +29,43 @@ const router = createRouter({
       path: '/courses',
       name:'courses',
       component: CoursesView,
+      meta: { requiresAuth: true } // Stores data about the route
     },
     {
       path: '/workspace',
       name:'workspace',
       component: WorkspaceView,
+      meta: { requiresAuth: true }
     },
     {
       path: '/edit',
       name:'edit',
       component: EditView,
+      meta: { requiresAuth: true }
     },
     {
       path: '/quiz',
       name:'quiz',
       component: QuizView,
+      meta: { requiresAuth: true }
     }
   ],
+
   scrollBehavior(to, from, savedPosition) {
     // always scroll to top
     return { top: 0 }
   },
 })
+
+router.beforeEach((to, from, next) => {
+  const isAuthenticated = !!localStorage.getItem('token'); // Check if token exists
+
+  if (to.matched.some(record => record.meta.requiresAuth) && !isAuthenticated) {
+    next({ name: 'login' }); // Redirect to login page
+  } else {
+    next(); // Proceed to route
+  }
+});
+
 
 export default router

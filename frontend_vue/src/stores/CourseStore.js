@@ -10,10 +10,12 @@ export const useCourseStore = defineStore("courseStore", () => {
     const additions = ref([]) // New courses added
     const edits = ref([]) // Courses edited: {id, new_title}
     const removals = ref([]) // Courses removed
+    const deleting = ref(false)
     
 
     // ----- Getters ----- try and use computed?
     const getCourses = computed(() => courses.value)
+    const getDeleting = computed(() => deleting.value)
 
     // ----- Actions -----
 
@@ -38,7 +40,11 @@ export const useCourseStore = defineStore("courseStore", () => {
                 return id
             }
             let new_course = {id: generateId(), title: title}
-            courses.value.push(new_course)
+
+            // Keep alphabetical order of course titles
+            courses.value.push(new_course);
+            courses.value.sort((a, b) => a.title.localeCompare(b.title));
+
             additions.value.push(new_course)
             console.log("Course additions: ", additions.value)
             success = true
@@ -97,43 +103,11 @@ export const useCourseStore = defineStore("courseStore", () => {
         console.log("Course removals: ", removals.value)
     }
 
+    function setDeleting(state) {
+        deleting.value = state
+    }
 
     // ----- Requests -----
-
-    function getCoursesRequestWorks() {
-        // Get courses
-        const getCourses =  async () => {
-            let success = false
-            try {
-                const token = localStorage.getItem('token')
-                const headers = {"Authorization": `Bearer ${token}`}
-
-                const response = await axios.get('http://127.0.0.1:8000/courses/get-courses', { headers })
-                const data = await response.data
-                setCourses(data?.courses)
-
-                success = true       
-            } catch (error) {
-                console.log("Error getting courses: ")
-            }
-            return success
-        }
-
-        let success = getCourses()
-        if (!success) {
-
-            // Refresh token
-            let refreshed = refresh()
-            if (refreshed) {
-                success = getCourses()
-            }
-            else {
-                // Failed to refresh token
-                success = false
-            }
-        }
-        return success
-    }
 
     function getCoursesRequest() {
         // Get courses
@@ -192,6 +166,7 @@ export const useCourseStore = defineStore("courseStore", () => {
         }
     }
 
+    // Testing predictor tree request
     function treeRequest() {
         // Get courses
         const getTree =  async () => {
@@ -217,14 +192,13 @@ export const useCourseStore = defineStore("courseStore", () => {
 
     return {
         getCourses,
-        additions,
-        edits,
-        removals,
+        getDeleting,
 
         setCourses,
         addCourse,
         editCourse,
         removeCourse,
+        setDeleting,
 
         getCoursesRequest,
         saveCoursesRequest,

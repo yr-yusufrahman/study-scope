@@ -4,9 +4,12 @@ import { defineStore } from "pinia";
 export const useToggleEditStore = defineStore("toggleEditStore", () => {
     // ----- State -----
     const active_edit = ref('') // Id of the course being edited
+    const delete_modal = ref(false) // Type of modal to show
 
 
     // ----- Getters -----
+
+    const getDeleteModal = computed(() => delete_modal.value)
 
     // Returns true if course is being edited
     function isEdit(id) {
@@ -29,10 +32,18 @@ export const useToggleEditStore = defineStore("toggleEditStore", () => {
         active_edit.value = ''
     }
 
+    function setDeleteModal(type) {
+        delete_modal.value = type
+    }
+
     return {
         active_edit,
+
+        getDeleteModal,
+
         isEdit,
         setEdit,
-        clear
+        clear,
+        setDeleteModal
     }
 })

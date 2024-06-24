@@ -15,18 +15,18 @@ def getCourses(request):
     user = request.user
     if user:
         # All courses for the user
-        courses = Course.objects.filter(owner=user)
+        courses = Course.objects.filter(owner=user).order_by('title')
         courses_data = []
         for course in courses:
             # All chapters for the course
-            chapters = Chapter.objects.filter(course=course)
+            #chapters = Chapter.objects.filter(course=course)
             courses_data.append({
                 'id': course.id,
                 'title': course.title,
-                'chapters': [{
-                    'id': chapter.id,
-                    'title': chapter.chapter_title,
-                } for chapter in chapters],
+                #'chapters': [{
+                #    'id': chapter.id,
+                #    'title': chapter.chapter_title,
+                #} for chapter in chapters],
             })
             
         response = {

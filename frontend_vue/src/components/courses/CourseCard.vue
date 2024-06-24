@@ -5,8 +5,12 @@ import { useCourseStore } from '../../stores/CourseStore.js'
 import { useChapterStore } from '@/stores/ChapterStore';
 import { useCardStore } from '@/stores/CardStore';
 import { useToggleEditStore } from '../../stores/ToggleEditStore.js'
+import autoResize from '../helpers/textResize'
 
-let props = defineProps({
+import ConfirmModal from '../helpers/ConfirmModal.vue'
+
+
+const props = defineProps({
   id: Number,
   title: String,
 })
@@ -45,16 +49,13 @@ function toggleEdit(id) {
 
 
 // Handles editing course title
-function handleEdit(e, id, original_title) {
+function handleEdit(id, original_title) {
   id = Number(id)
-  const new_title = e.target[0].value
+  const text_area = input.value
+  const new_title = text_area.value
+
   if (new_title !== original_title) {
-    let success = course_store.editCourse(id, new_title)
-    if (!success) {
-      console.log('Course already exists with this name')
-    }
-  } else {
-    console.log('Course title unchanged')
+    course_store.editCourse(id, new_title)
   }
   edit_store.setEdit(id)
 }
@@ -65,6 +66,13 @@ function handleDelete(id) {
   course_store.removeCourse(id)
 }
 
+// Opens the delete modal
+function handleDeleteModal(id) {
+  edit_store.setDeleteModal(0) // 0 for course
+  course_store.setDeleting(id)
+}
+
+
 </script>
 
 
@@ -72,13 +80,22 @@ function handleDelete(id) {
   <div class="card w-96 bg-base-100 shadow-xl">
     <div class="card-body">
       
-      <h2 v-show="!edit_store.isEdit(id)"  class="card-title">
+      <h2 v-show="!edit_store.isEdit(id)"  class="card-title break-all">
         <button @click="selectCourse()">{{ title }}</button>
       </h2>
       
-
-      <form v-show="edit_store.isEdit(id)" @submit.prevent="(event) => handleEdit(event, id, title)">
-        <input ref="input" :value=title type="text" placeholder="Title" class="input input-bordered" />  
+      <form v-show="edit_store.isEdit(id)" @submit.prevent="(event) => handleEdit(id, title)">
+        <textarea 
+          rows="1"
+          ref="input" 
+          :value=title
+          type="text" 
+          placeholder="Title" 
+          class="textarea textarea-bordered card-edit overflow-y-hidden" 
+          required
+          @input="autoResize($event.target)"
+          @keydown.enter.prevent="handleEdit(id, title)"
+        ></textarea> 
       </form>
 
       <p>8 Chapters</p>
@@ -88,6 +105,10 @@ function handleDelete(id) {
       </div>
       <div class="card-actions justify-end">
         <button class="btn btn-primary" @click="handleDelete(id)">Delete</button>
+
+        <!-- The button to open modal -->
+        <label for="my_modal_7" class="btn btn-error" @click="handleDeleteModal(id)">Delete</label>
+
       </div>
     </div>
   </div>
