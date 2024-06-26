@@ -6,11 +6,13 @@ import EditCard from './EditCard.vue'
 import AddCard from './AddCard.vue'
 import { useCardStore } from '@/stores/CardStore.js'
 import { useToggleEditStore } from '@/stores/ToggleEditStore.js'
+import { useDragStore } from '@/stores/DragStore.js'
 
 
 const router = useRouter()
 const card_store = useCardStore()
 const edit_store = useToggleEditStore()
+const drag_store = useDragStore()
 
 const list = ref(null)
 const chapter_name = ref('')
@@ -40,23 +42,29 @@ function toggleEdit(addIndex) {
 }
 
 
+// ----- Dragging functions -----
 // Changes the order of the cards in state when dropped in the droppable area
 function onDrop(event) {
-  card_store.setDroppedCorrectly(true)
-  const update = card_store.setMoveCard()
+  //card_store.setDroppedCorrectly(true)
+  
+  drag_store.setDroppedCorrectly(true)
+  const update = drag_store.setMoveCard() //card_store.setMoveCard()
 
   if (update) {
     // Forces DOM to update list of cards
-    card_store.setDropUpdate()
+    //card_store.setDropUpdate()
+    drag_store.setDropUpdate()
   }
   
   stopAutoScroll()
 }
 
 
-// Adds card template when dragging over
+// Adds card template when dragging over a certain position
 function onDragOver(event) {
   let new_index = 0
+
+  // Get the card being dragged
   let draggable = list.value.querySelector('.dragging')
 
   // Find the card being dragged and its index 
@@ -76,9 +84,10 @@ function onDragOver(event) {
     list.value.insertBefore(draggable, afterElement)
   }
 
-  card_store.setDragIndex(new_index)
+  //card_store.setDragIndex(new_index)
+  drag_store.setDragIndex(new_index)
 
-  scroll(event)
+  dragScroll(event)
 }
 
 
@@ -101,7 +110,7 @@ function getDragAfterItem(y) {
 
 
 // Auto scroll when dragging up or down
-function scroll(event) {
+function dragScroll(event) {
   const scrollSpeed = 18
   const threshold = 100
 
@@ -116,15 +125,17 @@ function scroll(event) {
 }
 
 function startAutoScroll(speed) {
-  
-  if (card_store.getScrolling) {
+  // card_store.getScrolling
+  if (drag_store.getScrolling) {
     return
   }
 
-  card_store.setScrolling(true)
+  //card_store.setScrolling(true)
+  drag_store.setScrolling(true)
 
   const scrollStep = () => {
-    if (!card_store.getScrolling) {
+    // !card_store.getScrolling
+    if (!drag_store.getScrolling) {
       return
     }
     window.scrollBy(0, speed)
@@ -136,8 +147,12 @@ function startAutoScroll(speed) {
 }
 
 function stopAutoScroll() {
-  card_store.setScrolling(false)
+  //card_store.setScrolling(false)
+  drag_store.setScrolling(false)
 }
+
+
+
 
 
 // Sends changes to backend
@@ -157,7 +172,7 @@ function saveChanges() {
     @drop="onDrop"
     @dragover.prevent="onDragOver"
     @dragenter.prevent
-    @dragleave.prevent="onDragLeave"
+    @dragleave.prevent
   >
     <h1 class="font-bold">{{ chapter_name }}</h1>
 

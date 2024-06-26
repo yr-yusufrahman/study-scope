@@ -28,20 +28,18 @@ const makeRequest = () => {
 
 
 onBeforeMount(() => {
-    const chapter = Number(localStorage.getItem('selectedChapter'))
+    const state_chapter = card_store.getChapter
 
-    // Cards belong to a chapter so if there chapter is not selected, no card request
-    if (chapter) {
-        empty.value = false
-        
-        // If storage chapter is different from state chapter, set state chapter
-        if (chapter !== card_store.getChapter) {
+    // If there is no chapter in state, check storage
+    if (!state_chapter) {
+        // Local storage is just for persisting on refresh
+        const chapter = Number(localStorage.getItem('selectedChapter'))
+        if (chapter) {
             card_store.setChapter(chapter)
-        } else { 
-            makeRequest() 
-        }
-
-    } 
+        }  
+    } else {
+        empty.value = false
+    }
 })
 
 

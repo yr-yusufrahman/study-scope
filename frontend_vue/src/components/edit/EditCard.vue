@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import AddCard from './AddCard.vue'
 import { useCardStore } from '@/stores/CardStore';
 import { useToggleEditStore } from '@/stores/ToggleEditStore';
+import { useDragStore } from '@/stores/DragStore';
 import autoResize from '../helpers/textResize.js'
 
 defineProps({
@@ -16,6 +17,8 @@ defineProps({
 
 const card_store = useCardStore()
 const edit_store = useToggleEditStore()
+const drag_store = useDragStore()
+
 const add_below = ref(false)
 const new_question = ref('')
 const new_answer = ref('')
@@ -52,9 +55,8 @@ function handleEdit(id, original_question, original_answer) {
 }
 
 
-function dragState(state) {
-    dragging.value = state
-}
+// ----- Dragging functions -----
+function dragState(state) { dragging.value = state }
 
 
 // Allows dragging of cards
@@ -62,27 +64,44 @@ function startDrag(e, id) {
     dragging.value = true
     e.dataTransfer.dropEffect = 'move'
     e.dataTransfer.effectAllowed = 'move'
-    card_store.setDragging(id)
-    card_store.setDroppedCorrectly(false) // Assume dragging in undroppable area
+    //card_store.setDragging(id)
+    //card_store.setDroppedCorrectly(false) // Assume dragging in undroppable area
+
+    // Set the card being dragged
+    drag_store.setDragging(id)
+    drag_store.setDroppedCorrectly(false)
 }
 
 
 // Stops dragging of cards and correctly moves card if dropped in undroppable area
 function stopDrag() {
     dragging.value = false
-    card_store.setScrolling(false)
+    //card_store.setScrolling(false)
+
+    // When card stops dragging, stop auto scrolling
+    drag_store.setScrolling(false)
 
     // Check if card was dropped in undroppable area and it was moved
-    if (!card_store.getDroppedCorrectly) {
-        card_store.setDroppedCorrectly(true)
-        const update = card_store.setMoveCard() // Force update
+    // !card_store.getDroppedCorrectly
+    if (!drag_store.getDroppedCorrectly) {
+        //card_store.setDroppedCorrectly(true)
+
+        drag_store.setDroppedCorrectly(true)
+
+        const update = drag_store.setMoveCard() //card_store.setMoveCard() // Force update
+        
 
         if (update) {
-            card_store.setDropUpdate()
+            //card_store.setDropUpdate()
+
+            drag_store.setDropUpdate()
         }
     }
 
-    card_store.setDragging(null)
+    //card_store.setDragging(null)
+
+    // Stop dragging
+    drag_store.setDragging(null)
 }
 
 </script>
