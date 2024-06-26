@@ -14,6 +14,8 @@ export const useChapterStore = defineStore('chapterStore', () => {
     const removals = ref([]) // Chapters removed
   
     // Getters
+    const getCourse = computed(() => course.value)
+    const getCourseName = computed(() => course_name.value)
     const getChapters = computed(() => chapters.value)
 
 
@@ -21,16 +23,11 @@ export const useChapterStore = defineStore('chapterStore', () => {
     // Setters
 
     // Sets all chapters for the selected course
-    function setChapters(chapter_list) {
-        chapters.value = chapter_list
-    }
+    function setChapters(chapter_list) { chapters.value = chapter_list }
 
-    function selectCourse(id, name) {
+    function selectCourse(id) {
         localStorage.setItem('selectedCourse', id)
-        localStorage.setItem('selectedCourseName', name)
-
         course.value = id
-        course_name.value = name
     }
 
     // Add chapter to course
@@ -120,16 +117,17 @@ export const useChapterStore = defineStore('chapterStore', () => {
         const getChapters =  async () => {
             let success = false
             try {
-                const selected_course = Number(localStorage.getItem('selectedCourse'))
+                //const selected_course = Number(localStorage.getItem('selectedCourse'))
                 const token = localStorage.getItem('token')
                 const headers = {"Authorization": `Bearer ${token}`}
                 const body = { 
-                    course_id: selected_course,
+                    course_id: course.value,
                 }
 
                 const response = await axios.post('http://127.0.0.1:8000/courses/get-chapters', body, { headers })
                 const data = await response.data
                 setChapters(data?.chapters)
+                course_name.value = data?.course_title
 
                 success = true       
             } catch (error) {
@@ -183,6 +181,8 @@ export const useChapterStore = defineStore('chapterStore', () => {
     }
 
     return {
+        getCourse,
+        getCourseName,
         getChapters,
 
         selectCourse,

@@ -2,12 +2,14 @@
 import EditChapterModal from './EditChapterModal.vue'
 import ChapterCard from './ChapterCard.vue'
 import AddChapter from './AddChapter.vue'
+import ConfirmModal from '../helpers/ConfirmModal.vue'
 
 import { useRouter } from 'vue-router'
 import { RouterLink } from 'vue-router'
 import { ref, onUnmounted, onMounted, onBeforeMount } from 'vue'
 import { useChapterStore } from '../../stores/ChapterStore.js'
 import { useToggleEditStore } from '../../stores/ToggleEditStore.js'
+import logout from '../helpers/logout.js'
 
 const router = useRouter()
 
@@ -19,23 +21,28 @@ const course_name = ref('')
 const addId = -1
 
 
-// Check if course was selected
 onBeforeMount(() => {
     const course = Number(localStorage.getItem('selectedCourse'))
-    if (course === null) {
+    if (!course) {
         router.push('/courses')
-    } else {
-        course_name.value = localStorage.getItem('selectedCourseName')
+        return
+    } else if (course !== chapter_store.getCourse) {
+        chapter_store.selectCourse(course)
     }
+
+    const makeRequest = () => {
+        const request = chapter_store.getChaptersRequest()
+        request.then((success) => {
+            if (!success) {
+                logout()
+                router.push('/login')
+            }
+        })
+    }
+    makeRequest()
 })
 
-// Check for logged in
-onMounted(() => {
-    let success = chapter_store.getChaptersRequest()
-    if (!success) {
-        router.push('/login')
-    }
-})
+
 
 // Before leaving
 onUnmounted(() => {
@@ -66,7 +73,7 @@ function saveChanges() {
         <div class="text-m breadcrumbs overflow-x-clip">
             <ul class="whitespace-normal">
                 <li><RouterLink to="/courses">Courses</RouterLink></li> 
-                <li><p>{{ course_name }}</p></li> 
+                <li><p>{{ chapter_store.getCourseName }}</p></li> 
             </ul>
         </div> 
 
@@ -92,6 +99,7 @@ function saveChanges() {
             <button class="btn btn-accent" @click="saveChanges">Save Changes</button>    
         </div>
         
+        <ConfirmModal />
               
     </div>
 </template>

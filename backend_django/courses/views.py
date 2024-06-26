@@ -118,8 +118,10 @@ def getChapters(request):
 
                 chapters_data.append(data)
             
+            # Include the course title in the response
             response = {
                 'chapters': chapters_data,
+                'course_title': course.title,
             }
 
             return Response(response, status=status.HTTP_200_OK)
@@ -191,21 +193,40 @@ def getCards(request):
     if user:
         # Get the chapter id
         chapter_id = request.data.get('chapter_id')
-        cards = Card.objects.filter(chapter=chapter_id).order_by('order')
-        card_data = []
-        for card in cards:
-            card_data.append({
-                'id': card.id,
-                'question': card.question,
-                'answer': card.answer,
-                'order': card.order,
-            })
+        chapter = Chapter.objects.filter(id=chapter_id).first()
+
+        # Check if chapter exists
+        if chapter:
+            cards = Card.objects.filter(chapter=chapter).order_by('order')
+            card_data = []
+            for card in cards:
+                card_data.append({
+                    'id': card.id,
+                    'question': card.question,
+                    'answer': card.answer,
+                    'order': card.order,
+                })
+            
+            # Include the chapter title in the response
+            response = {
+                'cards': card_data,
+                'chapter_title': chapter.chapter_title,
+                'next_due': {}
+            }
+
+            # Check if the chapter has a next due date
+            if chapter.next_due:
+                response['next_due'] = {
+                    'date': chapter.next_due.strftime('%Y-%m-%d'),
+                    'days': (chapter.next_due - timezone.now()).days,
+                }
+                
+            return Response(response, status=status.HTTP_200_OK)
         
-        response = {
-            'cards': card_data,
-        }
-        return Response(response, status=status.HTTP_200_OK)
+        # If chapter does not exist
+        return Response(status=status.HTTP_400_BAD_REQUEST)
     
+    # User not authenticated
     return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 

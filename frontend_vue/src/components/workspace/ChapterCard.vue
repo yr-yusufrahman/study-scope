@@ -24,8 +24,7 @@ function selectChapter() {
   const title = props.title
   const due = props.due
 
-  card_store.setChapter(id, title, due)
-  //localStorage.setItem('selectedChapter', id)
+  card_store.setChapter(id)
 }
 
 
@@ -61,6 +60,11 @@ function handleDelete(id) {
   chapter_store.removeChapter(id)
 }
 
+
+function handleDeleteModal(id) {
+  edit_store.setDeleteModal(1, id) // 1 for chapter
+
+}
 </script>
 
 
@@ -92,7 +96,8 @@ function handleDelete(id) {
       <div tabindex="0" role="button" class="btn" >...</div>
       <ul tabindex="0" class="absolute glass-light dropdown-content z-[1] menu p-2 shadow rounded-box right-0">
         <li><button @click="toggleEdit(id)">Edit</button></li>
-        <li><button @click="handleDelete(id)">Delete</button></li>
+        <li><button @click="handleDelete(id)">Delete old</button></li>
+        <label for="delete_modal" class="btn btn-error" @click="handleDeleteModal(id)">Delete</label>
       </ul>
     </div>
   </div>

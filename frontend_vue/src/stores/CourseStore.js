@@ -20,9 +20,7 @@ export const useCourseStore = defineStore("courseStore", () => {
     // ----- Actions -----
 
     // Sets the list of courses
-    function setCourses(courses_list) {
-        courses.value = courses_list
-    }
+    function setCourses(courses_list) { courses.value = courses_list }
 
     // Adds new course to the list and keeps track of additions
     function addCourse(title) {
@@ -103,9 +101,7 @@ export const useCourseStore = defineStore("courseStore", () => {
         console.log("Course removals: ", removals.value)
     }
 
-    function setDeleting(state) {
-        deleting.value = state
-    }
+    function setDeleting(state) { deleting.value = state }
 
     // ----- Requests -----
 
@@ -166,6 +162,8 @@ export const useCourseStore = defineStore("courseStore", () => {
         }
     }
 
+
+
     // Testing predictor tree request
     function treeRequest() {
         // Get courses
@@ -203,7 +201,7 @@ export const useCourseStore = defineStore("courseStore", () => {
         getCoursesRequest,
         saveCoursesRequest,
 
-
+        // Testing predictor tree request
         treeRequest
     }
 })

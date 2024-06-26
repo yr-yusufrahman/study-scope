@@ -26,11 +26,11 @@ const input = ref('')
 // Selects course for workspace
 function selectCourse() {
   const id = props.id
-  const title = props.title
-  const current = localStorage.getItem('selectedCourse')
-  if (current != id) {
+  const current = Number(localStorage.getItem('selectedCourse'))
+
+  if (current !== id) {
     card_store.clear()
-    chapter_store.selectCourse(id, title)
+    chapter_store.selectCourse(id)
 
   }
   router.push('/workspace')
@@ -68,8 +68,8 @@ function handleDelete(id) {
 
 // Opens the delete modal
 function handleDeleteModal(id) {
-  edit_store.setDeleteModal(0) // 0 for course
-  course_store.setDeleting(id)
+  edit_store.setDeleteModal(0, id) // 0 for course
+  //course_store.setDeleting(id)
 }
 
 
@@ -107,7 +107,7 @@ function handleDeleteModal(id) {
         <button class="btn btn-primary" @click="handleDelete(id)">Delete</button>
 
         <!-- The button to open modal -->
-        <label for="my_modal_7" class="btn btn-error" @click="handleDeleteModal(id)">Delete</label>
+        <label for="delete_modal" class="btn btn-error" @click="handleDeleteModal(id)">Delete</label>
 
       </div>
     </div>

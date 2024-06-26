@@ -5,9 +5,7 @@ import ConfirmModal from '../helpers/ConfirmModal.vue'
 
 import { useRouter } from 'vue-router'
 import { ref, onUnmounted, onMounted, onBeforeMount } from 'vue'
-import axios from 'axios'
 import logout from '../helpers/logout.js'
-import refresh from '../helpers/refresh.js'
 import { useCourseStore } from '../../stores/CourseStore.js'
 import { useToggleEditStore } from '../../stores/ToggleEditStore.js'
 
@@ -21,7 +19,7 @@ const addId = -1
 
 
 // Check for logged in
-onMounted(() => {
+onBeforeMount(() => {
     const request = course_store.getCoursesRequest()
     request.then((success) => {
         if (!success) {

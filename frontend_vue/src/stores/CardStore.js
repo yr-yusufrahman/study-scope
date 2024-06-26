@@ -6,26 +6,29 @@ import refresh from "@/components/helpers/refresh";
 import { useChapterStore } from "./ChapterStore";
 
 export const useCardStore = defineStore('cardStore', () => {
-
     const chapter = ref(null)
     const chapter_name = ref('')
+    const due = ref(null)
     const due_date = ref(null)
     const due_days = ref(0)
-    const dragging = ref(null)
-    const drag_index = ref(null)
-    const isScrolling = ref(false)
-    const droppedCorrectly = ref(null)
-    const update = ref(0)
 
     const cards = ref([])
     const additions = ref([]) // New cards added
     const edits = ref([]) // Cards edited: {question, answer, order}
     const removals = ref([]) // ID of cards removed
     const moves = ref([]) // Cards moved: Use ID and new index like {id, new_index} or store list of ID representing new order
-    // When adding and deleting, make changes to moves list as well
+    const dragging = ref(null)
+    const drag_index = ref(null)
+    const isScrolling = ref(false)
+    const droppedCorrectly = ref(null)
+    const update = ref(0) 
   
+
     // Getters
     const getChapter = computed(() => chapter.value)
+    const getChapterName = computed(() => chapter_name.value)
+    const getDue = computed(() => due.value)
+
     const getDueDate = computed(() => due_date.value)
     const getDueDays = computed(() => due_days.value)
     const getCards = computed(() => cards.value)
@@ -36,30 +39,27 @@ export const useCardStore = defineStore('cardStore', () => {
 
 
     // Sets the current chapter
-    function setChapter(id, title, due) {
+    function setChapter(id) {
         chapter.value = id
-        chapter_name.value = title
-        console.log("Due date: ", due)
-        due_date.value = due.date
-        due_days.value = due.days
+        //chapter_name.value = title
+        //console.log("Due date: ", due)
+        //due_date.value = due.date
+        //due_days.value = due.days
 
         localStorage.setItem('selectedChapter', id)
-        localStorage.setItem('selectedChapterName', title)
+        //localStorage.setItem('selectedChapterName', title)
     }
 
-    function setCards(cards_list) {
-        cards.value = cards_list
-    }
+    function setCards(cards_list) { cards.value = cards_list }
 
-    function setMoves(cards_list) {
-        moves.value = cards_list.map(card => card.id)
-    }
-
+    function setMoves(cards_list) { moves.value = cards_list.map(card => card.id) }
 
     function clear() {
         chapter.value = null
         chapter_name.value = ''
         cards.value = []
+
+        localStorage.removeItem('selectedChapter')
         /*
         additions.value = []
         edits.value = []
@@ -172,25 +172,15 @@ export const useCardStore = defineStore('cardStore', () => {
         return force_update
     }
 
-    function setDragging(id) {
-        dragging.value = id
-    }
+    function setDragging(id) { dragging.value = id }
 
-    function setScrolling(state) {
-        isScrolling.value = state
-    }
+    function setScrolling(state) { isScrolling.value = state }
 
-    function setDroppedCorrectly(state) {
-        droppedCorrectly.value = state
-    }
+    function setDroppedCorrectly(state) { droppedCorrectly.value = state }
 
-    function setDragIndex(index) {
-        drag_index.value = index
-    }
+    function setDragIndex(index) { drag_index.value = index }
 
-    function setDropUpdate() {
-        update.value += 1
-    }
+    function setDropUpdate() { update.value += 1 }
 
     
     // ----- Requests -----
@@ -211,7 +201,8 @@ export const useCardStore = defineStore('cardStore', () => {
                 const data = await response.data
 
                 setCards(data?.cards)
-                //setMoves(data?.cards)
+                chapter_name.value = data?.chapter_title
+                due.value = data?.next_due
 
                 success = true       
             } catch (error) {
@@ -263,8 +254,10 @@ export const useCardStore = defineStore('cardStore', () => {
     }
 
     return { 
-        chapter,
         getChapter,
+        getChapterName,
+        getDue,
+
         getDueDate,
         getDueDays,
         getCards,

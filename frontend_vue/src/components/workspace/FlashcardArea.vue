@@ -1,41 +1,61 @@
 <script setup>
+import Flashcard from './Flashcard.vue'
+import CarouselSlide from './CarouselSlide.vue'
+
 import { onBeforeMount, onMounted, watch, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import Flashcard from './Flashcard.vue'
 import { useCardStore } from '@/stores/CardStore.js'
 import { useToggleEditStore } from '@/stores/ToggleEditStore.js'
-
+import logout from '../helpers/logout.js'
 
 const router = useRouter()
 
 const card_store = useCardStore()
 const edit_store = useToggleEditStore()
+const empty = ref(true)
 
-const chapter_name = ref('')
-const addId = -2
 
-// Before mounting, check if chapter id is in local storage
-// If it is, check if it belongs to the selected course
-// If is does, use find function to find the chapter in chapter list and set all state variables
 
-onMounted(() => {
-  chapter_name.value = localStorage.getItem("selectedChapterName")
+const makeRequest = () => {
+    const request = card_store.getCardsRequest()
+    request.then((success) => {
+        if (!success) {
+            logout()
+            router.push('/login')
+        }
+    })
+}
+
+
+onBeforeMount(() => {
+    const chapter = Number(localStorage.getItem('selectedChapter'))
+
+    // Cards belong to a chapter so if there chapter is not selected, no card request
+    if (chapter) {
+        empty.value = false
+        
+        // If storage chapter is different from state chapter, set state chapter
+        if (chapter !== card_store.getChapter) {
+            card_store.setChapter(chapter)
+        } else { 
+            makeRequest() 
+        }
+
+    } 
 })
+
 
 // Watches for changes in selected chapter
 watch(() => card_store.getChapter, (value) => {
-    let request = card_store.getCardsRequest();
-    if (!request) {
-        router.push('/login')
-    } else {
-        chapter_name.value = localStorage.getItem('selectedChapterName')
-    }
+    if (value) empty.value = false
+
+    makeRequest()
 })
 
 
 // Opens input for editing card
-function toggleEdit() {
-  edit_store.setEdit(addId)
+function toggleEdit(id) {
+  edit_store.setEdit(id)
 }
 
 function editing() {
@@ -54,29 +74,37 @@ function goToQuiz() {
 
 <template>
     <div id="cards" class="p-5 card-width">
-        <div class="flex flex-row justify-around">
-            <h1>Next due in {{ card_store.getDueDays }} days</h1>
-            <h1 class=" font-bold text-center">{{ chapter_name }}</h1>
-            <button 
-                v-show="card_store.getChapter && card_store.getCards.length != 0" 
-                class="btn btn-primary"
-                @click="goToQuiz"
-            >Begin Quiz</button>
-        </div>
+        <h1 v-show="empty" class="text-center">Click a chapter to show flashcards!</h1>
 
 
-        <div class="card-list">
-            <Flashcard v-for="card in card_store.getCards" 
-            :id="card.id" 
-            :question="card.question" 
-            :answer="card.answer"
-            :order="card.order" />
-            <button 
-                v-show="card_store.getChapter" 
-                class="btn btn-info" 
-                @click="editing"
-            >Add or Remove Card</button>
-        </div>
+        <section v-show="!empty" class="flex flex-col gap-10">
+            <!-- Heading -->
+            <div class="flex flex-row justify-around">
+                <h1 v-show="card_store.getDue">Next due in {{ card_store.getDue?.days }} days</h1>
+                <h1 class=" font-bold text-center">{{ card_store.getChapterName }}</h1>
+                <button 
+                    v-show="card_store.getChapter && card_store.getCards.length != 0" 
+                    class="btn btn-primary"
+                    @click="goToQuiz"
+                >Begin Quiz</button>
+            </div>
+
+            <!-- Flashcards -->
+            <CarouselSlide />
+
+            <div class="card-list">
+                <Flashcard v-for="card in card_store.getCards" 
+                :id="card.id" 
+                :question="card.question" 
+                :answer="card.answer"
+                :order="card.order" />
+                <button 
+                    v-show="card_store.getChapter" 
+                    class="btn btn-info" 
+                    @click="editing"
+                >Add or Remove Card</button>
+            </div>
+        </section>
     </div>
 </template>
 
