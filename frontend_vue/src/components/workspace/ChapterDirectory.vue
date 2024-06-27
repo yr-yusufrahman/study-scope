@@ -16,19 +16,12 @@ const router = useRouter()
 const chapter_store = useChapterStore()
 const edit_store = useToggleEditStore()
 
-// State
-const course_name = ref('')
 const addId = -1
 
 
+// Reddirect to courses page if no course selected
 onBeforeMount(() => {
-    const course = Number(localStorage.getItem('selectedCourse'))
-    if (!course) {
-        router.push('/courses')
-        return
-    } else if (course !== chapter_store.getCourse) {
-        chapter_store.selectCourse(course)
-    }
+    const state_course = chapter_store.getCourse
 
     const makeRequest = () => {
         const request = chapter_store.getChaptersRequest()
@@ -39,9 +32,23 @@ onBeforeMount(() => {
             }
         })
     }
-    makeRequest()
-})
 
+    // If there is no chapter in state, check storage
+    if (state_course) {
+        makeRequest()
+        return
+    } else {
+        // Local storage is just for persisting on refresh
+        const course = Number(localStorage.getItem('selectedCourse'))
+        if (course) {
+            chapter_store.selectCourse(course)
+            makeRequest()
+            return
+        } else {
+            router.push('/courses')
+        }
+    }
+})
 
 
 // Before leaving
@@ -88,6 +95,7 @@ function saveChanges() {
                 :title="chapter.title"
                 :due="chapter.next_due"
                 :key="index"
+                :drag="false"
             />
         </div>
 

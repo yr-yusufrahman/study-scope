@@ -2,16 +2,17 @@ import { computed, ref } from "vue";
 import { defineStore } from "pinia";
 import axios from "axios";
 import makeRequest from "@/components/helpers/requestFlow"
-import refresh from "@/components/helpers/refresh"
+import equalStrings from "@/components/helpers/equalStrings"
+
 
 export const useCourseStore = defineStore("courseStore", () => {
+    let additions = [] // New courses added
+    let edits = [] // Courses edited: {id, new_title}
+    let removals = [] // Courses removed
 
+    // ----- State -----
     const courses = ref([])
-    const additions = ref([]) // New courses added
-    const edits = ref([]) // Courses edited: {id, new_title}
-    const removals = ref([]) // Courses removed
     const deleting = ref(false)
-    
 
     // ----- Getters ----- try and use computed?
     const getCourses = computed(() => courses.value)
@@ -26,7 +27,7 @@ export const useCourseStore = defineStore("courseStore", () => {
     function addCourse(title) {
         let success = false
         // Check if course already exists
-        if (!courses.value.find(course => course.title === title)) {
+        if (!courses.value.find(course => equalStrings(course.title, title))) {
             // Give course a local id for editing
             const generateId = () => {
                 let id = Math.floor(Math.random() * 1000);
@@ -43,8 +44,8 @@ export const useCourseStore = defineStore("courseStore", () => {
             courses.value.push(new_course);
             courses.value.sort((a, b) => a.title.localeCompare(b.title));
 
-            additions.value.push(new_course)
-            console.log("Course additions: ", additions.value)
+            additions.push(new_course)
+            console.log("Course additions: ", additions)
             success = true
         }
         return success
@@ -54,25 +55,25 @@ export const useCourseStore = defineStore("courseStore", () => {
     function editCourse(id, new_title) {
         let success = false
         // Check if course exists
-        if (!courses.value.find(course => course.title === new_title)) {
+        if (!courses.value.find(course => equalStrings(course.title, new_title))) {
             // Check if course is new
-            if (additions.value.find(course => course.id === id)) {
-                additions.value.forEach((item, index) => {
+            if (additions.find(course => course.id === id)) {
+                additions.forEach((item, index) => {
                     if (item.id === id) {
-                        additions.value[index].title = new_title
+                        additions[index].title = new_title
                     }
                 })
             }
 
             // Check if course has been edited before
-            else if (edits.value.find(course => course.id === id)) {
-                edits.value.forEach((item, index) => {
+            else if (edits.find(course => course.id === id)) {
+                edits.forEach((item, index) => {
                     if (item.id === id) {
-                        edits.value[index].new_title = new_title
+                        edits[index].new_title = new_title
                     }
                 })
             } else {
-                edits.value.push({id, new_title})
+                edits.push({id, new_title})
             }
 
             // Update state
@@ -82,7 +83,7 @@ export const useCourseStore = defineStore("courseStore", () => {
                 }
             })
             success = true
-            console.log("Course edits: ", edits.value)
+            console.log("Course edits: ", edits)
         }
         return success
     }
@@ -90,15 +91,15 @@ export const useCourseStore = defineStore("courseStore", () => {
     // Removes course from the list and keeps track of deletions
     function removeCourse(id) {
         // If course is new, remove it from additions
-        if (additions.value.find(course => course.id === id)) {
-            additions.value = additions.value.filter(course => course.id !== id)
+        if (additions.find(course => course.id === id)) {
+            additions = additions.filter(course => course.id !== id)
         } else {
-            removals.value.push({id: id})
+            removals.push({id: id})
         }
         // Remove course from edit list as it is going to be deleted
-        edits.value = edits.value.filter(course => course.id !== id)
+        edits = edits.filter(course => course.id !== id)
         courses.value = courses.value.filter(course => course.id !== id)
-        console.log("Course removals: ", removals.value)
+        console.log("Course removals: ", removals)
     }
 
     function setDeleting(state) { deleting.value = state }
@@ -129,12 +130,12 @@ export const useCourseStore = defineStore("courseStore", () => {
     }
 
     function saveCoursesRequest() {
-        const additions_list = additions.value
-        const edits_list = edits.value
-        const removals_list = removals.value
-    
+        //const additions_list = additions.value
+        //const edits_list = edits.value
+        //const removals_list = removals.value
+        const edited = additions.length > 0 || edits.length > 0 || removals.length > 0
         // If changes were made
-        if (additions_list.length > 0 || edits_list.length > 0 || removals_list.length > 0) {
+        if (edited) {
 
             // Save changes to courses
             const saveChanges =  async () => {
@@ -143,12 +144,16 @@ export const useCourseStore = defineStore("courseStore", () => {
                     const token = localStorage.getItem('token')
                     const headers = {"Authorization": `Bearer ${token}`}
                     const body = { 
-                        add: additions_list,
-                        edit: edits_list,
-                        remove: removals_list
+                        add: additions,
+                        edit: edits,
+                        remove: removals
                     }
 
                     await axios.post('http://127.0.0.1:8000/courses/change-courses', body, { headers })
+                    // Clear changes
+                    additions = []
+                    edits = []
+                    removals = []
                     success = true
                 } catch (error) {
                     console.log("Error saving changes: ")
@@ -189,6 +194,9 @@ export const useCourseStore = defineStore("courseStore", () => {
     }
 
     return {
+        courses,
+        deleting,
+
         getCourses,
         getDeleting,
 

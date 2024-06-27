@@ -55,9 +55,12 @@ function handleEdit(id, original_title) {
   const new_title = text_area.value
 
   if (new_title !== original_title) {
-    course_store.editCourse(id, new_title)
+    let success = course_store.editCourse(id, new_title)
+    if (success) {
+      edit_store.setEdit(id)  
+    }
   }
-  edit_store.setEdit(id)
+  
 }
 
 

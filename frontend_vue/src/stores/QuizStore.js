@@ -48,29 +48,17 @@ export const useQuizStore = defineStore('quizStore', () => {
 
 
     // Setters
-    function setLoading(loading_state) {
-        loading.value = loading_state
-    }
+    function setLoading(loading_state) { loading.value = loading_state }
 
-    function setQuiz(quiz_list) {
-        quiz.value = quiz_list
-    }
+    function setQuiz(quiz_list) { quiz.value = quiz_list }
 
-    function setHistory(history_list) {
-        history.value = history_list
-    }
+    function setHistory(history_list) { history.value = history_list }
 
-    function setTotal(quiz_total) {
-        total.value = quiz_total
-    }
+    function setTotal(quiz_total) { total.value = quiz_total }
 
-    function setMarks(mark) {
-        marks.value = mark
-    }
+    function setMarks(mark) { marks.value = mark }
 
-    function setLocation(location_state) {
-        location.value = location_state
-    }
+    function setLocation(location_state) { location.value = location_state }
 
     // Set the options for the current blank word
     function setOptions(index) {
@@ -94,9 +82,7 @@ export const useQuizStore = defineStore('quizStore', () => {
         options.value = []
     }
 
-    function setMistakes(mistakes_state) {
-        mistakes.value = mistakes_state
-    }
+    function setMistakes(mistakes_state) { mistakes.value = mistakes_state }
 
     function endQuiz() {
         clearOptions()
@@ -108,17 +94,11 @@ export const useQuizStore = defineStore('quizStore', () => {
     }
 
     // Record the user's answer for a multiple choice question: -1 unanswered, 0 incorrect, 1 correct
-    function recordMultipleChoiceAnswer(answer_type) {
-        history.value[location.value][blank_index.value] = answer_type
-    }
+    function recordMultipleChoiceAnswer(answer_type) { history.value[location.value][blank_index.value] = answer_type }
 
-    function recordRateAnswer(answer) {
-        history.value[location.value][0] = answer
-    }
+    function recordRateAnswer(answer) { history.value[location.value][0] = answer }
 
-    function setReveal(reveal_state) {
-        reveal.value = reveal_state
-    }
+    function setReveal(reveal_state) { reveal.value = reveal_state }
 
 
     // Request

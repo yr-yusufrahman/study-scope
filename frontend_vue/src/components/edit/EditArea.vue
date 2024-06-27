@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeMount, onMounted, ref } from 'vue'
+import { onBeforeMount, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { RouterLink } from 'vue-router'
 import EditCard from './EditCard.vue'
@@ -29,6 +29,11 @@ onMounted(() => {
   chapter_name.value = localStorage.getItem("selectedChapterName")
 })
 
+onUnmounted(() => {
+  edit_store.clear()
+  drag_store.clear()
+
+})
 
 function back() {
   router.push('/workspace')
@@ -43,16 +48,14 @@ function toggleEdit(addIndex) {
 
 
 // ----- Dragging functions -----
+
 // Changes the order of the cards in state when dropped in the droppable area
 function onDrop(event) {
-  //card_store.setDroppedCorrectly(true)
-  
   drag_store.setDroppedCorrectly(true)
-  const update = drag_store.setMoveCard() //card_store.setMoveCard()
+  const update = drag_store.setMoveCard()
 
   if (update) {
     // Forces DOM to update list of cards
-    //card_store.setDropUpdate()
     drag_store.setDropUpdate()
   }
   
@@ -84,9 +87,7 @@ function onDragOver(event) {
     list.value.insertBefore(draggable, afterElement)
   }
 
-  //card_store.setDragIndex(new_index)
   drag_store.setDragIndex(new_index)
-
   dragScroll(event)
 }
 
@@ -125,16 +126,13 @@ function dragScroll(event) {
 }
 
 function startAutoScroll(speed) {
-  // card_store.getScrolling
   if (drag_store.getScrolling) {
     return
   }
 
-  //card_store.setScrolling(true)
   drag_store.setScrolling(true)
 
   const scrollStep = () => {
-    // !card_store.getScrolling
     if (!drag_store.getScrolling) {
       return
     }
@@ -147,7 +145,6 @@ function startAutoScroll(speed) {
 }
 
 function stopAutoScroll() {
-  //card_store.setScrolling(false)
   drag_store.setScrolling(false)
 }
 
@@ -185,7 +182,7 @@ function saveChanges() {
     <div class="card-list gap-0 items-center card-width">
 
       <!-- add-index is add under the card -->
-      <div class=" w-full" ref="list" :key="card_store.getUpdate"> 
+      <div class=" w-full" ref="list" :key="drag_store.getUpdate"> 
 
         <TransitionGroup name="display">
           <EditCard v-for="(card, index) in card_store.getCards"

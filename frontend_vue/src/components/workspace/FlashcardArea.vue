@@ -15,7 +15,6 @@ const edit_store = useToggleEditStore()
 const empty = ref(true)
 
 
-
 const makeRequest = () => {
     const request = card_store.getCardsRequest()
     request.then((success) => {
@@ -71,39 +70,43 @@ function goToQuiz() {
 
 
 <template>
-    <div id="cards" class="p-5 card-width">
-        <h1 v-show="empty" class="text-center">Click a chapter to show flashcards!</h1>
+	<div id="cards" class="p-5 card-width">
+		<h1 v-show="empty" class="text-center">Click a chapter to show flashcards!</h1>
 
 
-        <section v-show="!empty" class="flex flex-col gap-10">
-            <!-- Heading -->
-            <div class="flex flex-row justify-around">
-                <h1 v-show="card_store.getDue">Next due in {{ card_store.getDue?.days }} days</h1>
-                <h1 class=" font-bold text-center">{{ card_store.getChapterName }}</h1>
-                <button 
-                    v-show="card_store.getChapter && card_store.getCards.length != 0" 
-                    class="btn btn-primary"
-                    @click="goToQuiz"
-                >Begin Quiz</button>
-            </div>
+		<section v-show="!empty" class="flex flex-col gap-10">
+			<!-- Heading -->
+			<div class="flex flex-row justify-around">
+				<h1 v-show="card_store.getDue?.days">Next due in {{ card_store.getDue?.days }} days</h1>
+				<h1 class=" font-bold text-center">{{ card_store.getChapterName }}</h1>
 
-            <!-- Flashcards -->
-            <CarouselSlide />
+				<div v-show="card_store.getChapter && card_store.getCards.length != 0">
 
-            <div class="card-list">
-                <Flashcard v-for="card in card_store.getCards" 
-                :id="card.id" 
-                :question="card.question" 
-                :answer="card.answer"
-                :order="card.order" />
-                <button 
-                    v-show="card_store.getChapter" 
-                    class="btn btn-info" 
-                    @click="editing"
-                >Add or Remove Card</button>
-            </div>
-        </section>
-    </div>
+					<button 
+						class="btn btn-primary"
+						@click="goToQuiz"
+					>Begin Quiz</button>                    
+				</div>
+
+			</div>
+
+			<!-- Flashcards -->
+			<CarouselSlide v-show="card_store.getChapter && card_store.getCards.length != 0" />
+
+			<div class="card-list">
+				<Flashcard v-for="card in card_store.getCards" 
+				:id="card.id" 
+				:question="card.question" 
+				:answer="card.answer"
+				:order="card.order" />
+				<button 
+					v-show="card_store.getChapter" 
+					class="btn btn-info" 
+					@click="editing"
+				>Add or Remove Card</button>
+			</div>
+		</section>
+	</div>
 </template>
 
 
