@@ -22,13 +22,19 @@ export const useChapterStore = defineStore('chapterStore', () => {
     const course = ref(null) // Selected course, use this first then localStorage. localStorage is to persist data
     const course_name = ref('')
     const chapters = ref([])
-
+    const checkModified = ref(0)
   
     // ----- Getters -----
     const getCourse = computed(() => course.value)
     const getCourseName = computed(() => course_name.value)
     const getChapters = computed(() => chapters.value)
-
+    const isModified = computed(() => {
+        checkModified.value += 1
+        const edited = additions.length > 0 || edits.length > 0 || removals.length > 0
+        const swapped = moves.length > 0 && changedOrder()
+        const changed_course = change_course.new_course_id !== null
+        return edited || swapped || changed_course
+    })
 
     // ----- Actions -----
 
@@ -168,10 +174,6 @@ export const useChapterStore = defineStore('chapterStore', () => {
     }
 
     function saveChaptersRequest() {
-        //const additions_list = additions.value
-        //const edits_list = edits.value
-        //const removals_list = removals.value
-        //const moves_list = moves.value
         const edited = additions.length > 0 || edits.length > 0 || removals.length > 0 || change_course.new_course_id !== null
         const swapped = moves.length > 0 && changedOrder()
     
@@ -221,10 +223,12 @@ export const useChapterStore = defineStore('chapterStore', () => {
         course,
         course_name,
         chapters,
+        checkModified,
 
         getCourse,
         getCourseName,
         getChapters,
+        isModified,
 
         selectCourse,
         addChapter,

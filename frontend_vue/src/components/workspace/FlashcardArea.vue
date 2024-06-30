@@ -13,6 +13,7 @@ const router = useRouter()
 const card_store = useCardStore()
 const edit_store = useToggleEditStore()
 const empty = ref(true)
+const card_list = () => card_store.getChapter && card_store.getCards.length != 0
 
 
 const makeRequest = () => {
@@ -80,7 +81,7 @@ function goToQuiz() {
 				<h1 v-show="card_store.getDue?.days">Next due in {{ card_store.getDue?.days }} days</h1>
 				<h1 class=" font-bold text-center">{{ card_store.getChapterName }}</h1>
 
-				<div v-show="card_store.getChapter && card_store.getCards.length != 0">
+				<div v-show="card_list()">
 
 					<button 
 						class="btn btn-primary"
@@ -91,7 +92,7 @@ function goToQuiz() {
 			</div>
 
 			<!-- Flashcards -->
-			<CarouselSlide v-show="card_store.getChapter && card_store.getCards.length != 0" />
+			<CarouselSlide v-show="card_list()" />
 
 			<div class="card-list">
 				<Flashcard v-for="card in card_store.getCards" 

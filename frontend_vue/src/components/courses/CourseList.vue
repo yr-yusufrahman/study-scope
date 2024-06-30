@@ -3,7 +3,7 @@ import CourseCard from './CourseCard.vue'
 import AddCourse from './AddCourse.vue'
 import ConfirmModal from '../helpers/ConfirmModal.vue'
 
-import { useRouter } from 'vue-router'
+import { useRouter, onBeforeRouteLeave } from 'vue-router'
 import { ref, onUnmounted, onMounted, onBeforeMount } from 'vue'
 import logout from '../helpers/logout.js'
 import { useCourseStore } from '../../stores/CourseStore.js'
@@ -20,13 +20,21 @@ const addId = -1
 
 // Check for logged in
 onBeforeMount(() => {
-    const request = course_store.getCoursesRequest()
-    request.then((success) => {
-        if (!success) {
-            logout()
-            router.push('/login')
-        }
-    })
+	const request = course_store.getCoursesRequest()
+	request.then((success) => {
+		if (!success) {
+			logout()
+			router.push('/login')
+		}
+	})
+})
+
+
+// Autosave changes when leaving the page
+onBeforeRouteLeave((to, from) => {
+  if (course_store.isModified) {
+    course_store.saveCoursesRequest()
+  }
 })
 
 
@@ -44,11 +52,13 @@ function toggleEdit() {
 
 // Sends changes to backend
 function saveChanges() {
-    let success = course_store.saveCoursesRequest()
-    if (!success) {
-        router.push('/login')
-    
-    }
+	const request = course_store.saveCoursesRequest()
+	request.then((success) => {
+		if (!success) {
+			logout()
+			router.push('/login')
+		}
+	})
 }
 // END saveChanges
 
@@ -75,7 +85,7 @@ function treeTest() {
         <button class="btn btn-accent" @click="saveChanges">Save Changes</button>      
         <button class="btn btn-accent" @click="treeTest">Tree Test</button>
 
-        <ConfirmModal />
+        <ConfirmModal :remove="true" />
     </div>
 </template>
 

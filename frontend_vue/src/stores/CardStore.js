@@ -17,12 +17,19 @@ export const useCardStore = defineStore('cardStore', () => {
     const chapter_name = ref('')
     const due = ref(null)
     const cards = ref([])
+    const checkModified = ref(0)
   
     // ----- Getters -----
     const getChapter = computed(() => chapter.value)
     const getChapterName = computed(() => chapter_name.value)
     const getDue = computed(() => due.value)
     const getCards = computed(() => cards.value)
+    const isModified = computed(() => {
+        checkModified.value += 1
+        const edited = additions.length > 0 || edits.length > 0 || removals.length > 0
+        const swapped = moves.length > 0 && changedOrder()
+        return edited || swapped
+    })
 
 
     // ----- Actions
@@ -125,6 +132,11 @@ export const useCardStore = defineStore('cardStore', () => {
         })
     }
 
+    function isChanged() {
+        const edited = additions.length > 0 || edits.length > 0 || removals.length > 0
+        const swapped = moves.length > 0 && changedOrder()
+        return edited || swapped
+    }
 
     // ----- Requests -----
     
@@ -207,11 +219,13 @@ export const useCardStore = defineStore('cardStore', () => {
         chapter_name,
         due,
         cards,
+        checkModified,
 
         getChapter,
         getChapterName,
         getDue,
         getCards,
+        isModified,
 
         setChapter,
         clear,

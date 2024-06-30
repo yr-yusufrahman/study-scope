@@ -1,12 +1,15 @@
 <script setup>
-import { onBeforeMount, onMounted, onUnmounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { onBeforeMount, onMounted, onBeforeUnmount, onUnmounted, ref } from 'vue'
+import { useRouter, onBeforeRouteLeave } from 'vue-router'
 import { RouterLink } from 'vue-router'
 import EditCard from './EditCard.vue'
 import AddCard from './AddCard.vue'
+import ConfirmModal from '../helpers/ConfirmModal.vue'
 import { useCardStore } from '@/stores/CardStore.js'
 import { useToggleEditStore } from '@/stores/ToggleEditStore.js'
 import { useDragStore } from '@/stores/DragStore.js'
+import logout from '../helpers/logout.js'
+import EditView from '@/views/EditView.vue'
 
 
 const router = useRouter()
@@ -15,25 +18,67 @@ const edit_store = useToggleEditStore()
 const drag_store = useDragStore()
 
 const list = ref(null)
-const chapter_name = ref('')
+const edit_modal = ref(null)
 
 
+// Redirect to courses page if no course selected
 onBeforeMount(() => {
-  if (!card_store.getChapter) {
-    router.push('/workspace')
+  const state_chapter = card_store.getChapter
+
+  const makeRequest = () => {
+    const request = card_store.getCardsRequest()
+    request.then((success) => {
+      if (!success) {
+        logout()
+        router.push('/login')
+      }
+    })
+  }
+
+  // If there is no chapter in state, check storage
+  if (!state_chapter) {
+    // Local storage is just for persisting on refresh
+    const chapter = Number(localStorage.getItem('selectedChapter'))
+    if (chapter) {
+      card_store.setChapter(chapter)
+      makeRequest()
+      return
+    } else {
+      router.push('/workspace')
+    }
   }
 })
 
 
-onMounted(() => {
-  chapter_name.value = localStorage.getItem("selectedChapterName")
+// Autosave changes when leaving the page
+onBeforeRouteLeave((to, from) => {
+  if (card_store.isModified) {
+    card_store.saveCardsRequest()
+  }
 })
+
+
+/*
+// Check if the user is leaving the page with unsaved changes
+onBeforeRouteLeave((to, from) => {
+  if (card_store.isModified) {
+    if (edit_store.getSaveModal !== 2) {
+      const save = edit_modal.value.querySelector("#save_modal")
+      save.checked = true
+      edit_store.setSaveModal(2) // 2 is to save card changes
+      edit_store.setRedirect(to.path)
+      return false
+    }
+  }
+})
+*/
+
 
 onUnmounted(() => {
   edit_store.clear()
   drag_store.clear()
-
 })
+
 
 function back() {
   router.push('/workspace')
@@ -154,10 +199,13 @@ function stopAutoScroll() {
 
 // Sends changes to backend
 function saveChanges() {
-  let success = card_store.saveCardsRequest()
-  if (!success) {
-    router.push('/login')
-  }
+  const request = card_store.saveCardsRequest()
+  request.then((success) => {
+    if (!success) {
+      logout()
+      router.push('/login')
+    }
+  })
 }
 // END saveChanges
 </script>
@@ -171,7 +219,7 @@ function saveChanges() {
     @dragenter.prevent
     @dragleave.prevent
   >
-    <h1 class="font-bold">{{ chapter_name }}</h1>
+    <h1 class="font-bold">{{ card_store.getChapterName }}</h1>
 
     <div class=" w-full pb-1 flex flex-row">
       <button @click="back" class="btn btn-ghost">Back</button>
@@ -182,7 +230,7 @@ function saveChanges() {
     <div class="card-list gap-0 items-center card-width">
 
       <!-- add-index is add under the card -->
-      <div class=" w-full" ref="list" :key="drag_store.getUpdate"> 
+      <section class=" w-full" ref="list" :key="drag_store.getUpdate"> 
 
         <TransitionGroup name="display">
           <EditCard v-for="(card, index) in card_store.getCards"
@@ -195,8 +243,9 @@ function saveChanges() {
             class=" w-full"
           />
         </TransitionGroup>
-      </div>
+      </section>
 
+      <!-- Add card -->
       <Transition>
         <div class="w-full" v-show="edit_store.isEdit(card_store.getCards.length-1)">
           <AddCard class="w-full" :add-index="card_store.getCards.length-1" />
@@ -209,6 +258,10 @@ function saveChanges() {
         class="btn btn-info"
         @click="toggleEdit(card_store.getCards.length-1)"
       >Add Card</button>
+    </div>
+
+    <div ref="edit_modal">
+      <ConfirmModal :remove="false" />
     </div>
   </div>
 </template>

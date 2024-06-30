@@ -48,8 +48,8 @@ function handleDelete(id) {
 function handleEdit(id, original_question, original_answer) {
     const edit_question = new_question.value.value
     const edit_answer = new_answer.value.value
-
     if (edit_question !== original_question || edit_answer !== original_answer) {
+        console.log("Edted card.")
         card_store.editCard(id, edit_question, edit_answer)
     }
 }

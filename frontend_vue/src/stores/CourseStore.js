@@ -13,10 +13,16 @@ export const useCourseStore = defineStore("courseStore", () => {
     // ----- State -----
     const courses = ref([])
     const deleting = ref(false)
+    const checkModified = ref(0)
 
     // ----- Getters ----- try and use computed?
     const getCourses = computed(() => courses.value)
     const getDeleting = computed(() => deleting.value)
+    const isModified = computed(() => {
+        checkModified.value += 1
+        const edited = additions.length > 0 || edits.length > 0 || removals.length > 0
+        return edited
+    })
 
     // ----- Actions -----
 
@@ -130,9 +136,6 @@ export const useCourseStore = defineStore("courseStore", () => {
     }
 
     function saveCoursesRequest() {
-        //const additions_list = additions.value
-        //const edits_list = edits.value
-        //const removals_list = removals.value
         const edited = additions.length > 0 || edits.length > 0 || removals.length > 0
         // If changes were made
         if (edited) {
@@ -196,9 +199,11 @@ export const useCourseStore = defineStore("courseStore", () => {
     return {
         courses,
         deleting,
+        checkModified,
 
         getCourses,
         getDeleting,
+        isModified,
 
         setCourses,
         addCourse,
