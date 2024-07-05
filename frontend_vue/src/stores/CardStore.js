@@ -132,12 +132,6 @@ export const useCardStore = defineStore('cardStore', () => {
         })
     }
 
-    function isChanged() {
-        const edited = additions.length > 0 || edits.length > 0 || removals.length > 0
-        const swapped = moves.length > 0 && changedOrder()
-        return edited || swapped
-    }
-
     // ----- Requests -----
     
     // Get cards for the selected chapter

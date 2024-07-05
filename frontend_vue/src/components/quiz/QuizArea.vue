@@ -28,21 +28,29 @@ onBeforeMount(() => {
     const chapter = card_store.getChapter
     if (!chapter) {
         router.push('/workspace')
-    } 
-})
-
-onMounted(() => {
-    let request = quiz_store.getQuizRequest()
-    if (!request) {
-        router.push('/login')
-    } else {
-        // Prevent the user from leaving the quiz by refreshing the page
-        window.addEventListener('beforeunload', refreshHandler)
     }
+
+    // Check if quiz is successfully loaded
+	const request = quiz_store.getQuizRequest()
+	request.then((success) => {
+		if (!success) {
+			router.push('/workspace')
+		} else {
+            quiz_store.setLoading(false)
+        }
+	})
 })
 
+// Add event listener to prevent user from refreshing the page
+onMounted(() => {
+    // Prevent the user from leaving the quiz by refreshing the page
+    window.addEventListener('beforeunload', refreshHandler)
+})
+
+// Remove event listener when the component is unmounted
 onBeforeUnmount(() => {
     window.removeEventListener('beforeunload', refreshHandler)
+    quiz_store.setLoading(true)
 })
 
 // Check if the user is leaving the quiz

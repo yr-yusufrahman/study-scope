@@ -27,31 +27,6 @@ def defaultModelParams():
     return params
 
 
-# Make a prediction by building a model from the parameters
-def queryModelOld(params, input):
-    # Standardize the new data
-    scaler = StandardScaler()
-    scaled_input = scaler.fit_transform(input)
-
-    # Create a Linear Regression model
-    model = LinearRegression()
-    model.coef_ = np.array(params['coef'])
-    model.intercept_ = np.array(params['intercept'])
-
-    # Make prediction
-    prediction = model.predict(scaled_input)
-
-    return prediction
-
-
-def queryModel(predictor_obj, input):
-    model_serialized = predictor_obj.tree
-    model = pickle.loads(model_serialized)
-
-    # Make prediction
-    prediction = model.predict(input)
-    return prediction
-
 
 # Default User tree - 3 features is sufficient - maybe 1-hot encode course for the tree
 def defaultTree():

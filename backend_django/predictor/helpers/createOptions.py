@@ -11,13 +11,15 @@ def getSynsets(keywords, blanked):
     sets = []
     format_blanked = [] # Checks which blanked keywords have synsets, they may need to be splitted
     for keyword in keywords:
-        adjusted = keyword.replace(" ", "_") # Synsets only recognize underscores
-        synsets = wn.synsets(adjusted)
+        formatted_keyword = keyword.replace(" ", "_") # Synsets only recognize underscores
+        synsets = wn.synsets(formatted_keyword)
+
         if synsets:
             sets.append(synsets)
             if keyword in blanked:
                 format_blanked.append(keyword)
         else:
+            # If no synsets are found for the key term, split into separate words, search for synsets
             format = keyword.split()
             for word in format:
                 synsets = wn.synsets(word)
@@ -137,7 +139,9 @@ def similarity(synsets1, synsets2):
 def prioritise(synsets, blanked):
     priority = []
     other = []
-    for ss in synsets:
+    for ss in synsets: # One of the ss is a list of synsets but the others are single synsets
+        #print(f"Synset: {ss}")
+        #print(f"Name: {ss.name()},\n")
         name = ss.name().split('.')[0]
         for blank in blanked:
             if (name in blank) and (ss not in priority):
@@ -148,6 +152,7 @@ def prioritise(synsets, blanked):
             other.append(ss)
 
     return priority, other
+# END prioritise
 
 
 # Returns a list of possible answer options by randomly choosing related words
@@ -250,23 +255,30 @@ def getOptions(blanked, priority, extra, NUMBER_OPTIONS):
 
 # Generates MCQ options to choose from based on keywords and blanked words within the answer
 def generateOptions(keywords, blanked):
-    all_sets, format_blanked = getSynsets(keywords, blanked)
-
-    if len(all_sets) == 0:
-        return []
+    # Get a collection of synsets for each keyword and format blanked words - list of lists
+    all_sets_collection, format_blanked = getSynsets(keywords, blanked)
     
-    elif len(all_sets) > 1:
-        synsets1 = all_sets[0] # Has 3 ss
-        synsets2 = all_sets[1] # 2 ss
+    # If no synsets are found, no options can be generated
+    if len(all_sets_collection) == 0:
+        return []
+
+    if len(all_sets_collection) == 1:
+        # If there is 1 collection of synsets, use it
+        merged = all_sets_collection[0]
+
+    # If there are collections of synsets, compare them and merge them, starting with the first 2
+    else:
+        synsets1 = all_sets_collection[0]
+        synsets2 = all_sets_collection[1]
+
         merged = similarity(synsets1, synsets2)
 
-        # merged is already filtered, you are just adding to it by examining the next synset
-        for i in range(2, len(all_sets)):
-            new_set = all_sets[i]
+        # Examine remaining collections of synsets and merge them with the merged collection
+        for i in range(2, len(all_sets_collection)):
+            new_set = all_sets_collection[i]
             merged = similarity(merged, new_set)
-    else:
-        merged = all_sets
-    #print(f'{merged}\n')
+
+    # Prioritise synsets based on blanked words and separate the rest
     priority, extra = prioritise(merged, format_blanked)
 
     options = []

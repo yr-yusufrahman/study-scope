@@ -49,15 +49,10 @@ export const useQuizStore = defineStore('quizStore', () => {
 
     // Setters
     function setLoading(loading_state) { loading.value = loading_state }
-
     function setQuiz(quiz_list) { quiz.value = quiz_list }
-
     function setHistory(history_list) { history.value = history_list }
-
     function setTotal(quiz_total) { total.value = quiz_total }
-
     function setMarks(mark) { marks.value = mark }
-
     function setLocation(location_state) { location.value = location_state }
 
     // Set the options for the current blank word
@@ -95,9 +90,7 @@ export const useQuizStore = defineStore('quizStore', () => {
 
     // Record the user's answer for a multiple choice question: -1 unanswered, 0 incorrect, 1 correct
     function recordMultipleChoiceAnswer(answer_type) { history.value[location.value][blank_index.value] = answer_type }
-
     function recordRateAnswer(answer) { history.value[location.value][0] = answer }
-
     function setReveal(reveal_state) { reveal.value = reveal_state }
 
 
@@ -120,27 +113,16 @@ export const useQuizStore = defineStore('quizStore', () => {
                 setQuiz(data.quiz_content)
                 setTotal(data.total)
                 setHistory(data.history)
+
+                loading.value = false
+                success = true
             } catch (error) {
                 console.log("Error getting quiz for chapter: ")
-            } finally {
-                loading.value = false
             }
             return success
         }
 
-        let success = getQuiz()
-        if (!success) {
-
-            // Refresh token
-            let refreshed = refresh()
-            if (refreshed) {
-                success = getQuiz()
-            }
-            else {
-                // Failed to refresh token
-                success = false
-            }
-        }
+        let success = makeRequest(getQuiz)
         return success
     }
 
@@ -179,6 +161,17 @@ export const useQuizStore = defineStore('quizStore', () => {
     }
 
     return {
+        loading,
+        quiz,
+        history,
+        location,
+        blank_index,
+        options,
+        mistakes,
+        total,
+        marks,
+        reveal,
+
         getLoading,
         getQuiz,
         getTotal,
