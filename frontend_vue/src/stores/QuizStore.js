@@ -1,6 +1,6 @@
 import { computed, ref } from "vue"
 import { defineStore } from "pinia"
-import axios from "axios"
+import axios, { all } from "axios"
 import makeRequest from "@/components/helpers/requestFlow"
 import refresh from "@/components/helpers/refresh"
 import { useChapterStore } from "./ChapterStore"
@@ -49,6 +49,14 @@ export const useQuizStore = defineStore('quizStore', () => {
     const getBlankAnswer = computed(() => quiz.value[location.value]?.blanked[blank_index.value]) // answer with blanka
     const getMistakes = computed(() => mistakes.value) // number of mistakes made by the user
     const isAnswered = computed(() => history.value[location.value]) // has the user answered the current question?
+    const allChoicesAnswered = computed(() => {
+        const question_choices = history.value[location.value]
+        let all_answered = true
+        if (question_choices && getType.value === 1) {
+            all_answered = question_choices.every(choice => choice !== -1)
+        }
+        return all_answered
+    })
     const getReveal = computed(() => reveal.value) // has the user revealed the answer?
     
     // MCQ Options for the current blank word
@@ -67,6 +75,8 @@ export const useQuizStore = defineStore('quizStore', () => {
     function setTotal(quiz_total) { total.value = quiz_total }
     function setMarks(mark) { marks.value = mark }
     function setLocation(location_state) { location.value = location_state }
+
+    function setBlankIndex(index) { blank_index.value = index }
 
     // Set the options for the current blank word
     function setOptions(index) {
@@ -102,7 +112,7 @@ export const useQuizStore = defineStore('quizStore', () => {
     }
 
     // Record the user's answer for a multiple choice question: -1 unanswered, 0 incorrect, 1 correct
-    function recordMultipleChoiceAnswer(answer_type) { history.value[location.value][blank_index.value] = answer_type }
+    function recordChoiceAnswer(answer_type) { history.value[location.value][blank_index.value] = answer_type }
     function recordRateAnswer(answer) { history.value[location.value][0] = answer }
     function setReveal(reveal_state) { reveal.value = reveal_state }
 
@@ -200,6 +210,7 @@ export const useQuizStore = defineStore('quizStore', () => {
         getMistakes,
         getHistory,
         isAnswered,
+        allChoicesAnswered,
         getReveal,
 
         setLoading,
@@ -209,7 +220,9 @@ export const useQuizStore = defineStore('quizStore', () => {
         clearOptions,
         setMistakes,
         endQuiz,
-        recordMultipleChoiceAnswer,
+        recordChoiceAnswer,
+        setBlankIndex,
+        //recordMultipleChoiceAnswer,
         recordRateAnswer,
         setReveal,
 

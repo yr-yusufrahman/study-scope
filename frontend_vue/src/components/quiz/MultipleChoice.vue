@@ -62,7 +62,7 @@ function selectOption(option, index) {
     // If the option is the correct answer
     if (option === quiz_store.getBlankAnswer) {
         quiz_store.setMarks(quiz_store.getMarks + 1)
-        quiz_store.recordMultipleChoiceAnswer(1)
+        quiz_store.recordChoiceAnswer(1)
         clearQuestion()
     } else {
         // Incorrect answer
@@ -72,7 +72,7 @@ function selectOption(option, index) {
         // Check if all 3 incorrect options have been chosen
         if (fullyAttempted()) {
             quiz_store.setMarks(quiz_store.getMarks + 1)
-            quiz_store.recordMultipleChoiceAnswer(0)
+            quiz_store.recordChoiceAnswer(0)
             clearQuestion()
         }
     }
