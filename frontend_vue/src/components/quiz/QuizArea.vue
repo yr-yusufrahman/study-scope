@@ -4,6 +4,7 @@ import { useRouter, onBeforeRouteLeave } from 'vue-router'
 
 // Components
 import MultipleChoice from './MultipleChoice.vue'
+import FillBlanks from './FillBlanks.vue'
 import RevealAnswer from './RevealAnswer.vue'
 import FinishModal from './FinishModal.vue'
 
@@ -128,8 +129,9 @@ function navigate(new_location) {
 
         <!-- Question/answer area -->
         <div class="w-full h-full">
-            <MultipleChoice v-show="quiz_store.isMultipleChoice" />
-            <RevealAnswer v-show="!quiz_store.isMultipleChoice" />
+            <MultipleChoice v-show="quiz_store.getType === 0" />
+            <FillBlanks v-show="quiz_store.getType === 1" />
+            <RevealAnswer v-show="quiz_store.getType === 2" />
         </div>
 
         <!-- Navigation buttons -->

@@ -155,39 +155,6 @@ def prioritise(synsets, blanked):
 # END prioritise
 
 
-# Returns a list of possible answer options by randomly choosing related words
-def getOptionsOld(blanked, priority, extra, NUMBER_OPTIONS):
-    options = []
-    while len(options) < NUMBER_OPTIONS:
-        synsets = priority
-
-        # Biased coin toss
-        collection = random.randint(1, 10)
-        if (collection > 7):
-            synsets = extra
-
-        set = random.randint(0, len(synsets)-1)
-        synset = synsets[set]
-        hyponyms_list = getHyponyms(synset)    
-        
-        # Randomly look for hyponyms first then synonyms
-        if hyponyms_list:
-            chosen = random.randint(0, len(hyponyms_list)-1)
-            hyponym = hyponyms_list[chosen].replace("_", " ")
-            if hyponym not in options and hyponym not in blanked:
-                options.append(hyponym)
-        else:
-            synonyms_list = synset.lemma_names()
-            if synonyms_list:
-                chosen = random.randint(0, len(synonyms_list)-1)
-                synonym = synonyms_list[chosen].replace("_", " ")
-                if synonym not in options and synonym not in blanked:
-                    options.append(synonym)
-    
-    return options
-# END getOptions
-
-
 # This might be less efficient but it allows for error checking incase there are not enough options generated
 # Returns a list of possible answer options by randomly choosing related words - finds all possible words first
 def getOptions(blanked, priority, extra, NUMBER_OPTIONS):
@@ -251,7 +218,7 @@ def getOptions(blanked, priority, extra, NUMBER_OPTIONS):
     return options
 # END getOptions
                    
-                    
+            
 
 # Generates MCQ options to choose from based on keywords and blanked words within the answer
 def generateOptions(keywords, blanked):

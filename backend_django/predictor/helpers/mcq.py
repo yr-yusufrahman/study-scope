@@ -42,15 +42,13 @@ def createQuiz(cards):
     
     for card in cards:
         keywords, blanked_words = getBlanks(rake, card['answer'])
-        #print(f"Question: {card['question']}, Keywords: {keywords}")
         # If keywords are found in the answer, generate options
         if keywords:
             #question_words = extractKeywords(rake, card['question'])
-            all_keywords = keywords 
-            #+ question_words           
+            all_keywords = keywords
+            #+ question_words
 
             choices = generateOptions(all_keywords, blanked_words)
-
             if len(choices) == 0:
                 card['multiple_choice'] = False
                 total += 1
@@ -63,6 +61,8 @@ def createQuiz(cards):
                 history.append([-1]*len(blanked_words))
         else:
             card['multiple_choice'] = False
+            total += 1
+            history.append([-1])
 
         quiz_content.append(card)
 

@@ -10,7 +10,7 @@ const selected_options = ref([false, false, false, false]) // Disable option but
 const reload = ref(0)
 
 onBeforeUpdate(() => {
-    if (quiz_store.isMultipleChoice) {
+    if (quiz_store.getType === 0) {
         blanked_answer.value = splitTextIntoParts()
         reload.value = quiz_store.getHistory.length
     }
@@ -103,7 +103,7 @@ function clearQuestion() {
 <template>
     <div class="h-full w-full flex flex-col items-center justify-center gap-6">
         <!-- Multiple choice blanked answer -->
-        <div v-show="quiz_store.isMultipleChoice" class="w-4/5" >
+        <div v-show="quiz_store.getType === 0" class="w-4/5" >
             <p v-if="!quiz_store.isAnswered"></p>
             <p v-else>
                 <span v-for="(part, index) in blanked_answer" :key="index">

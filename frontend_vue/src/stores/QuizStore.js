@@ -29,7 +29,20 @@ export const useQuizStore = defineStore('quizStore', () => {
     const getTotal = computed(() => total.value) // total number of potential answers in the quiz
     const getMarks = computed(() => marks.value) // user's total marks
     const getLocation = computed(() => location.value) // current question index
-    const isMultipleChoice = computed(() => quiz.value[location.value]?.multiple_choice) // is current question an mcq
+
+    // Get the type of the current question
+    const getType = computed(() => {
+        const type = quiz.value[location.value]?.type
+        switch (type) {
+            case "multiple_choice":
+                return 0
+            case "fill_in_blank":
+                return 1
+            case "reveal":
+                return 2
+        }
+    })
+
     const getQuestion = computed(() => quiz.value[location.value]?.question) // current question
     const getAnswer = computed(() => quiz.value[location.value]?.answer) // current answer
     const getBlanks = computed(() => quiz.value[location.value]?.blanked) // current blanked words for MCQ
@@ -177,7 +190,8 @@ export const useQuizStore = defineStore('quizStore', () => {
         getTotal,
         getMarks,
         getLocation,
-        isMultipleChoice,
+        //isMultipleChoice,
+        getType,
         getQuestion,
         getAnswer,
         getBlanks,

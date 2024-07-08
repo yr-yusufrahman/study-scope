@@ -13,7 +13,8 @@ import numpy as np
 
 from predictor.models import Revision, Predictor
 from courses.models import Course, Chapter, Card
-from predictor.helpers.mcq import createQuiz
+#from predictor.helpers.mcq import createQuiz
+from predictor.helpers.createQuiz import createQuiz
 #from predictor.helpers.loadModel import queryModel
 from predictor.helpers.makePrediction import makePrediction
 

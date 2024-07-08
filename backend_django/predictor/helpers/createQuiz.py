@@ -1,0 +1,151 @@
+from predictor.helpers.blankWords import multipleBlank
+from predictor.helpers.createOptions import generateOptions
+
+from rake_nltk import Rake
+import random
+
+
+# First, iterate through content and for each question/answer:
+# Extract keywords, blank some words, generate options
+
+
+# Gets letter-only keywords from a given text
+def extractKeywords(rake, text):
+    rake.extract_keywords_from_text(text)
+    extracted_words = list(set(rake.get_ranked_phrases()))
+
+    # Remove symbols, numbers and leading/trailing spaces from keywords
+    valid_words = ["".join(c for c in word if c.isalpha() or c.isspace()) for word in extracted_words if any(c.isalpha() or c.isspace() for c in word)]
+    keywords = [word.strip() for word in valid_words]
+
+    return keywords
+
+
+# Finds keywords in a answer and chooses which words are blanked
+def getBlanks(rake, answer):
+    valid_words = extractKeywords(rake, answer)
+
+    # Dictionary to store the position keywords by appearence order in the text
+    keyword_positions = {keyword: answer.find(keyword) for keyword in valid_words}
+    sorted_keywords = sorted(valid_words, key=lambda x: keyword_positions[x])
+
+    # Return a list of blanked words from 
+    blanked = multipleBlank(answer, sorted_keywords)
+    return sorted_keywords, blanked
+
+
+# Returns a tuple with the multiple choice question, total mark and input history template
+def createChoiceQuestion(card, keywords, blanked_words):
+    choices = generateOptions(keywords, blanked_words)
+    card['type'] = 'multiple_choice'
+    card['blanked'] = blanked_words
+    card['options'] = choices
+
+    # If no options, break the blanked phrases into individual words (verbs, nouns)
+    # If still no options, change question to be either fill in blank or reveal - can do coin toss
+    if len(choices) == 0:
+        change_type = random.choices([1, 2], weights=[0.5, 0.5])[0]
+        if change_type == 1:
+            return createFillQuestion(card, blanked_words)
+        else:
+            return createRevealQuestion(card)
+
+    question_total = len(blanked_words)
+    history = [-1]*len(blanked_words)
+    return card, question_total, history
+
+
+# Returns a tuple with the fill in blank question, total mark and input history template
+def createFillQuestion(card, blanked_words):   
+    adjusted_blanks = []
+
+    # Check if each blanked phrase is a single word (verbs, nouns)
+    for word in blanked_words:
+        split = word.split()
+        if len(split) > 1:
+            # Ideally, we would want to choose a word that is a noun or verb
+            chosen = random.choice(split)
+            adjusted_blanks.append(chosen)
+        else:
+            adjusted_blanks.append(word)
+
+    card['type'] = 'fill_in_blank'        
+    card['blanked'] = adjusted_blanks
+    card['options'] = []
+
+    question_total = len(blanked_words)
+    history = [-1]*len(blanked_words)
+    return card, question_total, history
+
+
+def createRevealQuestion(card):
+    card['type'] = 'reveal'
+    card['blanked'] = []
+    card['options'] = []
+
+    question_total = 1
+    history = [-1]
+    return card, question_total, history
+
+
+# Returns a the quiz as an array when given an array of card objects
+def createQuiz(cards):
+    rake = Rake()
+    quiz_content = []
+    total = 0
+    history = [] # Template for recording user answers: -1 for unanswered, 0 for wrong, 1 for correct
+    
+    for card in cards:
+        keywords, blanked_words = getBlanks(rake, card['answer']) # Only blank verbs, nouns or phrases
+        # If keywords are found in the answer, generate options
+        #print(f"Blanked words: {blanked_words}\n")
+        if keywords:
+            #question_words = extractKeywords(rake, card['question'])
+            all_keywords = keywords
+            #+ question_words           
+
+            # Choose the question type - 0: MCQ, 1: Fill in blank, 2: Reveal
+            question_type = random.choices([0, 1, 2], weights=[0.4, 0.3, 0.3])[0]
+            question = []
+            match question_type:
+                # MCQ
+                case 0:
+                    question = createChoiceQuestion(card, all_keywords, blanked_words)
+                    #card = question[0]
+                    #total += question[1]
+                    #history.append(question[2])
+                    #total += len(blanked_words)
+                    #history.append([-1]*len(blanked_words))
+                    
+                # Fill in blank
+                case 1:
+                    question = createFillQuestion(card, blanked_words)
+                    #card = question[0]
+                    #total += question[1]
+                    #history.append(question[2])
+                # Reveal
+                case 2:
+                    question = createRevealQuestion(card)
+                    #card['type'] = 'reveal'
+                    #total += 1
+                    #history.append([-1])
+            
+            card = question[0]
+            total += question[1]
+            history.append(question[2])
+    
+        else:
+            question = createRevealQuestion(card)
+            card = question[0]
+            total += question[1]
+            history.append(question[2])
+
+        quiz_content.append(card)
+
+    quiz = {
+        'quiz_content': quiz_content,
+        'total': total,
+        'history': history,
+    }
+    return quiz
+
