@@ -25,9 +25,12 @@ function navigate(forward) {
 
 <template>
     <section>
-        <div class=" shadow-lg bg-white rounded-md min-h-20 content-center" :class="{'border-teal-300 border-4': show}">
-            <button v-show="!show" class=" w-full min-h-20" @click="toggle">{{ card_store.getCards[current]?.question }}</button>
-            <button v-show="show" class=" w-full min-h-20" @click="toggle">{{ card_store.getCards[current]?.answer }}</button>
+        <div 
+            class=" shadow-lg bg-white rounded-md min-h-20 content-center" 
+            :class="{'border-teal-300 border-4': show, 'border-white border-4': !show}"
+        >
+            <button v-show="!show" class=" w-full min-h-60" @click="toggle">{{ card_store.getCards[current]?.question }}</button>
+            <button v-show="show" class=" w-full min-h-60" @click="toggle">{{ card_store.getCards[current]?.answer }}</button>
         </div>
         <div class="flex flex-row items-center justify-center pt-4 gap-4">
             <button 

@@ -98,7 +98,6 @@ def createQuiz(cards):
     for card in cards:
         keywords, blanked_words = getBlanks(rake, card['answer']) # Only blank verbs, nouns or phrases
         # If keywords are found in the answer, generate options
-        #print(f"Blanked words: {blanked_words}\n")
         if keywords:
             #question_words = extractKeywords(rake, card['question'])
             all_keywords = keywords
@@ -111,24 +110,14 @@ def createQuiz(cards):
                 # MCQ
                 case 0:
                     question = createChoiceQuestion(card, all_keywords, blanked_words)
-                    #card = question[0]
-                    #total += question[1]
-                    #history.append(question[2])
-                    #total += len(blanked_words)
-                    #history.append([-1]*len(blanked_words))
-                    
+            
                 # Fill in blank
                 case 1:
                     question = createFillQuestion(card, blanked_words)
-                    #card = question[0]
-                    #total += question[1]
-                    #history.append(question[2])
+
                 # Reveal
                 case 2:
                     question = createRevealQuestion(card)
-                    #card['type'] = 'reveal'
-                    #total += 1
-                    #history.append([-1])
             
             card = question[0]
             total += question[1]

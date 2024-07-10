@@ -19,29 +19,30 @@ onBeforeUpdate(() => {
 // Split the answer into parts to distinguish between blanked words and other text
 function splitTextIntoParts() {
 	let parts = []
-	let remainingString = quiz_store.getAnswer
+	let remaining_string = quiz_store.getAnswer
 	let wordsToBlank = quiz_store.getBlanks
 
 	// Examine each word to be blanked
 	wordsToBlank?.forEach((word, index) => {
-		const wordIndex = remainingString.indexOf(word)
+		const formatted_string = remaining_string.toLowerCase()
+		const wordIndex = formatted_string.indexOf(word)
 
 		// If the word is found in the answer string
 		if (wordIndex !== -1) {
 			// Add the text before the word
 			if (wordIndex > 0) {
-				parts.push({ text: remainingString.substring(0, wordIndex), isWord: false })
+				parts.push({ text: remaining_string.substring(0, wordIndex), isWord: false })
 			}
 
 			// Add the blanked word
 			parts.push({ text: word, isWord: true, index: index})
-			remainingString = remainingString.substring(wordIndex + word.length)
+			remaining_string = remaining_string.substring(wordIndex + word.length)
 		}
 	})
 
 	// Add the remaining text after the last blanked word
-	if (remainingString.length > 0) {
-		parts.push({ text: remainingString, isWord: false })
+	if (remaining_string.length > 0) {
+		parts.push({ text: remaining_string, isWord: false })
 	}
 
 	return parts
@@ -83,6 +84,7 @@ function roughEqualStrings(a, b) {
 	const distance = matrix[b.length][a.length]
   return distance <= 2
 }
+
 
 // Input answer for the blanked word
 function inputAnswer(blank_index, word_index, event) {
