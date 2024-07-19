@@ -37,7 +37,7 @@ function splitTextIntoParts() {
 
             // Add the blanked word
             parts.push({ text: word, isWord: true, index: index})
-            remainingString = remaining_string.substring(wordIndex + word.length)
+            remaining_string = remaining_string.substring(wordIndex + word.length)
         }
     })
 

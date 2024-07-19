@@ -33,7 +33,7 @@ function selectRating(selected) {
 	const mistakeValue = () => {
 		let mistakes = 0
 		const words = quiz_store.getAnswer.split(' ').length
-		console.log(words)
+		//console.log(words)
 		if (words < 16) {
 			mistakes = 1
 		} else if (words < 24) {

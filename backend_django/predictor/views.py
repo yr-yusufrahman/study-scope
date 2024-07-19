@@ -28,11 +28,14 @@ def getQuiz(request):
         # Get the chapter id
         #chapter_id = request.data.get('chapter_id')
         #cards = Card.objects.filter(chapter=chapter_id).order_by('order')
+
+        # Get course name
+        course_name = request.data.get('course_name')
         cards = request.data.get('cards')
         shuffle(cards)
 
         # Create a quiz with the cards - Array of dictionaries {mutliple_choice, blanked, options}
-        quiz = createQuiz(cards) # Returns {quiz_content, total, history}
+        quiz = createQuiz(cards, course_name) # Returns {quiz_content, total, history}
 
         return Response(quiz, status=status.HTTP_200_OK)
     

@@ -126,7 +126,8 @@ export const useQuizStore = defineStore('quizStore', () => {
                 const token = localStorage.getItem('token')
                 const headers = {"Authorization": `Bearer ${token}`}
                 const body = {
-                    cards: card_store.getCards,
+                    course_name: chapter_store.getCourseName,
+                    cards: card_store.getCards
                     //chapter_id: card_store.getChapter
                 }
 

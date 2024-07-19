@@ -59,7 +59,7 @@ def multipleBlank(answer, ranked):
 
 # Returns a list of blanked keywords after extracting all keywords
 def keywords(answers):
-    rake = Rake()
+    rake = Rake(max_length=2, include_repeated_phrases=False)
     extracted = []
     for answer in answers:
         rake.extract_keywords_from_text(answer)

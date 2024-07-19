@@ -1,5 +1,6 @@
 from predictor.helpers.blankWords import multipleBlank
-from predictor.helpers.createOptions import generateOptions
+from predictor.helpers.quiz.choices import generateOptions
+from predictor.helpers.createOptions import generateOptions as generateOptionsOld
 
 from rake_nltk import Rake
 import random
@@ -35,23 +36,30 @@ def getBlanks(rake, answer):
 
 
 # Returns a tuple with the multiple choice question, total mark and input history template
-def createChoiceQuestion(card, keywords, blanked_words):
-    choices = generateOptions(keywords, blanked_words)
-    card['type'] = 'multiple_choice'
-    card['blanked'] = blanked_words
-    card['options'] = choices
+def createChoiceQuestion(card, keywords, blanked_words, course_name):
+    #choices = generateOptionsOld(keywords, blanked_words)
+    NUMBER_OF_CHOICES = 3
+    choices, adjusted_blanks, blanks_changed = generateOptions(blanked_words, course_name, keywords, NUMBER_OF_CHOICES)
 
-    # If no options, break the blanked phrases into individual words (verbs, nouns)
-    # If still no options, change question to be either fill in blank or reveal - can do coin toss
-    if len(choices) == 0:
-        change_type = random.choices([1, 2], weights=[0.5, 0.5])[0]
+    # If no options are found for any blanked words, change question type
+    if len(adjusted_blanks) == 0:
+        change_type = random.randint(1, 2)
         if change_type == 1:
             return createFillQuestion(card, blanked_words)
         else:
             return createRevealQuestion(card)
+    
+    # If some blanked words were removed
+    elif blanks_changed:
+        card['blanked'] = adjusted_blanks
+    else:
+        card['blanked'] = blanked_words
 
-    question_total = len(blanked_words)
-    history = [-1]*len(blanked_words)
+    card['type'] = 'multiple_choice'
+    card['options'] = choices
+
+    question_total = len(card.get('blanked'))
+    history = [-1]*len(card.get('blanked'))
     return card, question_total, history
 
 
@@ -89,7 +97,7 @@ def createRevealQuestion(card):
 
 
 # Returns a the quiz as an array when given an array of card objects
-def createQuiz(cards):
+def createQuiz(cards, course_name):
     rake = Rake()
     quiz_content = []
     total = 0
@@ -104,12 +112,13 @@ def createQuiz(cards):
             #+ question_words           
 
             # Choose the question type - 0: MCQ, 1: Fill in blank, 2: Reveal
-            question_type = random.choices([0, 1, 2], weights=[0.4, 0.3, 0.3])[0]
+            question_type = 0
+            #question_type = random.choices([0, 1, 2], weights=[0.4, 0.3, 0.3])[0]
             question = []
             match question_type:
                 # MCQ
                 case 0:
-                    question = createChoiceQuestion(card, all_keywords, blanked_words)
+                    question = createChoiceQuestion(card, all_keywords, blanked_words, course_name)
             
                 # Fill in blank
                 case 1:
