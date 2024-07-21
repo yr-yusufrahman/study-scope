@@ -2,19 +2,27 @@
 import { useRouter } from 'vue-router'
 
 import { useQuizStore } from '@/stores/QuizStore'
+import { useCardStore } from '@/stores/CardStore'
 
 const router = useRouter()
 const quiz_store = useQuizStore()
+const card_store = useCardStore()
 
 
 // End the quiz
-function end() {    
+function end() {
+    const last_revision = card_store.getLastRevision
+    const revised_today = last_revision?.revised_today
+
     // Save results
-    let success = quiz_store.saveRevision()
-    if (success) {
-        router.push('/workspace')    
+    if (!revised_today) {
+        const request = quiz_store.saveRevision()
+        request.then((success) => {
+            if (!success) {
+                router.push('/workspace')
+            }
+	    })
     }
-    
 }
 </script>
 

@@ -112,8 +112,7 @@ def createQuiz(cards, course_name):
             #+ question_words           
 
             # Choose the question type - 0: MCQ, 1: Fill in blank, 2: Reveal
-            question_type = 0
-            #question_type = random.choices([0, 1, 2], weights=[0.4, 0.3, 0.3])[0]
+            question_type = random.choices([0, 1, 2], weights=[0.4, 0.3, 0.3])[0]
             question = []
             match question_type:
                 # MCQ

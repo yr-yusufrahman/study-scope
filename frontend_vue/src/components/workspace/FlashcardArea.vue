@@ -13,6 +13,7 @@ const router = useRouter()
 const card_store = useCardStore()
 const edit_store = useToggleEditStore()
 const empty = ref(true)
+const next_due = () => card_store.getDue?.days
 const card_list = () => card_store.getChapter && card_store.getCards.length != 0
 
 
@@ -78,11 +79,19 @@ function goToQuiz() {
 		<section v-show="!empty" class="flex flex-col gap-10">
 			<!-- Heading -->
 			<div class="flex flex-row justify-around">
-				<h1 v-show="card_store.getDue?.days">Next due in {{ card_store.getDue?.days }} days</h1>
+				<!-- Next due -->
+				<h1 v-show="next_due() > 1">Next due in {{ next_due() }} days</h1>
+				<h1 v-show="next_due() === 1">Next due in {{ next_due() }} day</h1>
+				<h1 v-show="next_due() === 0">Due Today!</h1>
+				<h1 v-show="next_due() < 0">Due {{ -1*next_due() }} days ago</h1>
+
+				<!-- Last revision results -->
+				<h1 v-show="card_store.getLastRevision">Last Mistakes: {{ card_store.getLastRevision?.mistakes }} </h1>
+				<h1 v-show="card_store.getLastRevision?.revised_today">You revised today! Practice some more?</h1>
+
 				<h1 class=" font-bold text-center">{{ card_store.getChapterName }}</h1>
 
 				<div v-show="card_list()">
-
 					<button 
 						class="btn btn-primary"
 						@click="goToQuiz"

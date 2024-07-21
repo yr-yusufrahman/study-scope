@@ -122,7 +122,8 @@ def getCards(request):
             response = {
                 'cards': card_data,
                 'chapter_title': chapter.chapter_title,
-                'next_due': {}
+                'next_due': {},
+                'last_revision': {},
             }
 
             # Check if the chapter has a next due date
@@ -132,6 +133,22 @@ def getCards(request):
                     'days': (chapter.next_due - timezone.now()).days,
                 }
                 
+            # Check if the chapter has a last revision
+            score = { "mistakes": -1, "inputs": -1, "revised_today": False }
+            chapter = Chapter.objects.get(id=chapter_id)
+            last_revision = Revision.objects.filter(chapter=chapter).order_by('-date').first()
+            if last_revision:
+                score.update({
+                    "mistakes": last_revision.mistakes,
+                    "inputs": last_revision.inputs,
+                })
+
+                # Check if the chapter was revised today
+                if last_revision.date.date() == datetime.now().date():
+                    score.update({"revised_today": True})
+
+            response['last_revision'] = score
+
             return Response(response, status=status.HTTP_200_OK)
         
         # If chapter does not exist

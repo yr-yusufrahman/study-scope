@@ -18,6 +18,7 @@ export const useCardStore = defineStore('cardStore', () => {
     const due = ref(null)
     const cards = ref([])
     const checkModified = ref(0)
+    const last_revision = ref(null) // {mistakes, inputs, revised_today}
   
     // ----- Getters -----
     const getChapter = computed(() => chapter.value)
@@ -30,6 +31,7 @@ export const useCardStore = defineStore('cardStore', () => {
         const swapped = moves.length > 0 && changedOrder()
         return edited || swapped
     })
+    const getLastRevision = computed(() => last_revision.value)
 
 
     // ----- Actions
@@ -153,6 +155,7 @@ export const useCardStore = defineStore('cardStore', () => {
                 chapter_name.value = data?.chapter_title
                 due.value = data?.next_due
                 setInitialOrder(data?.cards)
+                last_revision.value = data?.last_revision
 
                 success = true       
             } catch (error) {
@@ -220,6 +223,7 @@ export const useCardStore = defineStore('cardStore', () => {
         getDue,
         getCards,
         isModified,
+        getLastRevision,
 
         setChapter,
         clear,
