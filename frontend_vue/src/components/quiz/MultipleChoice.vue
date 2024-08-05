@@ -6,7 +6,6 @@ import { useQuizStore } from '@/stores/QuizStore'
 const quiz_store = useQuizStore()
 
 const blanked_answer = ref([])
-const selected_options = ref([false, false, false, false]) // Disable option buttons that have been selected
 const reload = ref(0)
 
 onBeforeUpdate(() => {
@@ -53,27 +52,26 @@ function splitTextIntoParts() {
 // Sets the options for the chosen blanked word
 function chooseBlankWord(index) {
     quiz_store.setOptions(index)
-    selected_options.value = [false, false, false, false]
 }
 
 
 // Select an option for answering the blanked word
 function selectOption(option, index) {
-
     // If the option is the correct answer
     if (option === quiz_store.getBlankAnswer) {
         quiz_store.setMarks(quiz_store.getMarks + 1)
-        quiz_store.recordChoiceAnswer(1)
+        //quiz_store.recordChoiceAnswer(1)
+        quiz_store.recordChoiceAnswerNew(1, index)
         clearQuestion()
     } else {
         // Incorrect answer
         quiz_store.setMistakes(quiz_store.getMistakes + 1)
-        selected_options.value[index] = true
-
+        quiz_store.recordChoiceAnswerNew(0, index)
         // Check if all 3 incorrect options have been chosen
-        if (fullyAttempted()) {
+        if (quiz_store.allChoicesAnsweredNew(quiz_store.getBlankIndex)) {
             quiz_store.setMarks(quiz_store.getMarks + 1)
-            quiz_store.recordChoiceAnswer(0)
+            //quiz_store.recordChoiceAnswer(0)
+            
             clearQuestion()
         }
     }
@@ -94,7 +92,6 @@ function fullyAttempted() {
 
 function clearQuestion() {
     quiz_store.clearOptions()
-    selected_options.value = [false, false, false, false]
 }
 
 
@@ -111,10 +108,10 @@ function clearQuestion() {
                     <span v-if="part.isWord">
 
                         <!-- If blanked word is answered -->
-                        <span v-if="quiz_store.isAnswered[part.index] === 1" class="blue">{{ part.text }}</span> 
+                        <span v-if="quiz_store.isCorrectChoice(part.index)" class="blue">{{ part.text }}</span> 
                         
                         <!-- If all options were attempted -->
-                        <span v-else-if="quiz_store.isAnswered[part.index] === 0" class="pastel-red">{{ part.text }}</span>
+                        <span v-else-if="quiz_store.allChoicesAnsweredNew(part.index)" class="pastel-red">{{ part.text }}</span>
 
                         <button v-else 
                             @click="chooseBlankWord(part.index)" 
@@ -136,7 +133,7 @@ function clearQuestion() {
                 <div v-for="(option, index) in quiz_store.getOptions" :key="index">
                     <button 
                         @click="selectOption(option, index)"
-                        :disabled="selected_options[index]" 
+                        :disabled="quiz_store.choiceAnswered(index)" 
                         class="btn btn-ghost"
                     >{{ option }}</button>
                 </div>

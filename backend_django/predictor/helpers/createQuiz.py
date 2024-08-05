@@ -35,9 +35,22 @@ def getBlanks(rake, answer):
     return sorted_keywords, blanked
 
 
+# Inserts blanked words along side the corresponding options
+def insertBlankChoice(choices, blanked_words):
+    # Randomly insert blanked words into the choices
+    for i in range(len(blanked_words)):
+        blank = blanked_words[i]
+        index = random.randint(0, 3)
+        choices[i].insert(index, blank)
+
+    #print(f"Choices: {choices}\n")
+    return choices
+
+
 # Returns a tuple with the multiple choice question, total mark and input history template
 def createChoiceQuestion(card, keywords, blanked_words, course_name):
     #choices = generateOptionsOld(keywords, blanked_words)
+    NUMBER_OF_ANSWERS = 1
     NUMBER_OF_CHOICES = 3
     choices, adjusted_blanks, blanks_changed = generateOptions(blanked_words, course_name, keywords, NUMBER_OF_CHOICES)
 
@@ -56,11 +69,16 @@ def createChoiceQuestion(card, keywords, blanked_words, course_name):
         card['blanked'] = blanked_words
 
     card['type'] = 'multiple_choice'
-    card['options'] = choices
+    card['options'] = insertBlankChoice(choices, card['blanked'])
 
-    question_total = len(card.get('blanked'))
-    history = [-1]*len(card.get('blanked'))
-    return card, question_total, history
+    # Template for recording answer for blanked term: -1 for unanswered, 0 for wrong, 1 for correct
+    ANSWER_TEMPLATE = [-1] * (NUMBER_OF_CHOICES + NUMBER_OF_ANSWERS)
+    QUESTION_TOTAL = len(card.get('blanked'))
+
+    # Template for recording all answers for the question, each blanked term has 4 slots: 1 for correct, 3 for wrong
+    history = [ANSWER_TEMPLATE] * QUESTION_TOTAL
+
+    return card, QUESTION_TOTAL, history
 
 
 # Returns a tuple with the fill in blank question, total mark and input history template
@@ -112,7 +130,7 @@ def createQuiz(cards, course_name):
             #+ question_words           
 
             # Choose the question type - 0: MCQ, 1: Fill in blank, 2: Reveal
-            question_type = random.choices([0, 1, 2], weights=[0.4, 0.3, 0.3])[0]
+            question_type = 0 #random.choices([0, 1, 2], weights=[0.4, 0.3, 0.3])[0]
             question = []
             match question_type:
                 # MCQ

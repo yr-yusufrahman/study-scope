@@ -20,6 +20,7 @@ export const useQuizStore = defineStore('quizStore', () => {
     const total = ref(0) // Total number of potential answers in the quiz
     const marks = ref(0)
     const reveal = ref(false)
+    const blanked_options = ref([])
 
 
     // Getters
@@ -49,6 +50,50 @@ export const useQuizStore = defineStore('quizStore', () => {
     const getBlankAnswer = computed(() => quiz.value[location.value]?.blanked[blank_index.value]) // answer with blanka
     const getMistakes = computed(() => mistakes.value) // number of mistakes made by the user
     const isAnswered = computed(() => history.value[location.value]) // has the user answered the current question?
+    
+    // is the user's answer correct?
+    const isCorrectChoiceOld = computed(() => {
+        const selected_choices = history.value[location.value][blank_index.value]
+        const correct = selected_choices.some((choice) => choice === 1)
+        return correct
+    })
+
+    function isCorrectChoice(index) {
+        if (getType.value === 0) {
+            const selected_choices = history.value[location.value][index]
+            const correct = selected_choices.some((choice) => choice === 1)
+            return correct
+        }
+    }
+
+    const allChoicesAnsweredNewOld = computed(() => {
+        const choices = history.value[location.value][blank_index.value]
+        return choices.every(choice => choice !== -1)
+    })
+
+    function allChoicesAnsweredNew(index) {
+        if (getType.value === 0) {
+            let answered = 0
+            const choices = history.value[location.value][index]
+            choices.forEach(choice => {
+                if (choice !== -1) {
+                    answered += 1
+                }
+            })
+            //console.log("Choices: ", choices)
+            return answered === 3
+        }    
+    }
+
+    function choiceAnswered(index) {
+        return history.value[location.value][blank_index.value][index] !== -1
+    }
+
+    const allBlanksAnswered = computed(() => {
+        const blanks = history.value[location.value]
+        return blanks.every(blank => blank.every(choice => choice !== -1))
+    })
+
     const allChoicesAnswered = computed(() => {
         const question_choices = history.value[location.value]
         let all_answered = true
@@ -57,13 +102,20 @@ export const useQuizStore = defineStore('quizStore', () => {
         }
         return all_answered
     })
+
+
+    const getBlankIndex = computed(() => blank_index.value) // index of the current blank word
+
+
     const getReveal = computed(() => reveal.value) // has the user revealed the answer?
     
     // MCQ Options for the current blank word
     const getOptions = computed(() => {
+        return quiz.value[location.value]?.options[blank_index.value]
+        /* 
         if (blank_index.value !== -1) {
             return quiz.value[location.value]?.options[blank_index.value]
-        }
+        }*/
         return []
     })
 
@@ -81,17 +133,18 @@ export const useQuizStore = defineStore('quizStore', () => {
     // Set the options for the current blank word
     function setOptions(index) {
         blank_index.value = index
-
+        /*
         // Get the answer for the current blank word
         const answer = getBlankAnswer.value
     
         // Insert the answer into the options at a random index
         const option_list = getOptions.value
+        
         if (option_list.length !== 4) {
             const insert_index = Math.floor(Math.random() * option_list.length+1)
             option_list.splice(insert_index, 0, answer)    
         }
-        options.value = option_list
+        options.value = option_list */
     }
 
     // Deselect the current blanked word and hide its options in an MCQ
@@ -112,7 +165,9 @@ export const useQuizStore = defineStore('quizStore', () => {
     }
 
     // Record the user's answer for a multiple choice question: -1 unanswered, 0 incorrect, 1 correct
+    function recordChoiceAnswerNew(answer_type, index) { history.value[location.value][blank_index.value][index] = answer_type }
     function recordChoiceAnswer(answer_type) { history.value[location.value][blank_index.value] = answer_type }
+
     function recordRateAnswer(answer) { history.value[location.value][0] = answer }
     function setReveal(reveal_state) { reveal.value = reveal_state }
 
@@ -213,6 +268,11 @@ export const useQuizStore = defineStore('quizStore', () => {
         isAnswered,
         allChoicesAnswered,
         getReveal,
+        isCorrectChoice,
+        allChoicesAnsweredNew,
+        allBlanksAnswered,
+        choiceAnswered,
+        getBlankIndex,
 
         setLoading,
         setMarks,
@@ -222,6 +282,7 @@ export const useQuizStore = defineStore('quizStore', () => {
         setMistakes,
         endQuiz,
         recordChoiceAnswer,
+        recordChoiceAnswerNew,
         setBlankIndex,
         //recordMultipleChoiceAnswer,
         recordRateAnswer,
