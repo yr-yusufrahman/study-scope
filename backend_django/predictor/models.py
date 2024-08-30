@@ -11,7 +11,6 @@ import joblib, io, os, numpy as np
 class Revision(models.Model):
     mistakes = models.IntegerField()
     inputs = models.IntegerField()
-    percentage_of_reveals = models.FloatField(default=0)
     date = models.DateTimeField(auto_now_add=True)
 
     # Calculated by looking at the previous and next revision session
@@ -51,12 +50,15 @@ class Revision(models.Model):
             if change >= 25:
                 loss = True
                 last_interval = int(last_interval * 0.8)
+            # Is progress: If mistake rate decreased by 25%, there was progress so lengthen the interval by 20%
+            elif change <= -25:
+                last_interval = int(last_interval * 1.2)
 
             # Complete the last revision session values
             last_revision.interval = last_interval # If there was no drop off, interval of last revision = days_since for this
             last_revision.mistake_rate = change
             last_revision.is_loss = loss
-            last_revision.save() # this causes error as it will use the modified save method which will cause an infinite loop 
+            last_revision.save()
 
 
     def setDaysSince(self):
@@ -68,6 +70,12 @@ class Revision(models.Model):
             self.days_since = days_since
             self.save()
                   
+
+    # Checks if the chapter had a drop off since the last revision
+    def dropOffDetected(self):
+        # Get the most recent revision for the same chapter
+        last_revision = Revision.objects.filter(chapter=self.chapter).exclude(id=self.pk).order_by('-date').first()
+        return last_revision.is_loss
 
 
 # mistake score, inputs, number of reveals
@@ -97,7 +105,6 @@ class Revision(models.Model):
 
 # Model for storing predictor parameters. Two for each course? To handle drop-offs and non-drop-offs.
 class Predictor(models.Model):
-    #parameters = models.JSONField(default=dict, null=True, blank=True)
     drop_off = models.BooleanField()
     tree = models.BinaryField(default=None)
     user = models.OneToOneField(User, on_delete=models.CASCADE, default=None)

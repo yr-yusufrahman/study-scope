@@ -4,7 +4,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 
 
-# Get the parameters of the default model
+# OLD - Get the parameters of the default model
 def defaultModelParams():
     # Find the path to the model file
     current_directory = os.path.dirname(os.path.abspath(__file__))

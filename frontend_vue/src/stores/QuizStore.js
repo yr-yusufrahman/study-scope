@@ -1,31 +1,31 @@
 import { computed, ref } from "vue"
 import { defineStore } from "pinia"
-import axios, { all } from "axios"
+import axios from "axios"
 import makeRequest from "@/components/helpers/requestFlow"
-import refresh from "@/components/helpers/refresh"
 import { useChapterStore } from "./ChapterStore"
 import { useCardStore } from "./CardStore"
 
+
 export const useQuizStore = defineStore('quizStore', () => {
+    // Other stores
     const chapter_store = useChapterStore()
     const card_store = useCardStore()
 
-    const loading = ref(true)
-    const quiz = ref([])
-    const history = ref([]) // History of the user's answers
+    const loading = ref(true) // Is the quiz loading
+    const quiz = ref([]) // Quiz content
+    const history = ref([]) // History of the user's quiz answers
     const location = ref(0) // Index of the current question
-    const blank_index = ref(-1) // Index of the current blank word in the question
+    const blank_index = ref(-1) // Index of the current blank word in the (MCQ/Fill-in-blank) question
     const options = ref([]) // Options for the current blank word
     const mistakes = ref(0) // Number of mistakes made by the user
     const total = ref(0) // Total number of potential answers in the quiz
-    const marks = ref(0)
-    const reveal = ref(false)
-    const blanked_options = ref([])
+    const marks = ref(0) // User's progressed through the quiz
+    const reveal = ref(false) // Has the user revealed the (reveal question) answer?
 
 
     // Getters
     const getLoading = computed(() => loading.value) // Is the quiz loading?
-    const getQuiz = computed(() => quiz.value) // quiz content
+    const getQuizLength = computed(() => quiz.value.length) // Number of questions in the quiz
     const getHistory = computed(() => history.value) // user's quiz answer history so far
     const getTotal = computed(() => total.value) // total number of potential answers in the quiz
     const getMarks = computed(() => marks.value) // user's total marks
@@ -50,13 +50,7 @@ export const useQuizStore = defineStore('quizStore', () => {
     const getBlankAnswer = computed(() => quiz.value[location.value]?.blanked[blank_index.value]) // answer with blanka
     const getMistakes = computed(() => mistakes.value) // number of mistakes made by the user
     const isAnswered = computed(() => history.value[location.value]) // has the user answered the current question?
-    
-    // is the user's answer correct?
-    const isCorrectChoiceOld = computed(() => {
-        const selected_choices = history.value[location.value][blank_index.value]
-        const correct = selected_choices.some((choice) => choice === 1)
-        return correct
-    })
+
 
     function isCorrectChoice(index) {
         if (getType.value === 0) {
@@ -65,11 +59,6 @@ export const useQuizStore = defineStore('quizStore', () => {
             return correct
         }
     }
-
-    const allChoicesAnsweredNewOld = computed(() => {
-        const choices = history.value[location.value][blank_index.value]
-        return choices.every(choice => choice !== -1)
-    })
 
     function allChoicesAnsweredNew(index) {
         if (getType.value === 0) {
@@ -80,7 +69,6 @@ export const useQuizStore = defineStore('quizStore', () => {
                     answered += 1
                 }
             })
-            //console.log("Choices: ", choices)
             return answered === 3
         }    
     }
@@ -127,7 +115,6 @@ export const useQuizStore = defineStore('quizStore', () => {
     function setTotal(quiz_total) { total.value = quiz_total }
     function setMarks(mark) { marks.value = mark }
     function setLocation(location_state) { location.value = location_state }
-
     function setBlankIndex(index) { blank_index.value = index }
 
     // Set the options for the current blank word
@@ -152,9 +139,7 @@ export const useQuizStore = defineStore('quizStore', () => {
         blank_index.value = -1
         options.value = []
     }
-
     function setMistakes(mistakes_state) { mistakes.value = mistakes_state }
-
     function endQuiz() {
         clearOptions()
         setHistory([])
@@ -167,7 +152,6 @@ export const useQuizStore = defineStore('quizStore', () => {
     // Record the user's answer for a multiple choice question: -1 unanswered, 0 incorrect, 1 correct
     function recordChoiceAnswerNew(answer_type, index) { history.value[location.value][blank_index.value][index] = answer_type }
     function recordChoiceAnswer(answer_type) { history.value[location.value][blank_index.value] = answer_type }
-
     function recordRateAnswer(answer) { history.value[location.value][0] = answer }
     function setReveal(reveal_state) { reveal.value = reveal_state }
 
@@ -213,12 +197,12 @@ export const useQuizStore = defineStore('quizStore', () => {
                 const token = localStorage.getItem('token')
 
                 // Count the number of reveal questions
-                const reveal_count = quiz.value.filter(card => card.multiple_choice === false).length               
+                //const reveal_count = quiz.value.filter(card => card.multiple_choice === false).length               
                 const headers = {"Authorization": `Bearer ${token}`}
                 const body = {
                     mistakes: mistakes.value,
                     inputs: total.value,
-                    number_of_reveals: reveal_count,
+                    //number_of_reveals: reveal_count,
                     chapter_id: card_store.getChapter,
                     course_id: Number(localStorage.getItem('selectedCourse'))
                 }
@@ -233,9 +217,9 @@ export const useQuizStore = defineStore('quizStore', () => {
 
         // Request flow for saving changes and refreshing token
         let success = makeRequest(saveResults)
-        if (success) {
-            endQuiz()
-        }
+        //if (success) {
+        //    endQuiz()
+        //}
         return success
     }
 
@@ -252,7 +236,7 @@ export const useQuizStore = defineStore('quizStore', () => {
         reveal,
 
         getLoading,
-        getQuiz,
+        getQuizLength,
         getTotal,
         getMarks,
         getLocation,
@@ -292,3 +276,4 @@ export const useQuizStore = defineStore('quizStore', () => {
         saveRevision
     }
 })
+

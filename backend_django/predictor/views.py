@@ -16,7 +16,7 @@ from courses.models import Course, Chapter, Card
 #from predictor.helpers.mcq import createQuiz
 from predictor.helpers.createQuiz import createQuiz
 #from predictor.helpers.loadModel import queryModel
-from predictor.helpers.makePrediction import makePrediction
+from predictor.helpers.makePrediction import makePrediction, retrainTree, makePredictionTest
 
 
 # Create a quiz with cards from a given chapter
@@ -48,7 +48,7 @@ def saveResults(request):
         # Get the results
         mistakes = request.data.get('mistakes')
         inputs = request.data.get('inputs')
-        number_of_reveals = request.data.get('number_of_reveals')
+        #number_of_reveals = request.data.get('number_of_reveals')
         chapter_id = request.data.get('chapter_id')
         course_id = request.data.get('course_id')
 
@@ -63,20 +63,20 @@ def saveResults(request):
                     # Make no changes
                     return Response(status=status.HTTP_200_OK)
                 
-            percentage_of_reveals = (number_of_reveals / inputs) * 100
-            percentage_of_reveals = round(percentage_of_reveals, 2)
+            #percentage_of_reveals = (number_of_reveals / inputs) * 100
+            #percentage_of_reveals = round(percentage_of_reveals, 2)
 
             # Save the results
             revision = Revision.objects.create(
                 mistakes=mistakes,
                 inputs=inputs,
-                percentage_of_reveals=percentage_of_reveals,
                 chapter=chapter
             )
             revision.save()
             revision.setDaysSince() # Calculate the days since last revision
             revision.complete() # Calculate the other field values from last revision data point
             
+            # If drop-off was detected, retrain the tree
 
             # Make a prediction
             course = Course.objects.get(id=course_id)
@@ -113,3 +113,12 @@ def getTree(request):
     return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 
+@api_view(["GET"])
+def dataTest(request):
+    user = request.user
+    if user:
+        makePredictionTest(user)
+        return Response(status=status.HTTP_200_OK)
+    
+    # User not authenticated
+    return Response(status=status.HTTP_401_UNAUTHORIZED)

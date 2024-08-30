@@ -9,6 +9,7 @@ import logout from '../helpers/logout.js'
 import { useCourseStore } from '../../stores/CourseStore.js'
 import { useToggleEditStore } from '../../stores/ToggleEditStore.js'
 
+import axios from 'axios'
 
 const router = useRouter()
 
@@ -63,10 +64,11 @@ function saveChanges() {
 // END saveChanges
 
 function treeTest() {
-    let success = course_store.treeRequest()
-    if (!success) {
-        router.push('/login')
-    }
+
+    const token = localStorage.getItem('token')
+    const headers = {"Authorization": `Bearer ${token}`}
+    axios.get('http://127.0.0.1:8000/predictor/test-tree', { headers })
+
 }
 
 </script>

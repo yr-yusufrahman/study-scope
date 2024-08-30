@@ -69,48 +69,48 @@ function matchesRating(type) {
 
 
 <template>
-		<div class="h-full w-full flex flex-col items-center gap-6">
-				<!-- Card -->
-				<div 
-						class="h-full w-3/5 shadow-lg border-4 rounded-lg flex flex-col items-center justify-center p-6"
-				>
-						<!-- Rating type -->
-						<div>
-								<p v-show="quiz_store.getReveal || answered" class=" text-base blue">{{ quiz_store.getAnswer }}</p>
-								<button v-show="!quiz_store.getReveal && !answered" @click="toggle" class="btn btn-ghost blue">Reveal</button>             
-						</div>
+	<div class="h-full w-full flex flex-col items-center gap-6">
+		<!-- Card -->
+		<div 
+			class="h-full w-3/5 shadow-lg border-4 rounded-lg flex flex-col items-center justify-center p-6"
+		>
+			<!-- Rating type -->
+			<div>
+				<p v-show="quiz_store.getReveal || answered" class=" text-base blue">{{ quiz_store.getAnswer }}</p>
+				<button v-show="!quiz_store.getReveal && !answered" @click="toggle" class="btn btn-ghost blue">Reveal</button>             
+			</div>
 
-				</div>
-
-				<!-- Inputs for rating -->
-				<div v-show="quiz_store.getReveal || answered" class="flex flex-col items-center gap-6">
-						<div class="text-base">
-								<p>Could you remember the answer?</p>
-						</div>
-
-						<!-- Colour code the given rating using conditional classes -->
-						<div class="w-full flex flex-row justify-center gap-6">
-								<button 
-										@click="selectRating(0)" 
-										:disabled="answered" 
-										class="btn btn-ghost w-24" 
-										:class="{'red-panel': matchesRating(0)}"
-								>No</button>
-								<button 
-										@click="selectRating(1)" 
-										:disabled="answered" 
-										class="btn btn-ghost w-24" 
-										:class="{'amber-panel': matchesRating(1)}"
-								>Almost</button>
-								<button 
-										@click="selectRating(2)" 
-										:disabled="answered" 
-										class="btn btn-ghost w-24" 
-										:class="{'green-panel': matchesRating(2)}"
-								>Yes</button>
-						</div>                
-				</div>
 		</div>
+
+		<!-- Inputs for rating -->
+		<div v-show="quiz_store.getReveal || answered" class="flex flex-col items-center gap-6">
+			<div class="text-base">
+				<p>Could you remember the answer?</p>
+			</div>
+
+			<!-- Colour code the given rating using conditional classes -->
+			<div class="w-full flex flex-row justify-center gap-6">
+				<button 
+					@click="selectRating(0)" 
+					:disabled="answered" 
+					class="btn btn-ghost w-24" 
+					:class="{'red-panel': matchesRating(0)}"
+				>No</button>
+				<button 
+					@click="selectRating(1)" 
+					:disabled="answered" 
+					class="btn btn-ghost w-24" 
+					:class="{'amber-panel': matchesRating(1)}"
+				>Almost</button>
+				<button 
+					@click="selectRating(2)" 
+					:disabled="answered" 
+					class="btn btn-ghost w-24" 
+					:class="{'green-panel': matchesRating(2)}"
+				>Yes</button>
+			</div>                
+		</div>
+	</div>
 </template>
 
 

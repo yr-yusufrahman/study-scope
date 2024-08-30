@@ -99,6 +99,7 @@ function inputAnswer(blank_index, word_index, event) {
 	}
 }
 
+
 // Reveals all the answers
 function showAnswers() {
 	const all_blanks = quiz_store.getBlanks

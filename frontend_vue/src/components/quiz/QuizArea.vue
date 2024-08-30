@@ -74,7 +74,7 @@ function refreshHandler(e) {
 // Go to a different question
 function navigate(new_location) {
     // Check if the location is the last question
-    if (new_location >= quiz_store.getQuiz.length-1) {
+    if (new_location >= quiz_store.getQuizLength-1) {
         end_flag.value = true
     } else {
         if (end_flag.value) {

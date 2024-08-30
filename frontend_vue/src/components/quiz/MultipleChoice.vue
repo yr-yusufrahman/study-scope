@@ -78,18 +78,6 @@ function selectOption(option, index) {
 }
 
 
-// If 3 options have been chosen, display the correct answer to blanked word
-function fullyAttempted() {
-    let count = 0
-    selected_options.value.forEach((option) => {
-        if (option === true) {
-            count++
-        }
-    })
-    return count === 3
-}
-
-
 function clearQuestion() {
     quiz_store.clearOptions()
 }
