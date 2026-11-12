@@ -1,0 +1,40 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Django
+*.log
+db.sqlite3
+db.sqlite3-journal
+backend_django/.env
+backend_django/client_secret*.json
+backend_django/client_secret*.apps.googleusercontent.com.json
+**/staticfiles/
+
+# ML / data artifacts (local copies at repo root)
+/interval_model.pkl
+/regression_model.npz
+
+# Node (Vue)
+frontend_vue/node_modules/
+frontend_vue/dist/
+
+# Editor / OS
+.idea/
+*.suo
+.DS_Store
+Thumbs.db
+
+# Local scratch & notes
+admin.txt
+Latest changes.txt
+Draft features/**/__pycache__/
+Draft features/**/*.pyc
+
+# Test / agent tooling
+.playwright-mcp/
+courses-page.png

@@ -180,7 +180,8 @@ export const useQuizStore = defineStore('quizStore', () => {
                 loading.value = false
                 success = true
             } catch (error) {
-                console.log("Error getting quiz for chapter: ")
+                const detail = error.response?.data?.detail || error.response?.data?.error
+                console.log("Error getting quiz for chapter: ", detail || error.message)
             }
             return success
         }

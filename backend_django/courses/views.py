@@ -18,7 +18,7 @@ from .helpers.editRequests import editCourses, editChapters, editCards
 def getCourses(request):
     # First confirm if user access token is valid
     user = request.user
-    if user:
+    if user.is_authenticated:
         # All courses for the user
         courses = Course.objects.filter(owner=user).order_by('title')
         courses_data = []
@@ -51,7 +51,7 @@ def getCourses(request):
 def getChapters(request):
     # First confirm if user access token is valid
     user = request.user
-    if user:
+    if user.is_authenticated:
         course_id = request.data.get('course_id')
         course = Course.objects.filter(owner=user, id=course_id).first()
 
@@ -101,7 +101,7 @@ def getChapters(request):
 def getCards(request):
     # First confirm if user access token is valid
     user = request.user
-    if user:
+    if user.is_authenticated:
         # Get the chapter id
         chapter_id = request.data.get('chapter_id')
         chapter = Chapter.objects.filter(id=chapter_id).first()
@@ -166,7 +166,7 @@ def getCards(request):
 def changeCourses(request):
     # First confirm if user access token is valid
     user = request.user
-    if user:
+    if user.is_authenticated:
         return editCourses(request, user)
 
     else:
@@ -181,7 +181,7 @@ def changeCourses(request):
 def changeChapters(request):
     # First confirm if user access token is valid
     user = request.user
-    if user:
+    if user.is_authenticated:
         return editChapters(request, user)
 
     else:
@@ -196,7 +196,7 @@ def changeChapters(request):
 def changeCards(request):
     # First confirm if user access token is valid
     user = request.user
-    if user:
+    if user.is_authenticated:
         return editCards(request, user)
 
     else:

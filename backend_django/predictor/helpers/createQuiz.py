@@ -1,9 +1,12 @@
 from predictor.helpers.blankWords import multipleBlank
 from predictor.helpers.quiz.choices import generateOptions
 from predictor.helpers.createOptions import generateOptions as generateOptionsOld
+from predictor.helpers.ensure_nltk import ensure_nltk_data
 
 from rake_nltk import Rake
 import random
+
+ensure_nltk_data()
 
 
 # First, iterate through content and for each question/answer:

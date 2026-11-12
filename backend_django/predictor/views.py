@@ -16,7 +16,7 @@ from courses.models import Course, Chapter, Card
 #from predictor.helpers.mcq import createQuiz
 from predictor.helpers.createQuiz import createQuiz
 #from predictor.helpers.loadModel import queryModel
-from predictor.helpers.makePrediction import makePrediction, retrainTree, makePredictionTest
+from predictor.helpers.makePrediction import makePrediction
 
 
 # Create a quiz with cards from a given chapter
@@ -24,15 +24,27 @@ from predictor.helpers.makePrediction import makePrediction, retrainTree, makePr
 def getQuiz(request):
     # First confirm if user access token is valid
     user = request.user
-    if user:
+    if user.is_authenticated:
         # Get the chapter id
         #cards = Card.objects.filter(chapter=chapter_id).order_by('order')
-        course_name = request.data.get('course_name')
-        cards = request.data.get('cards')
+        course_name = request.data.get('course_name') or ''
+        cards = request.data.get('cards') or []
+        if not cards:
+            return Response(
+                {'error': 'No flashcards in this chapter to quiz.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         shuffle(cards)
 
-        # Create a quiz with the cards - Array of dictionaries {mutliple_choice, blanked, options}
-        quiz_dictionary = createQuiz(cards, course_name) # Returns {quiz_content, total, history}
+        try:
+            # Returns {quiz_content, total, history}
+            quiz_dictionary = createQuiz(cards, course_name)
+        except Exception as exc:
+            return Response(
+                {'error': 'Quiz could not be generated.', 'detail': str(exc)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         return Response(quiz_dictionary, status=status.HTTP_200_OK)
     
@@ -44,7 +56,7 @@ def getQuiz(request):
 def saveResults(request):
     # First confirm if user access token is valid
     user = request.user
-    if user:
+    if user.is_authenticated:
         # Get the results
         mistakes = request.data.get('mistakes')
         inputs = request.data.get('inputs')
@@ -101,7 +113,7 @@ def saveResults(request):
 @api_view(["GET"])
 def getTree(request):
     user = request.user
-    if user:
+    if user.is_authenticated:
         predictor = Predictor.objects.get_or_create(user=user) # Returns a tuple [0] contains obj, [1] boolean success
         print(f"Predictor: {predictor}\n")
         model_serialized = predictor[0].tree
@@ -116,8 +128,7 @@ def getTree(request):
 @api_view(["GET"])
 def dataTest(request):
     user = request.user
-    if user:
-        makePredictionTest(user)
+    if user.is_authenticated:
         return Response(status=status.HTTP_200_OK)
     
     # User not authenticated

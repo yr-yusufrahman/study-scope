@@ -1,8 +1,19 @@
-from django.shortcuts import render, redirect
+from datetime import timedelta
+
+from django.conf import settings
 from django.contrib.auth import logout
+from django.contrib.auth.models import User
+from django.db.models import Count
+from django.shortcuts import render, redirect
+from django.utils import timezone
+
+from oauth2_provider.models import AccessToken, Application, RefreshToken
+from oauth2_provider.settings import oauth2_settings
+from oauthlib.common import generate_token
 
 from rest_framework import status, generics, permissions
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 import requests
@@ -108,6 +119,59 @@ def refreshAuth(request):
     return Response({}, status.HTTP_400_BAD_REQUEST)
 
 # END refreshAuth
+
+
+def _dev_login_user():
+    return (
+        User.objects.annotate(course_count=Count("course"))
+        .filter(course_count__gt=0)
+        .order_by("-course_count", "id")
+        .first()
+    )
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def devBypassLogin(request):
+    if not settings.DEBUG:
+        return Response({"detail": "Not available."}, status=status.HTTP_403_FORBIDDEN)
+
+    user = _dev_login_user()
+    if not user:
+        return Response({"detail": "No user with courses found."}, status=status.HTTP_404_NOT_FOUND)
+
+    application = Application.objects.first()
+    if not application:
+        return Response({"detail": "OAuth application not configured."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    expires = timezone.now() + timedelta(seconds=oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS)
+    access_token = AccessToken.objects.create(
+        user=user,
+        application=application,
+        token=generate_token(),
+        expires=expires,
+        scope="read write",
+    )
+    refresh_token = RefreshToken.objects.create(
+        user=user,
+        application=application,
+        token=generate_token(),
+        access_token=access_token,
+    )
+
+    name = user.first_name or user.username
+    if user.last_name:
+        name = f"{user.first_name} {user.last_name}".strip() or name
+
+    return Response(
+        {
+            "access_token": access_token.token,
+            "refresh_token": refresh_token.token,
+            "email": user.email,
+            "name": name,
+        },
+        status=status.HTTP_201_CREATED,
+    )
 
 
 # Create your views here.

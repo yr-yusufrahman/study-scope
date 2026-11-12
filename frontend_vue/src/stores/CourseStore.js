@@ -122,7 +122,7 @@ export const useCourseStore = defineStore("courseStore", () => {
 
                 const response = await axios.get('http://127.0.0.1:8000/courses/get-courses', { headers })
                 const data = await response.data
-                setCourses(data?.courses)
+                setCourses(data?.courses ?? [])
 
                 success = true       
             } catch (error) {

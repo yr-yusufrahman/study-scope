@@ -17,16 +17,22 @@ const router = useRouter()
 const course_store = useCourseStore()
 const edit_store = useToggleEditStore()
 const addId = -1
+const loading = ref(true)
+const loadError = ref(false)
 
 
 // Check for logged in
 onBeforeMount(() => {
 	const request = course_store.getCoursesRequest()
 	request.then((success) => {
+		loading.value = false
 		if (!success) {
+			loadError.value = true
 			logout()
 			router.push('/login')
+			return
 		}
+		loadError.value = false
 	})
 })
 
@@ -76,6 +82,9 @@ function treeTest() {
 
 <template>
     <div class="page-layout">
+        <p v-if="loading" class="text-center text-lg">Loading your courses…</p>
+        <p v-else-if="loadError" class="text-center text-lg">Could not load courses. Redirecting to sign in…</p>
+        <p v-else-if="course_store.getCourses.length === 0" class="text-center text-lg">No courses yet — add one below.</p>
         <div class="course-list">
             <CourseCard v-for="(course, index) in course_store.getCourses" 
             :id="course.id" 

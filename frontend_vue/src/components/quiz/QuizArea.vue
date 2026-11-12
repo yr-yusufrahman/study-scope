@@ -21,6 +21,7 @@ const quiz_store = useQuizStore()
 const start_flag = ref(true)
 const end_flag = ref(false)
 const progress = ref(0)
+const loadError = ref('')
 const finished = () => quiz_store.getMarks === quiz_store.getTotal
 
 
@@ -29,14 +30,18 @@ onBeforeMount(() => {
     const chapter = card_store.getChapter
     if (!chapter) {
         router.push('/workspace')
+        return
     }
 
     // Check if quiz is successfully loaded
 	const request = quiz_store.getQuizRequest()
 	request.then((success) => {
 		if (!success) {
-			router.push('/workspace')
+            loadError.value = 'Could not load the quiz. Make sure the backend is running and this chapter has flashcards.'
+            quiz_store.setLoading(false)
+            setTimeout(() => router.push('/workspace'), 2500)
 		} else {
+            loadError.value = ''
             quiz_store.setLoading(false)
         }
 	})
@@ -106,11 +111,16 @@ function navigate(new_location) {
 
 
 <template>
-    <div v-show="quiz_store.getLoading" class="h-full w-full flex flex-col items-center p-16">
+    <div v-if="loadError" class="h-full w-full flex flex-col items-center justify-center p-16">
+        <p class="text-error max-w-md text-center">{{ loadError }}</p>
+        <p class="mt-2 text-sm opacity-70">Returning to workspace…</p>
+    </div>
+
+    <div v-else-if="quiz_store.getLoading" class="h-full w-full flex flex-col items-center p-16">
         <h1>Loading...</h1>
     </div>
 
-    <div v-show="!quiz_store.getLoading" class="h-full w-full flex flex-col items-center p-16">
+    <div v-else class="h-full w-full flex flex-col items-center p-16">
         <!-- Progress bar, mistake counter -->
          <div class="w-full flex flex-row justify-around">
             <h1 class="pastel-red">Mistakes: {{ quiz_store.getMistakes }}</h1>
