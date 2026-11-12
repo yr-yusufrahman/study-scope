@@ -1,21 +1,31 @@
-# Study App
+# Study Scope
 
-A small hobby project for spaced-repetition flashcards. The interesting part is the quiz: it turns your own card answers into multiple choice, fill-in-the-blank, and reveal questions using keyword extraction (RAKE) and WordNet. No large language model is involved.
+A 2022 hobby project for spaced-repetition flashcards. The quiz is generated from your own card answers with classical natural language processing, not a large language model. A small scikit-learn decision tree then suggests how many days should pass before that chapter is due again.
 
-The interface is a Vue app. The API is Django with SQLite. Google sign-in is left on the login page marked **(DEPRECATED)**. The working path is **Continue with sample data**, which signs you into the bundled sample account while `DEBUG` is on.
+This repository is safe to show and to run on your own machine. It is not a public web service. Do not put the Django process on the internet.
 
-## Sample data
+## What you can walk through
 
-Courses, chapters, and cards from the original local database are in `backend_django/fixtures/default_demo.json` (Maths / Differentiation is the chapter with cards). Load them after migrations:
+1. Open the landing page. It explains what Study Scope was.
+2. Sign in with **Continue with sample data**. Google sign-in is still on the page and marked deprecated. It does nothing unless you add your own OAuth credentials.
+3. The dashboard is the old prototype layout. Its widgets are example data and say so.
+4. **How the quiz works** describes the ideas that were tried: RAKE keyword extraction, word sense disambiguation, WordNet co-hyponyms as multiple-choice distractors, word2vec as another distractor idea, and decision trees in scikit-learn.
+5. **Start quiz** runs the real generator on the Differentiation chapter in Maths.
+
+## Run it locally
+
+Backend, from the repository root:
 
 ```powershell
+py -3.13 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install django==4.1.7 djangorestframework django-cors-headers django-oauth-toolkit social-auth-app-django drf-social-oauth2 python-dotenv joblib numpy scikit-learn nltk rake-nltk
 cd backend_django
 ..\.venv\Scripts\python.exe manage.py migrate
 ..\.venv\Scripts\python.exe manage.py loaddata fixtures/default_demo.json
-..\.venv\Scripts\python.exe manage.py runserver
+..\.venv\Scripts\python.exe manage.py runserver 127.0.0.1:8000
 ```
 
-Frontend:
+Frontend, in another terminal:
 
 ```powershell
 cd frontend_vue
@@ -23,21 +33,10 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173/login and use **Continue with sample data**.
+Open http://localhost:5173/login.
 
-## What is rough on purpose
+The first quiz can take a while. NLTK downloads `punkt_tab` and stopwords, and the quiz code loads a local WordNet build.
 
-- Layout and copy are unfinished.
-- Only one chapter in the sample set has flashcards.
-- Interval prediction is a small scikit-learn tree trained on revision history, not a production model.
-- NLTK data (`punkt_tab`, stopwords, a local WordNet build) is downloaded on first quiz use.
+## Sample data
 
-## Security notes
-
-Reviewed while preparing this copy:
-
-- The Google OAuth client secret used to be hardcoded in settings and views, and an older `.env` was committed. Those values are removed from the tree. **Rotate that Google client secret** in Google Cloud; it remains in git history.
-- Google login now reads `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` from the environment and is labeled deprecated in the UI.
-- `DEBUG` is still on. The sample-account button calls `POST /auth/dev-login`, which only works when `DEBUG` is true.
-- Flashcard and quiz-result endpoints now require the chapter to belong to the signed-in user.
-- `SECRET_KEY` is still the Django starter key. Fine for a local demo, not for a public server.
+The database is SQLite. The sample account and cards are in `backend_django/fixtures/default_demo.json`. **Continue with sample data** only works while the backend is running locally.

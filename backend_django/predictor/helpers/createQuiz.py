@@ -1,6 +1,5 @@
 from predictor.helpers.blankWords import multipleBlank
 from predictor.helpers.quiz.choices import generateOptions
-from predictor.helpers.createOptions import generateOptions as generateOptionsOld
 from predictor.helpers.ensure_nltk import ensure_nltk_data
 
 from rake_nltk import Rake
@@ -52,7 +51,6 @@ def insertBlankChoice(choices, blanked_words):
 
 # Returns a tuple with the multiple choice question, total mark and input history template
 def createChoiceQuestion(card, keywords, blanked_words, course_name):
-    #choices = generateOptionsOld(keywords, blanked_words)
     NUMBER_OF_ANSWERS = 1
     NUMBER_OF_CHOICES = 3
     choices, adjusted_blanks, blanks_changed = generateOptions(blanked_words, course_name, keywords, NUMBER_OF_CHOICES)

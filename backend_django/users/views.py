@@ -133,7 +133,8 @@ def _dev_login_user():
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def devBypassLogin(request):
-    if not settings.DEBUG:
+    remote = request.META.get("REMOTE_ADDR")
+    if not settings.DEBUG or remote not in ("127.0.0.1", "::1"):
         return Response({"detail": "Not available."}, status=status.HTTP_403_FORBIDDEN)
 
     user = _dev_login_user()

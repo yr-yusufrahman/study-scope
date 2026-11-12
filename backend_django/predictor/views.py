@@ -6,13 +6,9 @@ from rest_framework.response import Response
 
 from random import shuffle
 from datetime import datetime
-import os
-import joblib, pickle
-from sklearn.preprocessing import StandardScaler
-import numpy as np
 
-from predictor.models import Revision, Predictor
-from courses.models import Course, Chapter, Card
+from predictor.models import Revision
+from courses.models import Course, Chapter
 #from predictor.helpers.mcq import createQuiz
 from predictor.helpers.createQuiz import createQuiz
 #from predictor.helpers.loadModel import queryModel
@@ -40,9 +36,9 @@ def getQuiz(request):
         try:
             # Returns {quiz_content, total, history}
             quiz_dictionary = createQuiz(cards, course_name)
-        except Exception as exc:
+        except Exception:
             return Response(
-                {'error': 'Quiz could not be generated.', 'detail': str(exc)},
+                {'error': 'Quiz could not be generated.'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
@@ -91,7 +87,9 @@ def saveResults(request):
             # If drop-off was detected, retrain the tree
 
             # Make a prediction
-            course = Course.objects.get(id=course_id)
+            course = Course.objects.filter(id=course_id, owner=user).first()
+            if not course:
+                return Response(status=status.HTTP_404_NOT_FOUND)
             prediction = makePrediction(revision, user)
             chapter.setDue(prediction) # Set the next due date for the chapter
 
@@ -106,30 +104,3 @@ def saveResults(request):
 
 
 # To get a prediction, just get the value from the next_due field in the Chapter model
-
-
-
-# Test purposes...
-@api_view(["GET"])
-def getTree(request):
-    user = request.user
-    if user.is_authenticated:
-        predictor = Predictor.objects.get_or_create(user=user) # Returns a tuple [0] contains obj, [1] boolean success
-        print(f"Predictor: {predictor}\n")
-        model_serialized = predictor[0].tree
-        model = pickle.loads(model_serialized)
-
-        return Response(status=status.HTTP_200_OK)
-    
-    # User not authenticated
-    return Response(status=status.HTTP_401_UNAUTHORIZED)
-
-
-@api_view(["GET"])
-def dataTest(request):
-    user = request.user
-    if user.is_authenticated:
-        return Response(status=status.HTTP_200_OK)
-    
-    # User not authenticated
-    return Response(status=status.HTTP_401_UNAUTHORIZED)
