@@ -117,10 +117,14 @@ function navigate(new_location) {
     </div>
 
     <div v-else-if="quiz_store.getLoading" class="h-full w-full flex flex-col items-center p-16">
+        <button class="btn btn-ghost self-end" @click="router.push('/dashboard')">Exit</button>
         <h1>Loading...</h1>
     </div>
 
     <div v-else class="h-full w-full flex flex-col items-center p-16">
+        <div class="w-full flex justify-end mb-2">
+            <button class="btn btn-outline btn-sm" @click="router.push('/dashboard')">Exit</button>
+        </div>
         <!-- Progress bar, mistake counter -->
          <div class="w-full flex flex-row justify-around">
             <h1 class="pastel-red">Mistakes: {{ quiz_store.getMistakes }}</h1>

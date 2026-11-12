@@ -1,0 +1,162 @@
+[
+  {
+    "model": "auth.user",
+    "pk": 7,
+    "fields": {
+      "password": "!",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "sample",
+      "first_name": "Sample",
+      "last_name": "Student",
+      "email": "sample@localhost",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2024-03-27T22:56:31.340Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "courses.course",
+    "pk": 1,
+    "fields": {
+      "title": "Maths",
+      "owner": 7
+    }
+  },
+  {
+    "model": "courses.course",
+    "pk": 2,
+    "fields": {
+      "title": "Physics",
+      "owner": 7
+    }
+  },
+  {
+    "model": "courses.course",
+    "pk": 3,
+    "fields": {
+      "title": "Economics",
+      "owner": 7
+    }
+  },
+  {
+    "model": "courses.course",
+    "pk": 4,
+    "fields": {
+      "title": "Computing",
+      "owner": 7
+    }
+  },
+  {
+    "model": "courses.chapter",
+    "pk": 1,
+    "fields": {
+      "chapter_title": "Differentiation",
+      "next_due": "2024-07-11T01:01:18.179Z",
+      "order": 1,
+      "course": 1
+    }
+  },
+  {
+    "model": "courses.chapter",
+    "pk": 2,
+    "fields": {
+      "chapter_title": "Market Failure",
+      "next_due": null,
+      "order": -1,
+      "course": 3
+    }
+  },
+  {
+    "model": "courses.chapter",
+    "pk": 3,
+    "fields": {
+      "chapter_title": "Integration",
+      "next_due": null,
+      "order": 0,
+      "course": 1
+    }
+  },
+  {
+    "model": "courses.card",
+    "pk": 1,
+    "fields": {
+      "question": "What is differentiation?",
+      "answer": "The process of finding the gradient function which computes the gradient of a function at a given value.",
+      "order": 0,
+      "chapter": 1
+    }
+  },
+  {
+    "model": "courses.card",
+    "pk": 2,
+    "fields": {
+      "question": "Why would differentiation be used?",
+      "answer": "It explains the rate of change in a dependent variable when changing independent variables. This can model patterns and relationships within large amounts of data, leading to fascinating insights.",
+      "order": 1,
+      "chapter": 1
+    }
+  },
+  {
+    "model": "courses.card",
+    "pk": 3,
+    "fields": {
+      "question": "AKSJDNSKJAN",
+      "answer": "akjsdnjkand",
+      "order": 2,
+      "chapter": 1
+    }
+  },
+  {
+    "model": "courses.card",
+    "pk": 4,
+    "fields": {
+      "question": "This answer should have a maximum of 4 mistakes?",
+      "answer": "aslkdmsla askdmalsdmk asfdsfg dfdfgbf dfdkfj asdismo difjojvofm oijfodij fosdfpok soidfjd paosasf ieuifnds xsohd osjdfjodsi oiasfdj osodijf osidfj oddfj",
+      "order": 3,
+      "chapter": 1
+    }
+  },
+  {
+    "model": "courses.card",
+    "pk": 5,
+    "fields": {
+      "question": "AnotherRevealQuestion",
+      "answer": "AnotherRevealAnswer",
+      "order": 4,
+      "chapter": 1
+    }
+  },
+  {
+    "model": "courses.card",
+    "pk": 8,
+    "fields": {
+      "question": "What does dy/dx find?",
+      "answer": "gradient. gradient. gradient.",
+      "order": 5,
+      "chapter": 1
+    }
+  },
+  {
+    "model": "oauth2_provider.application",
+    "pk": 1,
+    "fields": {
+      "client_id": "local-dev-client",
+      "user": null,
+      "redirect_uris": "http://localhost:5173/login",
+      "post_logout_redirect_uris": "",
+      "client_type": "confidential",
+      "authorization_grant_type": "authorization-code",
+      "client_secret": "!",
+      "hash_client_secret": true,
+      "name": "Local dev",
+      "skip_authorization": false,
+      "created": "2024-03-09T13:12:47.851Z",
+      "updated": "2024-03-11T23:56:32.939Z",
+      "algorithm": "",
+      "allowed_origins": ""
+    }
+  }
+]

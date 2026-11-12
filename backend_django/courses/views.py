@@ -104,7 +104,7 @@ def getCards(request):
     if user.is_authenticated:
         # Get the chapter id
         chapter_id = request.data.get('chapter_id')
-        chapter = Chapter.objects.filter(id=chapter_id).first()
+        chapter = Chapter.objects.filter(id=chapter_id, course__owner=user).first()
 
         # Check if chapter exists
         if chapter:

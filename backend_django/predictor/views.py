@@ -64,7 +64,7 @@ def saveResults(request):
         chapter_id = request.data.get('chapter_id')
         course_id = request.data.get('course_id')
 
-        chapter = Chapter.objects.get(id=chapter_id)
+        chapter = Chapter.objects.filter(id=chapter_id, course__owner=user).first()
         if chapter and inputs > 0:
             # Check if the chapter already had a previous revision on the same date
             last_revision = Revision.objects.filter(chapter=chapter).order_by('-date').first()

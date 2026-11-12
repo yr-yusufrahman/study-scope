@@ -20,7 +20,7 @@ function googleAuth() {
         localStorage.setItem('refresh', response.data.refresh_token)
         localStorage.setItem('email', response.data.email)
         localStorage.setItem('name', response.data.name)
-        router.push('/courses')
+        router.push('/dashboard')
       })
     /*
     fetch(google_auth, requestOptions)
@@ -30,7 +30,7 @@ function googleAuth() {
         localStorage.setItem('refresh', data.refresh_token)
         localStorage.setItem('email', data.email)
         localStorage.setItem('name', data.name)
-        router.push('/courses')
+        router.push('/dashboard')
       })
     */
   }
@@ -49,7 +49,7 @@ function devBypassLogin() {
       localStorage.setItem('refresh', response.data.refresh_token)
       localStorage.setItem('email', response.data.email)
       localStorage.setItem('name', response.data.name)
-      router.push('/courses')
+      router.push('/dashboard')
     })
     .catch(error => {
       console.log('Dev login failed', error)
@@ -72,7 +72,7 @@ googleAuth()
           class="btn btn-outline btn-secondary mt-4 w-full"
           @click="devBypassLogin"
         >
-          Continue as saved account (dev only)
+          Continue with sample data
         </button>
       </div>
     </div>

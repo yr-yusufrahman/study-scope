@@ -3,6 +3,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import CoursesView from '@/views/CoursesView.vue'
+import DashboardView from '@/views/DashboardView.vue'
+import QuizGuideView from '@/views/QuizGuideView.vue'
 import WorkspaceView from '@/views/WorkspaceView.vue'
 import EditView from '@/views/EditView.vue'
 import QuizView from '@/views/QuizView.vue'
@@ -24,6 +26,18 @@ const router = createRouter({
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       //component: () => import('../views/LoginView.vue')
+    },
+    {
+      path: '/quiz-guide',
+      name: 'quiz-guide',
+      component: QuizGuideView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/dashboard',
+      name: 'dashboard',
+      component: DashboardView,
+      meta: { requiresAuth: true }
     },
     {
       path: '/courses',

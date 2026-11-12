@@ -9,7 +9,7 @@ import GoogleMini from '../icons/GoogleMini.vue'
         <div class="gsi-material-button-icon">
           <GoogleMini />
         </div>
-        <span class="gsi-material-button-contents">Sign in with Google</span>
+        <span class="gsi-material-button-contents">Sign in with Google (DEPRECATED)</span>
         <span style="display: none;">Sign in with Google</span>
     </div>
     </button>

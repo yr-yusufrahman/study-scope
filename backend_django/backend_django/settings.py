@@ -10,9 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+import os
 from pathlib import Path
-#import os
-#from dotenv import load_dotenv
 
 #load_dotenv()
 
@@ -168,9 +167,9 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
-# Google Configuration
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = "REDACTED"
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = "REDACTED"
+# Google OAuth is deprecated for this project. Values stay empty unless set locally.
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get("GOOGLE_CLIENT_ID", "")
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
     'https://www.googleapis.com/auth/userinfo.email',

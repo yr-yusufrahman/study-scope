@@ -22,7 +22,7 @@ import requests
 # Gets auth code from google after user logs in
 @api_view(["GET"])
 def googleLogin(request):
-    CLIENT_ID = "REDACTED"
+    CLIENT_ID = settings.SOCIAL_AUTH_GOOGLE_OAUTH2_KEY
     NEXT = "http://localhost:5173/login"
     redirect_url = f"https://accounts.google.com/o/oauth2/v2/auth?client_id={CLIENT_ID}&response_type=code&scope=https://www.googleapis.com/auth/userinfo.profile%20https://www.googleapis.com/auth/userinfo.email&access_type=offline&redirect_uri={NEXT}"
     return redirect(redirect_url)
@@ -34,8 +34,8 @@ def googleAuth(request):
     code = request.data['code']
     if code:
         # Prepare the request parameters to exchange the auth code for access token
-        CLIENT_ID = "REDACTED"
-        CLIENT_SECRET='REDACTED'
+        CLIENT_ID = settings.SOCIAL_AUTH_GOOGLE_OAUTH2_KEY
+        CLIENT_SECRET = settings.SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET
         NEXT = "http://localhost:5173/login"
 
         token_endpoint = 'https://oauth2.googleapis.com/token'
@@ -95,8 +95,8 @@ def googleAuth(request):
 def refreshAuth(request):
     refresh_token = request.data['refresh']
     if refresh_token:
-        CLIENT_ID = "REDACTED"
-        CLIENT_SECRET='REDACTED'
+        CLIENT_ID = settings.SOCIAL_AUTH_GOOGLE_OAUTH2_KEY
+        CLIENT_SECRET = settings.SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET
 
         refresh_endpoint = 'http://127.0.0.1:8000/auth/token'
         refresh_params = {

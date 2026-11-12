@@ -6,7 +6,7 @@ const router = useRouter()
 // Check for logged in
 const token = localStorage.getItem('token')
 if (token) {
-  router.push('/courses')
+  router.push('/dashboard')
 }
 </script>
 

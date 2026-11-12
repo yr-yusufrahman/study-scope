@@ -9,8 +9,6 @@ import logout from '../helpers/logout.js'
 import { useCourseStore } from '../../stores/CourseStore.js'
 import { useToggleEditStore } from '../../stores/ToggleEditStore.js'
 
-import axios from 'axios'
-
 const router = useRouter()
 
 // State
@@ -69,14 +67,6 @@ function saveChanges() {
 }
 // END saveChanges
 
-function treeTest() {
-
-    const token = localStorage.getItem('token')
-    const headers = {"Authorization": `Bearer ${token}`}
-    axios.get('http://127.0.0.1:8000/predictor/test-tree', { headers })
-
-}
-
 </script>
 
 
@@ -93,8 +83,7 @@ function treeTest() {
             <AddCourse v-show="edit_store.isEdit(addId)" />
         </div>
         <button class="btn btn-info" @click="toggleEdit(addId)">Add Course</button>
-        <button class="btn btn-accent" @click="saveChanges">Save Changes</button>      
-        <button class="btn btn-accent" @click="treeTest">Tree Test</button>
+        <button class="btn btn-accent" @click="saveChanges">Save Changes</button>
 
         <ConfirmModal :remove="true" />
     </div>
