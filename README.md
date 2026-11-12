@@ -18,7 +18,7 @@ Backend, from the repository root:
 
 ```powershell
 py -3.13 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install django==4.1.7 djangorestframework django-cors-headers django-oauth-toolkit social-auth-app-django drf-social-oauth2 python-dotenv joblib numpy scikit-learn nltk rake-nltk
+.\.venv\Scripts\python.exe -m pip install -r backend_django\requirements.txt
 cd backend_django
 ..\.venv\Scripts\python.exe manage.py migrate
 ..\.venv\Scripts\python.exe manage.py loaddata fixtures/default_demo.json
